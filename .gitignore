@@ -16,5 +16,5 @@ fileList.bin
 *.exe
 *.tlog
 *.FileListAbsolute.txt
-bin/Debug/
-obj/Debug/
+/Base/bin/Debug/netcoreapp3.1/Base.dll
+/Base/obj/Debug/netcoreapp3.1/Base.dll
