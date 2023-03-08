@@ -97,7 +97,7 @@ namespace WpfApp1
 
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
-                Vector normalizedPosition = new Vector(0.1f, 0.2f);
+                Vector normalizedPosition = new Vector(0.5f, 0.5f);
                 DrawEllipseAtLocation(joint.Key, normalizedPosition, ellipseSize, Color.FromArgb(255, 0, 0, 0));
             }
         }
@@ -107,7 +107,7 @@ namespace WpfApp1
             Vector ellipseSize = new Vector(0.2f, 0.2f);
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
-                Vector normalizedPosition = new Vector(0.1f, 0.2f);
+                Vector normalizedPosition = new Vector(0.5f, 0.5f);
                 DrawEllipseAtLocation(joint.Key, normalizedPosition, ellipseSize, Color.FromArgb(0, 0, 0, 0));
             }
         }
@@ -123,8 +123,11 @@ namespace WpfApp1
             joint.Height = scaledWidth;
 
             Thickness margin = joint.Margin;
-            margin.Left = normalizedPosition.X * Width;
-            margin.Top = normalizedPosition.Y * Height;
+            margin.Right = 0;
+            margin.Bottom = 0;
+
+            margin.Left = (normalizedPosition.X - size.X / 2) * Width;
+            margin.Top = (normalizedPosition.Y - size.Y / 2) * Height;
             joint.Margin = margin;
 
             joint.Width = scaledWidth;
