@@ -16,3 +16,4 @@ fileList.bin
 *.exe
 *.tlog
 *.FileListAbsolute.txt
+bin/
