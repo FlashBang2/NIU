@@ -17,3 +17,4 @@ fileList.bin
 *.tlog
 *.FileListAbsolute.txt
 **/Base/**/*
+**/Base/**/*
