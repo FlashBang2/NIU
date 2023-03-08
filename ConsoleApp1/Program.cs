@@ -47,7 +47,6 @@ namespace ConsoleApp1 {
             new EventHandler<SkeletonFrameReadyEventArgs>
             (SkeletonFrameReady);
             kinect.Start();
-            Console.ReadKey();
         }
     }
 }
