@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Base
+namespace Base.SRC
 {
     internal class Program
     {
