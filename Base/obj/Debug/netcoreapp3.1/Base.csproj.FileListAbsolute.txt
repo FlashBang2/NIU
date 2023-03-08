@@ -1,0 +1,14 @@
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\Base\bin\Debug\netcoreapp3.1\Base.exe
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\Base\bin\Debug\netcoreapp3.1\Base.deps.json
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\Base\bin\Debug\netcoreapp3.1\Base.runtimeconfig.json
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\Base\bin\Debug\netcoreapp3.1\Base.runtimeconfig.dev.json
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\Base\bin\Debug\netcoreapp3.1\Base.dll
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\Base\bin\Debug\netcoreapp3.1\Base.pdb
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\Base\obj\Debug\netcoreapp3.1\Base.csproj.AssemblyReference.cache
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\Base\obj\Debug\netcoreapp3.1\Base.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\Base\obj\Debug\netcoreapp3.1\Base.AssemblyInfoInputs.cache
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\Base\obj\Debug\netcoreapp3.1\Base.AssemblyInfo.cs
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\Base\obj\Debug\netcoreapp3.1\Base.csproj.CoreCompileInputs.cache
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\Base\obj\Debug\netcoreapp3.1\Base.dll
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\Base\obj\Debug\netcoreapp3.1\Base.pdb
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\Base\obj\Debug\netcoreapp3.1\Base.genruntimeconfig.cache
