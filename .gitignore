@@ -16,4 +16,5 @@ fileList.bin
 *.exe
 *.tlog
 *.FileListAbsolute.txt
-bin/
+bin/Debug/
+obj/Debug/
