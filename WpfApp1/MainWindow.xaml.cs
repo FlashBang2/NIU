@@ -17,7 +17,6 @@ namespace WpfApp1
     {
         private Dictionary<JointType, Ellipse> ellipses = new Dictionary<JointType, Ellipse>();
         private bool IsKinnectAvailable = false;
-        private Timer timer;
 
         public MainWindow()
         {
