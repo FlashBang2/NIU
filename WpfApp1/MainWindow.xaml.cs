@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Timers;
+using System.Windows.Threading;
 using Microsoft.Kinect;
 
 namespace WpfApp1
@@ -23,6 +17,7 @@ namespace WpfApp1
     {
         private Dictionary<JointType, Ellipse> ellipses = new Dictionary<JointType, Ellipse>();
         private bool IsKinnectAvailable = false;
+        private Timer timer;
 
         public MainWindow()
         {
@@ -46,6 +41,15 @@ namespace WpfApp1
             if (IsKinnectAvailable)
             {
                 KinectStart();
+            }
+            else
+            {
+
+                // temp solution for testing
+                var dispatcher = new DispatcherTimer();
+                dispatcher.Tick += (sender, evt) => OnRender();
+                dispatcher.Interval = TimeSpan.FromMilliseconds(16.6);
+                dispatcher.Start();
             }
         }
         
@@ -74,13 +78,37 @@ namespace WpfApp1
                         
                         if (user != null)
                         {
-                            foreach (Joint joint in user.Joints.ToArray())
-                            {
-
-                            }
+                            OnRender();
                         }
                     }
                 }
+            }
+        }
+
+        private void OnRender()
+        {
+            ClearScreen();
+            RenderEachJoint();
+        }
+
+        private void RenderEachJoint()
+        {
+            Vector ellipseSize = new Vector(0.2f, 0.2f);
+
+            foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
+            {
+                Vector normalizedPosition = new Vector(0.1f, 0.2f);
+                DrawEllipseAtLocation(joint.Key, normalizedPosition, ellipseSize, Color.FromArgb(255, 0, 0, 0));
+            }
+        }
+
+        private void ClearScreen()
+        {
+            Vector ellipseSize = new Vector(0.2f, 0.2f);
+            foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
+            {
+                Vector normalizedPosition = new Vector(0.1f, 0.2f);
+                DrawEllipseAtLocation(joint.Key, normalizedPosition, ellipseSize, Color.FromArgb(0, 0, 0, 0));
             }
         }
 
