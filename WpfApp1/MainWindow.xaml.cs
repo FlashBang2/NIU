@@ -22,72 +22,7 @@ namespace WpfApp1
     public partial class MainWindow : Window
     {
         private Dictionary<JointType, Ellipse> ellipses = new Dictionary<JointType, Ellipse>();
-        static void SkeletonFrameReady(object sender,
-    SkeletonFrameReadyEventArgs args)
-        {
-            using (var frame = args.OpenSkeletonFrame())
-            {
-                if (frame != null)
-                {
-                    Skeleton[] skeletons = new Skeleton
-                    [frame.SkeletonArrayLength];
-                    frame.CopySkeletonDataTo(skeletons);
-                    if (skeletons.Length > 0)
-                    {
-                        var user = skeletons.Where
-                        (
-                        u => u.TrackingState ==
-                        SkeletonTrackingState.Tracked
-                        )
-                        .FirstOrDefault();
-                        if (user != null)
-                        {
-                            foreach (var joint in user.Joints.ToArray())
-                            {
-
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        public void DrawEllipseAtLocation(JointType type, Vector v2, Vector size, Color color)
-        {
-            Ellipse joint = ellipses[type];
-
-            float normalizedX = (float)v2.X;
-            float normalizedY = (float)v2.Y;
-
-            float scaledWidth = (float)(size.X * Width);
-            float scaledHeight = (float)(size.Y * Height);
-
-            joint.Width = scaledWidth;
-            joint.Height = scaledWidth;
-
-            Thickness margin = joint.Margin;
-            margin.Left = normalizedX * Width;
-            margin.Top = normalizedY * Height;
-            joint.Margin = margin;
-
-            joint.Width = scaledWidth;
-            joint.Height = scaledHeight;
-            joint.Fill = new SolidColorBrush(color);
-        }
-
-        static void KinectStart()
-        {
-            var kinect = KinectSensor
-                    .KinectSensors
-                    .FirstOrDefault
-                    (s => s.Status == KinectStatus.Connected);
-            kinect.SkeletonStream.Enable();
-            kinect.SkeletonFrameReady +=
-            new EventHandler<SkeletonFrameReadyEventArgs>
-            (SkeletonFrameReady);
-            kinect.Start();
-        }
-
+        private bool IsKinnectAvailable = false;
 
         public MainWindow()
         {
@@ -107,6 +42,66 @@ namespace WpfApp1
 
             DrawEllipseAtLocation(JointType.Head, new Vector(0.3f, 0.3f), new Vector(0.1f, 0.21f), Color.FromArgb(255, 0, 0, 0));
             DrawEllipseAtLocation(JointType.HandLeft, new Vector(0.3f, 0.2f), new Vector(0.1f, 0.1f), Color.FromArgb(255, 0, 0, 0));
+
+            if (IsKinnectAvailable)
+            {
+                KinectStart();
+            }
+        }
+        
+        private void KinectStart()
+        {
+            KinectSensor kinect = KinectSensor.KinectSensors.FirstOrDefault(s => s.Status == KinectStatus.Connected);
+
+            kinect.SkeletonStream.Enable();
+            kinect.SkeletonFrameReady += OnSkeletonFrameReady;
+            kinect.Start();
+        }
+
+        private void OnSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs args)
+        {
+            using (SkeletonFrame frame = args.OpenSkeletonFrame())
+            {
+                if (frame != null)
+                {
+                    Skeleton[] skeletons = new Skeleton[frame.SkeletonArrayLength];
+                    frame.CopySkeletonDataTo(skeletons);
+
+                    if (skeletons.Length > 0)
+                    {
+                        Skeleton user = skeletons.Where(u => u.TrackingState == SkeletonTrackingState.Tracked)
+                            .FirstOrDefault();
+                        
+                        if (user != null)
+                        {
+                            foreach (Joint joint in user.Joints.ToArray())
+                            {
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void DrawEllipseAtLocation(JointType type, Vector normalizedPosition, Vector size, Color color)
+        {
+            Ellipse joint = ellipses[type];
+
+            float scaledWidth = (float)(size.X * Width);
+            float scaledHeight = (float)(size.Y * Height);
+
+            joint.Width = scaledWidth;
+            joint.Height = scaledWidth;
+
+            Thickness margin = joint.Margin;
+            margin.Left = normalizedPosition.X * Width;
+            margin.Top = normalizedPosition.Y * Height;
+            joint.Margin = margin;
+
+            joint.Width = scaledWidth;
+            joint.Height = scaledHeight;
+            joint.Fill = new SolidColorBrush(color);
         }
     }
 }
