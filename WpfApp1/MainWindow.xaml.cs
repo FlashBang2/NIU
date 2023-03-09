@@ -51,7 +51,7 @@ namespace WpfApp1
                 dispatcher.Start();
             }
         }
-        
+
         private void KinectStart()
         {
             KinectSensor kinect = KinectSensor.KinectSensors.FirstOrDefault(s => s.Status == KinectStatus.Connected);
@@ -90,20 +90,41 @@ namespace WpfApp1
             RenderEachJoint();
         }
 
+        private Vector Lerp(Vector start, Vector end, float t)
+        {
+            return (1 - t) * start + t * end;
+        }
+
+        float t = 0;
+        private Vector startVector = new Vector();
+        private Vector endVector = new Vector(1.0f, 1.0f);
+
+
         private void RenderEachJoint()
         {
-            Vector ellipseSize = new Vector(0.2f, 0.2f);
+            Vector ellipseSize = new Vector(0.1f, 0.1f);
 
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
-                Vector normalizedPosition = new Vector(0.5f, 0.5f);
+                Vector normalizedPosition = Lerp(startVector, endVector, t);
+
+                t += 0.0016f;
+
+                if (t >= 1)
+                {
+                    t = 0;
+                    Vector temp = startVector;
+                    startVector = endVector;
+                    endVector = temp;
+                }
+
                 DrawEllipseAtLocation(joint.Key, normalizedPosition, ellipseSize, Color.FromArgb(255, 0, 0, 0));
             }
         }
 
         private void ClearScreen()
         {
-            Vector ellipseSize = new Vector(0.2f, 0.2f);
+            Vector ellipseSize = new Vector(0.1f, 0.1f);
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
                 Vector normalizedPosition = new Vector(0.5f, 0.5f);
