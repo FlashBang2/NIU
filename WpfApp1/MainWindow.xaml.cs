@@ -18,6 +18,10 @@ namespace WpfApp1
         private Dictionary<JointType, Ellipse> ellipses = new Dictionary<JointType, Ellipse>();
         private bool IsKinnectAvailable = false;
 
+        private float t = 0;
+        private Vector startVector = new Vector();
+        private Vector endVector = new Vector(1.0f, 1.0f);
+
         public MainWindow()
         {
             InitializeComponent();
@@ -34,9 +38,6 @@ namespace WpfApp1
                 canvas.Children.Add(ellipse);
             }
 
-            DrawEllipseAtLocation(JointType.Head, new Vector(0.3f, 0.3f), new Vector(0.1f, 0.21f), Color.FromArgb(255, 0, 0, 0));
-            DrawEllipseAtLocation(JointType.HandLeft, new Vector(0.3f, 0.2f), new Vector(0.1f, 0.1f), Color.FromArgb(255, 0, 0, 0));
-
             if (IsKinnectAvailable)
             {
                 KinectStart();
@@ -46,7 +47,7 @@ namespace WpfApp1
 
                 // temp solution for testing
                 var dispatcher = new DispatcherTimer();
-                dispatcher.Tick += (sender, evt) => OnRender();
+                dispatcher.Tick += (sender, evt) => Render();
                 dispatcher.Interval = TimeSpan.FromMilliseconds(16.6);
                 dispatcher.Start();
             }
@@ -65,7 +66,9 @@ namespace WpfApp1
         {
             using (SkeletonFrame frame = args.OpenSkeletonFrame())
             {
-                if (frame != null)
+                bool isSkeletonDataAvailable = frame != null;
+
+                if (isSkeletonDataAvailable)
                 {
                     Skeleton[] skeletons = new Skeleton[frame.SkeletonArrayLength];
                     frame.CopySkeletonDataTo(skeletons);
@@ -77,16 +80,16 @@ namespace WpfApp1
                         
                         if (user != null)
                         {
-                            OnRender();
+                            RenderEachJoint();
                         }
                     }
                 }
             }
         }
 
-        private void OnRender()
+        private void Render()
         {
-            ClearScreen();
+            ClearCanvas();
             RenderEachJoint();
         }
 
@@ -95,40 +98,34 @@ namespace WpfApp1
             return (1 - t) * start + t * end;
         }
 
-        float t = 0;
-        private Vector startVector = new Vector();
-        private Vector endVector = new Vector(1.0f, 1.0f);
-
-
         private void RenderEachJoint()
         {
             Vector ellipseSize = new Vector(0.1f, 0.1f);
+            Color boneColor = Color.FromArgb(255, 0, 0, 0);
 
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
                 Vector normalizedPosition = Lerp(startVector, endVector, t);
 
-                t += 0.0016f;
+                t += 0.0016f / 2;
 
                 if (t >= 1)
                 {
                     t = 0;
-                    Vector temp = startVector;
-                    startVector = endVector;
-                    endVector = temp;
+                    (endVector, startVector) = (startVector, endVector);
                 }
 
-                DrawEllipseAtLocation(joint.Key, normalizedPosition, ellipseSize, Color.FromArgb(255, 0, 0, 0));
+                DrawEllipseAtLocation(joint.Key, normalizedPosition, ellipseSize, boneColor);
             }
         }
 
-        private void ClearScreen()
+        private void ClearCanvas()
         {
             Vector ellipseSize = new Vector(0.1f, 0.1f);
+
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
-                Vector normalizedPosition = new Vector(0.5f, 0.5f);
-                DrawEllipseAtLocation(joint.Key, normalizedPosition, ellipseSize, Color.FromArgb(0, 0, 0, 0));
+                DrawEllipseAtLocation(joint.Key, new Vector(), ellipseSize, Color.FromArgb(0, 0, 0, 0));
             }
         }
 
