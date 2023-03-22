@@ -4,7 +4,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Timers;
 using System.Windows.Threading;
 using Microsoft.Kinect;
 
@@ -21,6 +20,13 @@ namespace WpfApp1
         private float t = 0;
         private Vector startVector = new Vector();
         private Vector endVector = new Vector(1.0f, 1.0f);
+
+        private bool switch01 = false;
+        private bool switch02 = false;
+
+        private DispatcherTimer calibrateY = new DispatcherTimer();
+        private DispatcherTimer calibrateX = new DispatcherTimer();
+        private DispatcherTimer update = new DispatcherTimer();
 
         public MainWindow()
         {
@@ -44,12 +50,39 @@ namespace WpfApp1
             }
             else
             {
-
                 // temp solution for testing
-                var dispatcher = new DispatcherTimer();
-                dispatcher.Tick += (sender, evt) => Render();
-                dispatcher.Interval = TimeSpan.FromMilliseconds(16.6);
-                dispatcher.Start();
+                calibrateY.Tick += (sender, evt) => CalibrateY();
+                calibrateY.Interval = TimeSpan.FromSeconds(60);
+                calibrateY.Start();
+            }
+        }
+
+        private void CalibrateX()
+        {
+            if (switch02)
+            {
+                calibrateX.Stop();
+                update.Tick += (sender, evt) => Render();
+                update.Interval = TimeSpan.FromMilliseconds(16.6);
+                update.Start();
+            }
+            else
+            {
+                switch02 = true;
+            }
+        }
+
+        private void CalibrateY()
+        {
+            if (switch01)
+            {
+                calibrateY.Stop();
+                calibrateX.Tick += (sender, evt) => CalibrateX();
+                calibrateX.Interval = TimeSpan.FromSeconds(60);
+            }
+            else
+            {
+                switch01 = true;
             }
         }
 
