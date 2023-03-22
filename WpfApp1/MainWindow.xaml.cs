@@ -30,6 +30,11 @@ namespace WpfApp1
         private DispatcherTimer calibrateX = new DispatcherTimer();
         private DispatcherTimer update = new DispatcherTimer();
 
+        private Skeleton user = null;
+        private float MaxY = 0;
+        private float MinX = 0;
+        private float MaxX = 0;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -69,10 +74,10 @@ namespace WpfApp1
 
                     label.Margin = margin;
                 };
-
                 calibrateY.Tick += (sender, evt) => CalibrateY();
-                calibrateY.Interval = TimeSpan.FromMilliseconds(16.6);
+                calibrateY.Interval = TimeSpan.FromSeconds(10);
                 calibrateY.Start();
+                KinectStart();
             }
         }
 
@@ -80,9 +85,12 @@ namespace WpfApp1
         {
             if (switch02)
             {
+                MinX = user.Joints[JointType.HandLeft].Position.X;
+                MaxX = user.Joints[JointType.HandRight].Position.X;
                 calibrateX.Stop();
                 update.Tick += (sender, evt) => Render();
                 update.Interval = TimeSpan.FromMilliseconds(16.6);
+                ShowCenteredText("");
                 update.Start();
             }
             else
@@ -96,9 +104,11 @@ namespace WpfApp1
         {
             if (switch01)
             {
+                MaxY = user.Joints[JointType.Head].Position.Y;
                 calibrateY.Stop();
                 calibrateX.Tick += (sender, evt) => CalibrateX();
-                calibrateX.Interval = TimeSpan.FromMilliseconds(16.6);
+                calibrateX.Interval = TimeSpan.FromSeconds(10);
+                calibrateX.Start();
             }
             else
             {
@@ -133,7 +143,7 @@ namespace WpfApp1
 
                     if (skeletons.Length > 0)
                     {
-                        Skeleton user = skeletons.Where(u => u.TrackingState == SkeletonTrackingState.Tracked)
+                        user = skeletons.Where(u => u.TrackingState == SkeletonTrackingState.Tracked)
                             .FirstOrDefault();
                         
                         if (user != null)
@@ -163,17 +173,11 @@ namespace WpfApp1
 
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
-                Vector normalizedPosition = Lerp(startVector, endVector, t);
 
-                t += 0.0016f / 2;
+                var x = (user.Joints[joint.Key].Position.X + MinX)/(MaxX + MinX);
+                var y = user.Joints[joint.Key].Position.Y/MaxY;
 
-                if (t >= 1)
-                {
-                    t = 0;
-                    (endVector, startVector) = (startVector, endVector);
-                }
-
-                DrawEllipseAtLocation(joint.Key, normalizedPosition, ellipseSize, boneColor);
+                DrawEllipseAtLocation(joint.Key, new Vector(x, y), ellipseSize, boneColor);
             }
         }
 
