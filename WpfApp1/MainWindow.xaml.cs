@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Controls;
 using System.Timers;
 using System.Windows.Threading;
 using Microsoft.Kinect;
@@ -21,6 +22,7 @@ namespace WpfApp1
         private float t = 0;
         private Vector startVector = new Vector();
         private Vector endVector = new Vector(1.0f, 1.0f);
+        private Label label;
 
         public MainWindow()
         {
@@ -44,13 +46,41 @@ namespace WpfApp1
             }
             else
             {
-
+#if false
                 // temp solution for testing
                 var dispatcher = new DispatcherTimer();
                 dispatcher.Tick += (sender, evt) => Render();
                 dispatcher.Interval = TimeSpan.FromMilliseconds(16.6);
                 dispatcher.Start();
+#else
+                string text = "Podnieś ręce";
+                label = new Label();
+                label.Content = text;
+                label.FontSize = 100;
+                canvas.Children.Add(label);
+                
+                Loaded += (o, e) =>
+                {
+                    ShowCenteredText(text + " 22");
+                };
+
+                label.SizeChanged += (o, e) =>
+                {
+                    double left = (Width - label.ActualWidth) / 2;
+                    double top = (Height - label.ActualHeight) / 2;
+
+                    Thickness margin = label.Margin;
+                    margin.Left = left;
+                    margin.Top = top;
+                    label.Margin = margin;
+                };
+#endif
             }
+        }
+
+        private void ShowCenteredText(string text)
+        {
+            label.Content = text;
         }
 
         private void KinectStart()
@@ -77,7 +107,7 @@ namespace WpfApp1
                     {
                         Skeleton user = skeletons.Where(u => u.TrackingState == SkeletonTrackingState.Tracked)
                             .FirstOrDefault();
-                        
+
                         if (user != null)
                         {
                             RenderEachJoint();
