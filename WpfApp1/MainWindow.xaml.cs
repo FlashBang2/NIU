@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Microsoft.Kinect;
+using System.Windows.Controls;
 
 namespace WpfApp1
 {
@@ -20,6 +21,7 @@ namespace WpfApp1
         private float t = 0;
         private Vector startVector = new Vector();
         private Vector endVector = new Vector(1.0f, 1.0f);
+        private Label label;
 
         private bool switch01 = false;
         private bool switch02 = false;
@@ -52,7 +54,7 @@ namespace WpfApp1
             {
                 // temp solution for testing
                 calibrateY.Tick += (sender, evt) => CalibrateY();
-                calibrateY.Interval = TimeSpan.FromSeconds(60);
+                calibrateY.Interval = TimeSpan.FromMilliseconds(16.6);
                 calibrateY.Start();
             }
         }
@@ -69,6 +71,7 @@ namespace WpfApp1
             else
             {
                 switch02 = true;
+                ShowCenteredText("Rozłóż Ręce");
             }
         }
 
@@ -78,12 +81,26 @@ namespace WpfApp1
             {
                 calibrateY.Stop();
                 calibrateX.Tick += (sender, evt) => CalibrateX();
-                calibrateX.Interval = TimeSpan.FromSeconds(60);
+                calibrateX.Interval = TimeSpan.FromMilliseconds(16.6);
             }
             else
             {
                 switch01 = true;
+                string text = "Podnieś ręce";
+                label = new Label();
+                label.Content = text;
+                label.FontSize = 100;
+                canvas.Children.Add(label);
+                Loaded += (o, e) =>
+                {
+                    ShowCenteredText(text + " 22");
+                };
             }
+        }
+
+        private void ShowCenteredText(string text)
+        {
+            label.Content = text;
         }
 
         private void KinectStart()
