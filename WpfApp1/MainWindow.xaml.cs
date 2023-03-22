@@ -22,6 +22,7 @@ namespace WpfApp1
         private float t = 0;
         private Vector startVector = new Vector();
         private Vector endVector = new Vector(1.0f, 1.0f);
+        private Label label;
 
         public MainWindow()
         {
@@ -53,14 +54,17 @@ namespace WpfApp1
                 dispatcher.Start();
 #else
                 string text = "Podnieś ręce";
-                Label label = new Label();
+                label = new Label();
                 label.Content = text;
                 label.FontSize = 100;
                 canvas.Children.Add(label);
-                Measure(new Size(Width, Height));
-                Arrange(new Rect(0, 0, DesiredSize.Width, DesiredSize.Height));
                 
                 Loaded += (o, e) =>
+                {
+                    ShowCenteredText(text + " 22");
+                };
+
+                label.SizeChanged += (o, e) =>
                 {
                     double left = (Width - label.ActualWidth) / 2;
                     double top = (Height - label.ActualHeight) / 2;
@@ -68,11 +72,15 @@ namespace WpfApp1
                     Thickness margin = label.Margin;
                     margin.Left = left;
                     margin.Top = top;
-
                     label.Margin = margin;
                 };
-#endif 
+#endif
             }
+        }
+
+        private void ShowCenteredText(string text)
+        {
+            label.Content = text;
         }
 
         private void KinectStart()
