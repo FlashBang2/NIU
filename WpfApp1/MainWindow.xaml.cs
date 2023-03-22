@@ -53,6 +53,23 @@ namespace WpfApp1
             else
             {
                 // temp solution for testing
+                string text = "Podnieś ręce";
+                label = new Label();
+                label.Content = text;
+                label.FontSize = 100;
+                canvas.Children.Add(label);
+                label.SizeChanged += (o, e) =>
+                {
+                    double left = (Width - label.ActualWidth) / 2;
+                    double top = (Height - label.ActualHeight) / 2;
+
+                    Thickness margin = label.Margin;
+                    margin.Left = left;
+                    margin.Top = top;
+
+                    label.Margin = margin;
+                };
+
                 calibrateY.Tick += (sender, evt) => CalibrateY();
                 calibrateY.Interval = TimeSpan.FromMilliseconds(16.6);
                 calibrateY.Start();
@@ -86,15 +103,6 @@ namespace WpfApp1
             else
             {
                 switch01 = true;
-                string text = "Podnieś ręce";
-                label = new Label();
-                label.Content = text;
-                label.FontSize = 100;
-                canvas.Children.Add(label);
-                Loaded += (o, e) =>
-                {
-                    ShowCenteredText(text + " 22");
-                };
             }
         }
 
