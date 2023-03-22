@@ -4,10 +4,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Windows.Controls;
-using System.Timers;
 using System.Windows.Threading;
 using Microsoft.Kinect;
+using System.Windows.Controls;
 
 namespace WpfApp1
 {
@@ -23,6 +22,13 @@ namespace WpfApp1
         private Vector startVector = new Vector();
         private Vector endVector = new Vector(1.0f, 1.0f);
         private Label label;
+
+        private bool switch01 = false;
+        private bool switch02 = false;
+
+        private DispatcherTimer calibrateY = new DispatcherTimer();
+        private DispatcherTimer calibrateX = new DispatcherTimer();
+        private DispatcherTimer update = new DispatcherTimer();
 
         public MainWindow()
         {
@@ -46,35 +52,49 @@ namespace WpfApp1
             }
             else
             {
-#if false
                 // temp solution for testing
-                var dispatcher = new DispatcherTimer();
-                dispatcher.Tick += (sender, evt) => Render();
-                dispatcher.Interval = TimeSpan.FromMilliseconds(16.6);
-                dispatcher.Start();
-#else
+                calibrateY.Tick += (sender, evt) => CalibrateY();
+                calibrateY.Interval = TimeSpan.FromMilliseconds(16.6);
+                calibrateY.Start();
+            }
+        }
+
+        private void CalibrateX()
+        {
+            if (switch02)
+            {
+                calibrateX.Stop();
+                update.Tick += (sender, evt) => Render();
+                update.Interval = TimeSpan.FromMilliseconds(16.6);
+                update.Start();
+            }
+            else
+            {
+                switch02 = true;
+                ShowCenteredText("Rozłóż Ręce");
+            }
+        }
+
+        private void CalibrateY()
+        {
+            if (switch01)
+            {
+                calibrateY.Stop();
+                calibrateX.Tick += (sender, evt) => CalibrateX();
+                calibrateX.Interval = TimeSpan.FromMilliseconds(16.6);
+            }
+            else
+            {
+                switch01 = true;
                 string text = "Podnieś ręce";
                 label = new Label();
                 label.Content = text;
                 label.FontSize = 100;
                 canvas.Children.Add(label);
-                
                 Loaded += (o, e) =>
                 {
                     ShowCenteredText(text + " 22");
                 };
-
-                label.SizeChanged += (o, e) =>
-                {
-                    double left = (Width - label.ActualWidth) / 2;
-                    double top = (Height - label.ActualHeight) / 2;
-
-                    Thickness margin = label.Margin;
-                    margin.Left = left;
-                    margin.Top = top;
-                    label.Margin = margin;
-                };
-#endif
             }
         }
 
@@ -107,7 +127,7 @@ namespace WpfApp1
                     {
                         Skeleton user = skeletons.Where(u => u.TrackingState == SkeletonTrackingState.Tracked)
                             .FirstOrDefault();
-
+                        
                         if (user != null)
                         {
                             RenderEachJoint();

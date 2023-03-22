@@ -29,7 +29,9 @@ namespace ConsoleApp1 {
                         {
                             foreach (var joint in user.Joints)
                             {
-                                Console.WriteLine(user.Joints[JointType.Head].Position.Z);
+                                //Console.WriteLine(user.Joints[JointType.Head].Position.Y);
+                                //Console.WriteLine(user.Joints[JointType.HandRight].Position.X);
+                                //Console.WriteLine(user.Joints[JointType.HandLeft].Position.X);
                             }
                         }
                     }
@@ -47,6 +49,7 @@ namespace ConsoleApp1 {
             new EventHandler<SkeletonFrameReadyEventArgs>
             (SkeletonFrameReady);
             kinect.Start();
+            Console.ReadLine();
         }
     }
 }
