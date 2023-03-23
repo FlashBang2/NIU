@@ -31,9 +31,9 @@ namespace WpfApp1
         private DispatcherTimer update = new DispatcherTimer();
 
         private Skeleton user = null;
-        private float MaxY = 0;
-        private float MinX = 0;
-        private float MaxX = 0;
+        private double MaxY = 0;
+        private double MinX = 0;
+        private double MaxX = 0;
 
         public MainWindow()
         {
@@ -57,6 +57,7 @@ namespace WpfApp1
             }
             else
             {
+                KinectStart();
                 // temp solution for testing
                 string text = "Podnieś ręce";
                 label = new Label();
@@ -75,18 +76,26 @@ namespace WpfApp1
                     label.Margin = margin;
                 };
                 calibrateY.Tick += (sender, evt) => CalibrateY();
-                calibrateY.Interval = TimeSpan.FromSeconds(10);
+                calibrateY.Interval = TimeSpan.FromSeconds(2);
                 calibrateY.Start();
-                KinectStart();
+
+                foreach (var x in Enum.GetValues(typeof(JointType)).Cast<JointType>())
+                {
+                    pos[x] = new Vector();
+                }
             }
         }
+
+        Dictionary<JointType, Vector> pos = new Dictionary<JointType, Vector>();
 
         private void CalibrateX()
         {
             if (switch02)
             {
-                MinX = user.Joints[JointType.HandLeft].Position.X;
-                MaxX = user.Joints[JointType.HandRight].Position.X;
+                MinX = -pos[JointType.HandLeft].X;
+                MaxX = -pos[JointType.HandRight].X;
+                Console.WriteLine("MinX: " + MinX);
+                Console.WriteLine("MaxX: " + MaxX);
                 calibrateX.Stop();
                 update.Tick += (sender, evt) => Render();
                 update.Interval = TimeSpan.FromMilliseconds(16.6);
@@ -104,10 +113,11 @@ namespace WpfApp1
         {
             if (switch01)
             {
-                MaxY = user.Joints[JointType.Head].Position.Y;
+                MaxY = -pos[JointType.HandRight].Y;
+                Console.WriteLine("MaxY: " + MaxY);
                 calibrateY.Stop();
                 calibrateX.Tick += (sender, evt) => CalibrateX();
-                calibrateX.Interval = TimeSpan.FromSeconds(10);
+                calibrateX.Interval = TimeSpan.FromSeconds(2);
                 calibrateX.Start();
             }
             else
@@ -148,7 +158,10 @@ namespace WpfApp1
                         
                         if (user != null)
                         {
-                            RenderEachJoint();
+                            foreach (var x in user.Joints.Cast<Joint>())
+                            {
+                                pos[x.JointType] = new Vector(x.Position.X, x.Position.Y);
+                            }
                         }
                     }
                 }
@@ -161,21 +174,17 @@ namespace WpfApp1
             RenderEachJoint();
         }
 
-        private Vector Lerp(Vector start, Vector end, float t)
-        {
-            return (1 - t) * start + t * end;
-        }
-
         private void RenderEachJoint()
         {
-            Vector ellipseSize = new Vector(0.1f, 0.1f);
+            Vector ellipseSize = new Vector(0.01f, 0.01f);
             Color boneColor = Color.FromArgb(255, 0, 0, 0);
 
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
 
-                var x = (user.Joints[joint.Key].Position.X + MinX)/(MaxX + MinX);
-                var y = user.Joints[joint.Key].Position.Y/MaxY;
+                var x = (-pos[joint.Key].X)/(MaxX + 1.5);
+                var y = (-pos[joint.Key].Y)/(MaxY + 1.5);
+                Console.WriteLine("x=" + x);
 
                 DrawEllipseAtLocation(joint.Key, new Vector(x, y), ellipseSize, boneColor);
             }
@@ -193,6 +202,8 @@ namespace WpfApp1
 
         private void DrawEllipseAtLocation(JointType type, Vector normalizedPosition, Vector size, Color color)
         {
+            Console.WriteLine(normalizedPosition);
+
             Ellipse joint = ellipses[type];
 
             float scaledWidth = (float)(size.X * Width);
@@ -202,8 +213,6 @@ namespace WpfApp1
             joint.Height = scaledWidth;
 
             Thickness margin = joint.Margin;
-            margin.Right = 0;
-            margin.Bottom = 0;
 
             margin.Left = (normalizedPosition.X - size.X / 2) * Width;
             margin.Top = (normalizedPosition.Y - size.Y / 2) * Height;

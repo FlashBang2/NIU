@@ -25,13 +25,17 @@ namespace ConsoleApp1 {
                         SkeletonTrackingState.Tracked
                         )
                         .FirstOrDefault();
+
+                        Console.WriteLine(user);
+
                         if (user != null)
                         {
+
                             foreach (var joint in user.Joints)
                             {
-                                //Console.WriteLine(user.Joints[JointType.Head].Position.Y);
-                                //Console.WriteLine(user.Joints[JointType.HandRight].Position.X);
-                                //Console.WriteLine(user.Joints[JointType.HandLeft].Position.X);
+                              Console.WriteLine(user.Joints[JointType.Head].Position.Y);
+                              Console.WriteLine(user.Joints[JointType.HandRight].Position.X);
+                              Console.WriteLine(user.Joints[JointType.HandLeft].Position.X);
                             }
                         }
                     }
