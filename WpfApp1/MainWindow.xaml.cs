@@ -14,11 +14,40 @@ namespace WpfApp1
     {
         public JointType JointA;
         public JointType JointB;
+        public Line DrawLine;
 
         public Connection(JointType a, JointType b)
         {
             JointA = a;
             JointB = b;
+            DrawLine = new Line();
+            DrawLine.Stroke = new SolidColorBrush(Color.FromArgb(255, 27, 58, 65));
+        }
+
+        public void AttachToCanvas(Canvas canvas)
+        {
+            canvas.Children.Add(DrawLine);
+        }
+
+        public void DrawConnection(Dictionary<JointType, Vector> jointLocations)
+        {
+            var posA = jointLocations[JointA];
+            var posB = jointLocations[JointB];
+
+            DrawLine.X1 = posA.X;
+            DrawLine.Y1 = posA.Y;
+
+            DrawLine.X2 = posB.X;
+            DrawLine.Y2 = posB.Y;
+        }
+
+        public void ClearConnectionLine()
+        {
+            DrawLine.X1 = 0;
+            DrawLine.Y1 = 0;
+
+            DrawLine.X2 = 0;
+            DrawLine.Y2 = 0;
         }
 
         public override string ToString()
@@ -90,8 +119,14 @@ namespace WpfApp1
                     Margin = new Thickness(10)
                 };
 
+
                 ellipses.Add(joint, ellipse);
                 canvas.Children.Add(ellipse);
+            }
+
+            foreach (Connection connection in Connections)
+            {
+                connection.AttachToCanvas(canvas);
             }
 
             if (IsKinnectAvailable)
@@ -131,7 +166,6 @@ namespace WpfApp1
                 }
             }
         }
-
 
         private void CalibrateX()
         {
@@ -217,6 +251,10 @@ namespace WpfApp1
         {
             ClearCanvas();
             RenderEachJoint();
+            foreach (Connection connection in Connections)
+            {
+                connection.DrawConnection(JointLocations);
+            }
         }
 
         private void RenderEachJoint()
@@ -242,6 +280,11 @@ namespace WpfApp1
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
                 DrawEllipseAtLocation(joint.Key, new Vector(), ellipseSize, Color.FromArgb(0, 0, 0, 0));
+            }
+
+            foreach (Connection connection in Connections)
+            {
+                connection.ClearConnectionLine();
             }
         }
 
