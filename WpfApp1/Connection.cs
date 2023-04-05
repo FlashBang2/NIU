@@ -29,7 +29,7 @@ namespace WpfApp1
             canvas.Children.Add(DrawLine);
         }
 
-        public void DrawConnection(Dictionary<JointType, Vector> jointLocations, double maxX, double maxY, FrameworkElement canvas)
+        public void DrawConnection(Dictionary<JointType, Vector> jointLocations, FrameworkElement canvas)
         {
             var x = jointLocations[JointA].X;
             var y = jointLocations[JointA].Y;
@@ -59,5 +59,33 @@ namespace WpfApp1
         {
             return JointA.ToString() + " => " + JointB.ToString();
         }
+
+        public static Connection[] Connections =
+        {
+            new Connection(JointType.Head, JointType.ShoulderCenter),
+
+            new Connection(JointType.ShoulderCenter, JointType.ShoulderRight),
+            new Connection(JointType.ShoulderRight, JointType.ElbowRight),
+            new Connection(JointType.ElbowRight, JointType.WristRight),
+            new Connection(JointType.WristRight, JointType.HandRight),
+
+            new Connection(JointType.ShoulderCenter, JointType.ShoulderLeft),
+            new Connection(JointType.ShoulderLeft, JointType.ElbowLeft),
+            new Connection(JointType.ElbowLeft, JointType.WristLeft),
+            new Connection(JointType.WristLeft, JointType.HandLeft),
+
+            new Connection(JointType.ShoulderCenter, JointType.Spine),
+            new Connection(JointType.Spine, JointType.HipCenter),
+
+            new Connection(JointType.HipCenter, JointType.HipRight),
+            new Connection(JointType.HipRight, JointType.KneeRight),
+            new Connection(JointType.KneeRight, JointType.AnkleRight),
+            new Connection(JointType.AnkleRight, JointType.FootRight),
+
+            new Connection(JointType.HipCenter, JointType.HipLeft),
+            new Connection(JointType.HipLeft, JointType.KneeLeft),
+            new Connection(JointType.KneeLeft, JointType.AnkleLeft),
+            new Connection(JointType.AnkleLeft, JointType.FootLeft),
+        };
     }
 }
