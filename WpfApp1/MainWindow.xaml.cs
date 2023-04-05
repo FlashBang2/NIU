@@ -309,13 +309,6 @@ namespace WpfApp1
             {
                 actionType = ActionType.MoveLeft;
             }
-            else if (
-                handRight.Y > head.Y ||
-                handLeft.Y > head.Y
-                )
-            {
-                actionType = ActionType.Jump;
-            }
             else
             {
                 actionType = ActionType.None;
