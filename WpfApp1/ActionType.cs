@@ -10,6 +10,7 @@ namespace WpfApp1
     {
         None = 0,
         MoveLeft = 1,
-        MoveRight = 2
+        MoveRight = 2,
+        Jump
     }
 }

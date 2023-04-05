@@ -63,7 +63,7 @@ namespace WpfApp1
         private double MaxX = 0;
 
         private Vector offset = new Vector(-2.46, 0.25);
-        private ActionType movingDirection = ActionType.MoveLeft;
+        private ActionType actionType = ActionType.None;
 
         public MainWindow()
         {
@@ -255,7 +255,7 @@ namespace WpfApp1
 
                 Thickness worldLocation = child.Margin;
 
-                switch(movingDirection)
+                switch(actionType)
                 {
                     case ActionType.MoveLeft:
                         worldLocation.Left += 10;
@@ -289,6 +289,36 @@ namespace WpfApp1
 
                 TempJointLocations[joint.Key] = new Vector(x, y);
                 DrawEllipseAtLocation(joint.Key, new Vector(x, y), ellipseSize, boneColor);
+            }
+
+            var ankleLeft = TempJointLocations[JointType.AnkleLeft];
+            var kneeRight = TempJointLocations[JointType.KneeRight];
+
+            var ankleRight = TempJointLocations[JointType.AnkleRight];
+            var kneeLeft = TempJointLocations[JointType.KneeLeft];
+
+            var head = TempJointLocations[JointType.Head];
+            var handRight = TempJointLocations[JointType.HandRight];
+            var handLeft = TempJointLocations[JointType.HandLeft];
+
+            if (ankleLeft.Y > kneeRight.Y)
+            {
+                actionType = ActionType.MoveRight;
+            }
+            else if (ankleRight.Y > kneeLeft.Y)
+            {
+                actionType = ActionType.MoveLeft;
+            }
+            else if (
+                handRight.Y > head.Y ||
+                handLeft.Y > head.Y
+                )
+            {
+                actionType = ActionType.Jump;
+            }
+            else
+            {
+                actionType = ActionType.None;
             }
         }
 
