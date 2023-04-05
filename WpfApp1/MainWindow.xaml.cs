@@ -230,8 +230,8 @@ namespace WpfApp1
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
 
-                var x = scale * (JointLocations[joint.Key].X + 1.5 + offset.X) / (MaxX + 3);
-                var y = scale * (-JointLocations[joint.Key].Y + 2 + offset.Y) / (MaxY + 3);
+                var x = scale * (JointLocations[joint.Key].X + offset.X) + 1.5 / (MaxX + 3);
+                var y = scale * (-JointLocations[joint.Key].Y + offset.Y) + 2 / (MaxY + 3);
                 Console.WriteLine("x=" + x);
 
                 TempJointLocations[joint.Key] = new Vector(x, y);
