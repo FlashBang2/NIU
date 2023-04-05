@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace WpfApp1
 {
-    internal enum DirectionType
+    internal enum ActionType
     {
         None = 0,
-        Left = 1,
-        Right = 2
+        MoveLeft = 1,
+        MoveRight = 2
     }
 }

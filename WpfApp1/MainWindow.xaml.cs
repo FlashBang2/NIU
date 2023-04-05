@@ -63,7 +63,7 @@ namespace WpfApp1
         private double MaxX = 0;
 
         private Vector offset = new Vector(-2.46, 0.25);
-        private DirectionType type = DirectionType.None;
+        private ActionType movingDirection = ActionType.MoveLeft;
 
         public MainWindow()
         {
@@ -241,26 +241,37 @@ namespace WpfApp1
                 connection.DrawConnection(TempJointLocations, MaxX, MaxY, this);
             }
 
-            if (movingDirection == DirectionType.Left)
-            {
-                foreach (var ch in canvas.Children.Cast<FrameworkElement>())
-                {
-                    Thickness thickness = ch.Margin;
-                    thickness.Left -= 10;
+            GameLoop();
+        }
 
-                    ch.Margin = thickness;
-                }
-            }
-            else if (movingDirection == DirectionType.Right)
+        private void GameLoop()
+        {
+            foreach (var child in canvas.Children.Cast<FrameworkElement>())
             {
-                foreach (var ch in canvas.Children.Cast<FrameworkElement>())
+                if (IsPartOfSkeleton(child))
                 {
-                    Thickness thickness = ch.Margin;
-                    thickness.Left += 10;
-
-                    ch.Margin = thickness;
+                    break;
                 }
+
+                Thickness worldLocation = child.Margin;
+
+                switch(movingDirection)
+                {
+                    case ActionType.MoveLeft:
+                        worldLocation.Left += 10;
+                        break;
+                    case ActionType.MoveRight:
+                        worldLocation.Left -= 10;
+                        break;
+                }
+
+                child.Margin = worldLocation;
             }
+        }
+
+        private static bool IsPartOfSkeleton(FrameworkElement ch)
+        {
+            return ch.GetType().Equals(typeof(Line)) || ch.GetType().Equals(typeof(Ellipse));
         }
 
         private void RenderEachJoint()
