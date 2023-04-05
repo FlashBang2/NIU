@@ -29,16 +29,19 @@ namespace WpfApp1
             canvas.Children.Add(DrawLine);
         }
 
-        public void DrawConnection(Dictionary<JointType, Vector> jointLocations)
+        public void DrawConnection(Dictionary<JointType, Vector> jointLocations, double maxX, double maxY, FrameworkElement canvas)
         {
-            var posA = jointLocations[JointA];
-            var posB = jointLocations[JointB];
+            var x = (jointLocations[JointA].X) / (maxX + 1.5);
+            var y = (-jointLocations[JointA].Y) / (maxY + 1.5);
 
-            DrawLine.X1 = posA.X;
-            DrawLine.Y1 = posA.Y;
+            DrawLine.X1 = x * canvas.Width;
+            DrawLine.Y1 = y * canvas.Height;
 
-            DrawLine.X2 = posB.X;
-            DrawLine.Y2 = posB.Y;
+            x = (jointLocations[JointB].X) / (maxX + 1.5);
+            y = (-jointLocations[JointB].Y) / (maxY + 1.5);
+
+            DrawLine.X2 = x * canvas.Width;
+            DrawLine.Y2 = y * canvas.Height;
         }
 
         public void ClearConnectionLine()
@@ -253,7 +256,7 @@ namespace WpfApp1
             RenderEachJoint();
             foreach (Connection connection in Connections)
             {
-                connection.DrawConnection(JointLocations);
+                connection.DrawConnection(JointLocations, MaxX, MaxY, this);
             }
         }
 
