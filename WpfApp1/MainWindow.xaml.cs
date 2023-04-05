@@ -42,6 +42,8 @@ namespace WpfApp1
 
             DrawLine.X2 = x * canvas.Width;
             DrawLine.Y2 = y * canvas.Height;
+            DrawLine.Stroke = new SolidColorBrush(Color.FromArgb(255, 27, 58, 65));
+            DrawLine.StrokeThickness = 2;
         }
 
         public void ClearConnectionLine()
@@ -65,7 +67,7 @@ namespace WpfApp1
     public partial class MainWindow : Window
     {
         private Dictionary<JointType, Ellipse> ellipses = new Dictionary<JointType, Ellipse>();
-        private bool IsKinnectAvailable = false;
+        private bool IsKinnectAvailable = true;
 
         private Label label;
         Dictionary<JointType, Vector> JointLocations = new Dictionary<JointType, Vector>();
@@ -268,7 +270,7 @@ namespace WpfApp1
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
 
-                var x = (-JointLocations[joint.Key].X) / (MaxX + 1.5);
+                var x = (JointLocations[joint.Key].X) / (MaxX + 1.5);
                 var y = (-JointLocations[joint.Key].Y) / (MaxY + 1.5);
                 Console.WriteLine("x=" + x);
 
