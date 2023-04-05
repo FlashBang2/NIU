@@ -273,12 +273,13 @@ namespace WpfApp1
         {
             Vector ellipseSize = new Vector(0.01f, 0.01f);
             Color boneColor = Color.FromArgb(255, 0, 0, 0);
+            double scale = 0.25f;
 
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
 
-                var x = (JointLocations[joint.Key].X + 1.5) / (MaxX + 3);
-                var y = (-JointLocations[joint.Key].Y) + 2 / (MaxY + 3);
+                var x = scale * (JointLocations[joint.Key].X + 1.5) / (MaxX + 3);
+                var y = scale * (-JointLocations[joint.Key].Y) + 2 / (MaxY + 3);
                 Console.WriteLine("x=" + x);
 
                 TempJointLocations[joint.Key] = new Vector(x, y);
