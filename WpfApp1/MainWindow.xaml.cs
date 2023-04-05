@@ -62,7 +62,7 @@ namespace WpfApp1
         private double MinX = 0;
         private double MaxX = 0;
 
-        private Vector offset = new Vector(0.0, 0.25);
+        private Vector offset = new Vector(-2.46, 0.25);
         private DirectionType type = DirectionType.None;
 
         public MainWindow()
@@ -238,7 +238,7 @@ namespace WpfApp1
         {
             Vector ellipseSize = new Vector(0.01f, 0.01f);
             Color boneColor = Color.FromArgb(255, 0, 0, 0);
-            double scale = 0.25f;
+            double scale = 0.15f;
 
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
