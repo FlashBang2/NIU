@@ -31,14 +31,14 @@ namespace WpfApp1
 
         public void DrawConnection(Dictionary<JointType, Vector> jointLocations, double maxX, double maxY, FrameworkElement canvas)
         {
-            var x = (jointLocations[JointA].X) / (maxX + 1.5);
-            var y = (-jointLocations[JointA].Y) / (maxY + 1.5);
+            var x = jointLocations[JointA].X;
+            var y = jointLocations[JointA].Y;
 
             DrawLine.X1 = x * canvas.Width;
             DrawLine.Y1 = y * canvas.Height;
 
-            x = (jointLocations[JointB].X) / (maxX + 1.5);
-            y = (-jointLocations[JointB].Y) / (maxY + 1.5);
+            x = jointLocations[JointB].X;
+            y = jointLocations[JointB].Y;
 
             DrawLine.X2 = x * canvas.Width;
             DrawLine.Y2 = y * canvas.Height;
