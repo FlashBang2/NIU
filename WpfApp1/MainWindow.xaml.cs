@@ -15,7 +15,7 @@ namespace WpfApp1
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Dictionary<JointType, Ellipse> ellipses = new Dictionary<JointType, Ellipse>();
+        private Dictionary<JointType, DebugJoint> joints = new Dictionary<JointType, DebugJoint>();
         private bool IsKinnectAvailable = false;
 
         private Label label;
@@ -69,14 +69,7 @@ namespace WpfApp1
             IEnumerable<JointType> joints = Enum.GetValues(typeof(JointType)).Cast<JointType>();
             foreach (JointType joint in joints)
             {
-                Ellipse ellipse = new Ellipse
-                {
-                    Margin = new Thickness(10)
-                };
-
-
-                ellipses.Add(joint, ellipse);
-                canvas.Children.Add(ellipse);
+                this.joints.Add(joint, new DebugJoint(this, joint));
             }
         }
 
@@ -240,17 +233,19 @@ namespace WpfApp1
 
         private void RenderEachJoint()
         {
-            Vector ellipseSize = new Vector(0.01f, 0.01f);
+            Vector jointSize = new Vector(0.01f, 0.01f);
             Color boneColor = Color.FromArgb(255, 0, 0, 0);
             double scale = 0.15f;
 
-            foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
+            foreach (KeyValuePair<JointType, DebugJoint> joint in joints)
             {
                 double x = scale * (JointLocations[joint.Key].X) + 1.5 / (MaxX + 3);
                 double y = scale * (-JointLocations[joint.Key].Y) + 2 / (MaxY + 3);
 
                 TempJointLocations[joint.Key] = new Vector(x + offset.X, y + offset.Y);
-                DrawEllipseAtLocation(joint.Key, TempJointLocations[joint.Key], ellipseSize, boneColor);
+
+                DebugJoint j = joint.Value;
+                j.DrawDebugJoint(TempJointLocations[joint.Key], jointSize, boneColor);
             }
 
             foreach (Connection connection in Connections)
@@ -284,40 +279,15 @@ namespace WpfApp1
 
         private void ClearCanvas()
         {
-            Vector ellipseSize = new Vector(0.1f, 0.1f);
-
-            foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
+            foreach (KeyValuePair<JointType, DebugJoint> joint in joints)
             {
-                DrawEllipseAtLocation(joint.Key, new Vector(), ellipseSize, Color.FromArgb(0, 0, 0, 0));
+                joint.Value.Clear();
             }
 
             foreach (Connection connection in Connections)
             {
                 connection.ClearConnectionLine();
             }
-        }
-
-        private void DrawEllipseAtLocation(JointType type, Vector normalizedPosition, Vector size, Color color)
-        {
-            Console.WriteLine(normalizedPosition);
-
-            Ellipse joint = ellipses[type];
-
-            double scaledWidth = size.X * Width;
-            double scaledHeight = size.Y * Height;
-
-            joint.Width = scaledWidth;
-            joint.Height = scaledWidth;
-
-            Thickness margin = joint.Margin;
-
-            margin.Left = (normalizedPosition.X - size.X / 2) * Width;
-            margin.Top = (normalizedPosition.Y - size.Y / 2) * Height;
-            joint.Margin = margin;
-
-            joint.Width = scaledWidth;
-            joint.Height = scaledHeight;
-            joint.Fill = new SolidColorBrush(color);
         }
     }
 }
