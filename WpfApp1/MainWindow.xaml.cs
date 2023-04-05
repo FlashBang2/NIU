@@ -16,7 +16,7 @@ namespace WpfApp1
     public partial class MainWindow : Window
     {
         private Dictionary<JointType, Ellipse> ellipses = new Dictionary<JointType, Ellipse>();
-        private bool IsKinnectAvailable = true;
+        private bool IsKinnectAvailable = false;
 
         private Label label;
         Dictionary<JointType, Vector> JointLocations = new Dictionary<JointType, Vector>();
@@ -69,7 +69,6 @@ namespace WpfApp1
         {
             InitializeComponent();
             IEnumerable<JointType> joints = Enum.GetValues(typeof(JointType)).Cast<JointType>();
-
             foreach (JointType joint in joints)
             {
                 Ellipse ellipse = new Ellipse
@@ -123,11 +122,32 @@ namespace WpfApp1
                     JointLocations[x] = new Vector();
                     TempJointLocations[x] = new Vector();
                 }
-
+                    
                 foreach (Connection connection in Connections)
                 {
                     Console.WriteLine(connection);
                 }
+
+                // temp solution for testing
+                string text = "Podnieś ręce";
+                label = new Label();
+                label.Content = text;
+                label.FontSize = 100;
+                canvas.Children.Add(label);
+                label.SizeChanged += (o, e) =>
+                {
+                    double left = (Width - label.ActualWidth) / 2;
+                    double top = (Height - label.ActualHeight) / 2;
+
+                    Thickness margin = label.Margin;
+                    margin.Left = left;
+                    margin.Top = top;
+
+                    label.Margin = margin;
+                };
+                calibrateY.Tick += (sender, evt) => CalibrateY();
+                calibrateY.Interval = TimeSpan.FromSeconds(2);
+                calibrateY.Start();
             }
         }
 
@@ -221,16 +241,25 @@ namespace WpfApp1
                 connection.DrawConnection(TempJointLocations, MaxX, MaxY, this);
             }
 
-            if (type == DirectionType.Left)
+            if (movingDirection == DirectionType.Left)
             {
-                foreach (var ch in canvas.Children)
+                foreach (var ch in canvas.Children.Cast<FrameworkElement>())
                 {
+                    Thickness thickness = ch.Margin;
+                    thickness.Left -= 10;
 
+                    ch.Margin = thickness;
                 }
             }
-            else if (type == DirectionType.Right)
+            else if (movingDirection == DirectionType.Right)
             {
+                foreach (var ch in canvas.Children.Cast<FrameworkElement>())
+                {
+                    Thickness thickness = ch.Margin;
+                    thickness.Left += 10;
 
+                    ch.Margin = thickness;
+                }
             }
         }
 
