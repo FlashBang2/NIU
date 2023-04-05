@@ -71,6 +71,7 @@ namespace WpfApp1
 
         private Label label;
         Dictionary<JointType, Vector> JointLocations = new Dictionary<JointType, Vector>();
+        Dictionary<JointType, Vector> TempJointLocations = new Dictionary<JointType, Vector>();
 
         private Connection[] Connections =
         {
@@ -168,6 +169,7 @@ namespace WpfApp1
                 foreach (var x in Enum.GetValues(typeof(JointType)).Cast<JointType>())
                 {
                     JointLocations[x] = new Vector();
+                    TempJointLocations[x] = new Vector();
                 }
 
                 foreach (Connection connection in Connections)
@@ -263,7 +265,7 @@ namespace WpfApp1
             RenderEachJoint();
             foreach (Connection connection in Connections)
             {
-                connection.DrawConnection(JointLocations, MaxX, MaxY, this);
+                connection.DrawConnection(TempJointLocations, MaxX, MaxY, this);
             }
         }
 
@@ -279,7 +281,7 @@ namespace WpfApp1
                 var y = (-JointLocations[joint.Key].Y) + 2 / (MaxY + 3);
                 Console.WriteLine("x=" + x);
 
-                JointLocations[joint.Key] = new Vector(x, y);
+                TempJointLocations[joint.Key] = new Vector(x, y);
                 DrawEllipseAtLocation(joint.Key, new Vector(x, y), ellipseSize, boneColor);
             }
         }
