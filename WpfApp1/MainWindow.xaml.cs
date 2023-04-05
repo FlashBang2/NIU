@@ -279,6 +279,7 @@ namespace WpfApp1
                 var y = (-JointLocations[joint.Key].Y) / (MaxY + 1.5);
                 Console.WriteLine("x=" + x);
 
+                JointLocations[joint.Key] = new Vector(x, y);
                 DrawEllipseAtLocation(joint.Key, new Vector(x, y), ellipseSize, boneColor);
             }
         }
