@@ -192,6 +192,7 @@ namespace WpfApp1
                 update.Interval = TimeSpan.FromMilliseconds(16.6);
                 ShowCenteredText("");
                 update.Start();
+                rectangle.Visibility = Visibility.Visible;
             }
             else
             {
