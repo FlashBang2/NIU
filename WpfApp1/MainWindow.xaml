@@ -7,6 +7,5 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="720" Width="1280">
     <Canvas x:Name="canvas">
-        <Line X1="10" Y1="10" X2="100" Y2="100" StrokeThickness="1" Stroke="Maroon"></Line>
     </Canvas>
 </Window>
