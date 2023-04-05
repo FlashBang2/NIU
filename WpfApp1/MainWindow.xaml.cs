@@ -275,8 +275,8 @@ namespace WpfApp1
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
 
-                var x = (JointLocations[joint.Key].X) / (MaxX + 1.5);
-                var y = (-JointLocations[joint.Key].Y) / (MaxY + 1.5);
+                var x = (JointLocations[joint.Key].X + 1.5) / (MaxX + 3);
+                var y = (-JointLocations[joint.Key].Y) + 2 / (MaxY + 3);
                 Console.WriteLine("x=" + x);
 
                 JointLocations[joint.Key] = new Vector(x, y);
