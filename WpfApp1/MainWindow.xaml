@@ -7,6 +7,6 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="720" Width="1280">
     <Canvas x:Name="canvas">
-        <Rectangle Visibility="Visible" x:Name="rectangle" Width="1280" Height="120" Fill="ForestGreen" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,586,0,0"/>
+        <Rectangle Visibility="Hidden" x:Name="rectangle" Width="1280" Height="120" Fill="ForestGreen" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,586,0,0"/>
     </Canvas>
 </Window>
