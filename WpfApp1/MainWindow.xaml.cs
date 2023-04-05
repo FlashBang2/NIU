@@ -63,6 +63,7 @@ namespace WpfApp1
         private double MaxX = 0;
 
         private Vector offset = new Vector(0.0, 0.25);
+        private DirectionType type = DirectionType.None;
 
         public MainWindow()
         {
@@ -218,6 +219,18 @@ namespace WpfApp1
             foreach (Connection connection in Connections)
             {
                 connection.DrawConnection(TempJointLocations, MaxX, MaxY, this);
+            }
+
+            if (type == DirectionType.Left)
+            {
+                foreach (var ch in canvas.Children)
+                {
+
+                }
+            }
+            else if (type == DirectionType.Right)
+            {
+
             }
         }
 
