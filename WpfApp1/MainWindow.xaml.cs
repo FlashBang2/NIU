@@ -18,10 +18,37 @@ namespace WpfApp1
         private Dictionary<JointType, Ellipse> ellipses = new Dictionary<JointType, Ellipse>();
         private bool IsKinnectAvailable = false;
 
-        private float t = 0;
-        private Vector startVector = new Vector();
-        private Vector endVector = new Vector(1.0f, 1.0f);
         private Label label;
+        Dictionary<JointType, Vector> JointLocations = new Dictionary<JointType, Vector>();
+        Dictionary<JointType, Vector> TempJointLocations = new Dictionary<JointType, Vector>();
+
+        private Connection[] Connections =
+        {
+            new Connection(JointType.Head, JointType.ShoulderCenter),
+
+            new Connection(JointType.ShoulderCenter, JointType.ShoulderRight),
+            new Connection(JointType.ShoulderRight, JointType.ElbowRight),
+            new Connection(JointType.ElbowRight, JointType.WristRight),
+            new Connection(JointType.WristRight, JointType.HandRight),
+
+            new Connection(JointType.ShoulderCenter, JointType.ShoulderLeft),
+            new Connection(JointType.ShoulderLeft, JointType.ElbowLeft),
+            new Connection(JointType.ElbowLeft, JointType.WristLeft),
+            new Connection(JointType.WristLeft, JointType.HandLeft),
+
+            new Connection(JointType.ShoulderCenter, JointType.Spine),
+            new Connection(JointType.Spine, JointType.HipCenter),
+
+            new Connection(JointType.HipCenter, JointType.HipRight),
+            new Connection(JointType.HipRight, JointType.KneeRight),
+            new Connection(JointType.KneeRight, JointType.AnkleRight),
+            new Connection(JointType.AnkleRight, JointType.FootRight),
+
+            new Connection(JointType.HipCenter, JointType.HipLeft),
+            new Connection(JointType.HipLeft, JointType.KneeLeft),
+            new Connection(JointType.KneeLeft, JointType.AnkleLeft),
+            new Connection(JointType.AnkleLeft, JointType.FootLeft),
+        };
 
         private bool switch01 = false;
         private bool switch02 = false;
@@ -35,11 +62,13 @@ namespace WpfApp1
         private double MinX = 0;
         private double MaxX = 0;
 
+        private Vector offset = new Vector(-2.46, 0.25);
+        private ActionType actionType = ActionType.None;
+
         public MainWindow()
         {
             InitializeComponent();
             IEnumerable<JointType> joints = Enum.GetValues(typeof(JointType)).Cast<JointType>();
-
             foreach (JointType joint in joints)
             {
                 Ellipse ellipse = new Ellipse
@@ -47,16 +76,23 @@ namespace WpfApp1
                     Margin = new Thickness(10)
                 };
 
+
                 ellipses.Add(joint, ellipse);
                 canvas.Children.Add(ellipse);
             }
 
+            foreach (Connection connection in Connections)
+            {
+                connection.AttachToCanvas(canvas);
+            }
+
             if (IsKinnectAvailable)
             {
-                KinectStart();
-            }
-            else
-            {
+
+                foreach (var x in Enum.GetValues(typeof(JointType)).Cast<JointType>())
+                {
+                    JointLocations[x] = new Vector();
+                }
                 KinectStart();
                 // temp solution for testing
                 string text = "Podnieś ręce";
@@ -78,22 +114,49 @@ namespace WpfApp1
                 calibrateY.Tick += (sender, evt) => CalibrateY();
                 calibrateY.Interval = TimeSpan.FromSeconds(2);
                 calibrateY.Start();
-
+            }
+            else
+            {
                 foreach (var x in Enum.GetValues(typeof(JointType)).Cast<JointType>())
                 {
-                    pos[x] = new Vector();
+                    JointLocations[x] = new Vector();
+                    TempJointLocations[x] = new Vector();
                 }
+                    
+                foreach (Connection connection in Connections)
+                {
+                    Console.WriteLine(connection);
+                }
+
+                // temp solution for testing
+                string text = "Podnieś ręce";
+                label = new Label();
+                label.Content = text;
+                label.FontSize = 100;
+                canvas.Children.Add(label);
+                label.SizeChanged += (o, e) =>
+                {
+                    double left = (Width - label.ActualWidth) / 2;
+                    double top = (Height - label.ActualHeight) / 2;
+
+                    Thickness margin = label.Margin;
+                    margin.Left = left;
+                    margin.Top = top;
+
+                    label.Margin = margin;
+                };
+                calibrateY.Tick += (sender, evt) => CalibrateY();
+                calibrateY.Interval = TimeSpan.FromSeconds(2);
+                calibrateY.Start();
             }
         }
-
-        Dictionary<JointType, Vector> pos = new Dictionary<JointType, Vector>();
 
         private void CalibrateX()
         {
             if (switch02)
             {
-                MinX = -pos[JointType.HandLeft].X;
-                MaxX = -pos[JointType.HandRight].X;
+                MinX = -JointLocations[JointType.HandLeft].X;
+                MaxX = -JointLocations[JointType.HandRight].X;
                 Console.WriteLine("MinX: " + MinX);
                 Console.WriteLine("MaxX: " + MaxX);
                 calibrateX.Stop();
@@ -101,6 +164,7 @@ namespace WpfApp1
                 update.Interval = TimeSpan.FromMilliseconds(16.6);
                 ShowCenteredText("");
                 update.Start();
+                rectangle.Visibility = Visibility.Visible;
             }
             else
             {
@@ -113,7 +177,7 @@ namespace WpfApp1
         {
             if (switch01)
             {
-                MaxY = -pos[JointType.HandRight].Y;
+                MaxY = -JointLocations[JointType.HandRight].Y;
                 Console.WriteLine("MaxY: " + MaxY);
                 calibrateY.Stop();
                 calibrateX.Tick += (sender, evt) => CalibrateX();
@@ -155,12 +219,12 @@ namespace WpfApp1
                     {
                         user = skeletons.Where(u => u.TrackingState == SkeletonTrackingState.Tracked)
                             .FirstOrDefault();
-                        
+
                         if (user != null)
                         {
                             foreach (var x in user.Joints.Cast<Joint>())
                             {
-                                pos[x.JointType] = new Vector(x.Position.X, x.Position.Y);
+                                JointLocations[x.JointType] = new Vector(x.Position.X, x.Position.Y);
                             }
                         }
                     }
@@ -172,21 +236,82 @@ namespace WpfApp1
         {
             ClearCanvas();
             RenderEachJoint();
+            foreach (Connection connection in Connections)
+            {
+                connection.DrawConnection(TempJointLocations, MaxX, MaxY, this);
+            }
+
+            GameLoop();
+        }
+
+        private void GameLoop()
+        {
+            foreach (var child in canvas.Children.Cast<FrameworkElement>())
+            {
+                if (IsPartOfSkeleton(child))
+                {
+                    break;
+                }
+
+                Thickness worldLocation = child.Margin;
+
+                switch(actionType)
+                {
+                    case ActionType.MoveLeft:
+                        worldLocation.Left += 10;
+                        break;
+                    case ActionType.MoveRight:
+                        worldLocation.Left -= 10;
+                        break;
+                }
+
+                child.Margin = worldLocation;
+            }
+        }
+
+        private static bool IsPartOfSkeleton(FrameworkElement ch)
+        {
+            return ch.GetType().Equals(typeof(Line)) || ch.GetType().Equals(typeof(Ellipse));
         }
 
         private void RenderEachJoint()
         {
             Vector ellipseSize = new Vector(0.01f, 0.01f);
             Color boneColor = Color.FromArgb(255, 0, 0, 0);
+            double scale = 0.15f;
 
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
 
-                var x = (-pos[joint.Key].X)/(MaxX + 1.5);
-                var y = (-pos[joint.Key].Y)/(MaxY + 1.5);
+                var x = scale * (JointLocations[joint.Key].X + offset.X) + 1.5 / (MaxX + 3);
+                var y = scale * (-JointLocations[joint.Key].Y + offset.Y) + 2 / (MaxY + 3);
                 Console.WriteLine("x=" + x);
 
+                TempJointLocations[joint.Key] = new Vector(x, y);
                 DrawEllipseAtLocation(joint.Key, new Vector(x, y), ellipseSize, boneColor);
+            }
+
+            var ankleLeft = TempJointLocations[JointType.AnkleLeft];
+            var kneeRight = TempJointLocations[JointType.KneeRight];
+
+            var ankleRight = TempJointLocations[JointType.AnkleRight];
+            var kneeLeft = TempJointLocations[JointType.KneeLeft];
+
+            var head = TempJointLocations[JointType.Head];
+            var handRight = TempJointLocations[JointType.HandRight];
+            var handLeft = TempJointLocations[JointType.HandLeft];
+
+            if (ankleLeft.Y > kneeRight.Y)
+            {
+                actionType = ActionType.MoveRight;
+            }
+            else if (ankleRight.Y > kneeLeft.Y)
+            {
+                actionType = ActionType.MoveLeft;
+            }
+            else
+            {
+                actionType = ActionType.None;
             }
         }
 
@@ -197,6 +322,11 @@ namespace WpfApp1
             foreach (KeyValuePair<JointType, Ellipse> joint in ellipses)
             {
                 DrawEllipseAtLocation(joint.Key, new Vector(), ellipseSize, Color.FromArgb(0, 0, 0, 0));
+            }
+
+            foreach (Connection connection in Connections)
+            {
+                connection.ClearConnectionLine();
             }
         }
 
