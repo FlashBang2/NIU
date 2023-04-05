@@ -67,7 +67,7 @@ namespace WpfApp1
     public partial class MainWindow : Window
     {
         private Dictionary<JointType, Ellipse> ellipses = new Dictionary<JointType, Ellipse>();
-        private bool IsKinnectAvailable = true;
+        private bool IsKinnectAvailable = false;
 
         private Label label;
         Dictionary<JointType, Vector> JointLocations = new Dictionary<JointType, Vector>();
@@ -135,8 +135,13 @@ namespace WpfApp1
             }
 
             if (IsKinnectAvailable)
-            {
-                KinectStart();
+            { 
+                
+                foreach (var x in Enum.GetValues(typeof(JointType)).Cast<JointType>())
+                {
+                    JointLocations[x] = new Vector();
+                }
+            KinectStart();
                 // temp solution for testing
                 string text = "Podnieś ręce";
                 label = new Label();
