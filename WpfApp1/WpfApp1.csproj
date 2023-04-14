@@ -102,5 +102,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="skeleton.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(ProjectDir)skeleton.txt $(ProjectDir)$(OutDir)\skeleton.txt
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>

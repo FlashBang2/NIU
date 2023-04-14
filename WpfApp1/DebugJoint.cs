@@ -15,9 +15,9 @@ namespace WpfApp1
 
         public bool IsVisible
         {
-            get => IsVisible; set
+            get => _visible; set
             {
-                if (IsVisible)
+                if (_visible)
                 {
                     _joint.Visibility = Visibility.Visible;
                 }
@@ -26,9 +26,10 @@ namespace WpfApp1
                     _joint.Visibility = Visibility.Hidden;
                 }
 
-                IsVisible = value;
+                _visible = value;
             }
         }
+        private bool _visible;
 
         public DebugJoint(MainWindow window, JointType type)
         {

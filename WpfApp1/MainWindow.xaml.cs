@@ -7,6 +7,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using Microsoft.Kinect;
 using System.Windows.Controls;
+using System.IO;
 
 namespace WpfApp1
 {
@@ -60,8 +61,56 @@ namespace WpfApp1
 
             if (!IsKinnectAvailable)
             {
+                LoadTestSkeleton();
                 StartupCalibration();
             }
+        }
+
+        private void LoadTestSkeleton()
+        {
+            string[] lines = File.ReadAllLines("skeleton.txt");
+
+            int lineNo = 0;
+            string jointTag = "";
+
+            foreach (string line in lines)
+            {
+                bool isJointTag = lineNo % 2 == 0;
+                if (isJointTag)
+                {
+                    jointTag = line;
+                }
+                else
+                {
+                    string[] pos = line.Split(';');
+
+                    pos = pos.Select(v => v.Replace(',', '.')).ToArray();
+
+                    double x = double.Parse(pos[0]);
+                    double y = -double.Parse(pos[1]);
+
+                    foreach (var joint in JointLocations.Keys)
+                    {
+                        if (joint.ToString().Equals(jointTag))
+                        {
+                            TempJointLocations[joint] = (new Vector(x, y) + TempJointLocations[joint]) / 2;
+                            JointLocations[joint] = TempJointLocations[joint];
+
+                            break;
+                        }
+                    }
+                }
+
+                lineNo++;
+            }
+
+            foreach (var i in joints)
+            {
+                i.Value.IsVisible = true;
+            }
+
+            int j = 0;
+
         }
 
         private void AddJoints()
@@ -242,7 +291,7 @@ namespace WpfApp1
                 double x = scale * (JointLocations[joint.Key].X) + 1.5 / (MaxX + 3);
                 double y = scale * (-JointLocations[joint.Key].Y) + 2 / (MaxY + 3);
 
-                TempJointLocations[joint.Key] = new Vector(x + offset.X, y + offset.Y);
+                TempJointLocations[joint.Key] = new Vector(x, y);
 
                 DebugJoint j = joint.Value;
                 j.DrawDebugJoint(TempJointLocations[joint.Key], jointSize, boneColor);
