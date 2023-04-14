@@ -35,16 +35,18 @@ namespace WpfApp1
 
         private WeakReference<MainWindow> _window;
 
-        private Rect Bounds;
-        private readonly Rectangle CharacterDebugBounds = new Rectangle();
+        private Rect _bounds;
+        public Rect Bounds { get => _bounds; }
+
+        private readonly Rectangle _characterDebugBounds = new Rectangle();
 
         public DebugSkeleton(Canvas canvas, MainWindow window)
         {
             _connections = Connection.Connections;
             _window = new WeakReference<MainWindow>(window);
             AddJoints(window);
-            Bounds = new Rect(new Vector(), new Vector());
-            canvas.Children.Add(CharacterDebugBounds);
+            _bounds = new Rect(new Vector(), new Vector());
+            canvas.Children.Add(_characterDebugBounds);
 
             foreach (Connection connection in _connections)
             {
@@ -63,7 +65,7 @@ namespace WpfApp1
             IEnumerable<JointType> joints = Enum.GetValues(typeof(JointType)).Cast<JointType>();
             foreach (JointType joint in joints)
             {
-                this._joints.Add(joint, new DebugJoint(window));
+                _joints.Add(joint, new DebugJoint(window));
             }
         }
 
@@ -188,17 +190,17 @@ namespace WpfApp1
                 maxY = Math.Max(maxY, bounds.Down);
             }
 
-            Bounds = new Rect(new Vector(minX, minY), new Vector(maxX, maxY));
-            CharacterDebugBounds.Width = Bounds.Width;
-            CharacterDebugBounds.Height = Bounds.Height;
+            _bounds = new Rect(new Vector(minX, minY), new Vector(maxX, maxY));
+            _characterDebugBounds.Width = _bounds.Width;
+            _characterDebugBounds.Height = _bounds.Height;
 
-            Thickness margin = CharacterDebugBounds.Margin;
-            margin.Left = Bounds.Left;
-            margin.Top = Bounds.Top;
-            CharacterDebugBounds.Margin = margin;
+            Thickness margin = _characterDebugBounds.Margin;
+            margin.Left = _bounds.Left;
+            margin.Top = _bounds.Top;
+            _characterDebugBounds.Margin = margin;
 
-            CharacterDebugBounds.Stroke = new SolidColorBrush(Color.FromRgb(125, 125, 255));
-            CharacterDebugBounds.StrokeThickness = 1;
+            _characterDebugBounds.Stroke = new SolidColorBrush(Color.FromRgb(125, 125, 255));
+            _characterDebugBounds.StrokeThickness = 1;
         }
 
         private void CalculateScaledBounds(double scale, KeyValuePair<JointType, DebugJoint> joint)
