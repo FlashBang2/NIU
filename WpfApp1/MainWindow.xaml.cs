@@ -16,13 +16,8 @@ namespace WpfApp1
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Dictionary<JointType, DebugJoint> joints = new Dictionary<JointType, DebugJoint>();
         private bool IsKinnectAvailable = false;
-
         private Label label;
-        Dictionary<JointType, Vector> JointLocations = new Dictionary<JointType, Vector>();
-        Dictionary<JointType, Vector> TempJointLocations = new Dictionary<JointType, Vector>();
-        private Connection[] Connections;
 
         private bool switch01 = false;
         private bool switch02 = false;
@@ -32,126 +27,20 @@ namespace WpfApp1
         private DispatcherTimer update = new DispatcherTimer();
 
         private Skeleton user = null;
-        private double MaxY = 0;
-        private double MinX = 0;
-        private double MaxX = 0;
-
-        private Vector offset = new Vector(-2.46, 0.25);
+        DebugSkeleton skeleton;
         private ActionType actionType = ActionType.None;
-
-        private Rect rect;
-        private Rectangle charRect = new Rectangle();
-
-        Vector jointSize = new Vector(0.01f, 0.01f);
-        double scale = 0.15f;
 
         public MainWindow()
         {
             InitializeComponent();
-            AddJoints();
-
-            Connections = Connection.Connections;
-
-            foreach (Connection connection in Connections)
-            {
-                connection.AttachToCanvas(canvas);
-            }
-
-            foreach (var x in Enum.GetValues(typeof(JointType)).Cast<JointType>())
-            {
-                JointLocations[x] = new Vector();
-                TempJointLocations[x] = new Vector();
-            }
+            skeleton = new DebugSkeleton(canvas, this);
 
             StartKinect();
 
-            canvas.Children.Add(charRect);
             if (!IsKinnectAvailable)
             {
-                LoadTestSkeleton();
+                skeleton.LoadTestSkeleton();
                 StartupCalibration();
-            }
-        }
-
-        private void FindSkeletonBounds()
-        {
-            double minX = double.PositiveInfinity;
-            double minY = double.PositiveInfinity;
-            double maxX = double.NegativeInfinity;
-            double maxY = double.NegativeInfinity;
-
-            foreach (var i in joints)
-            {
-                Rect bounds = i.Value.Bounds;
-                minX = Math.Min(minX, bounds.Left);
-                minY = Math.Min(minY, bounds.Top);
-
-                maxX = Math.Max(maxX, bounds.Right);
-                maxY = Math.Max(maxY, bounds.Down);
-            }
-
-            rect = new Rect(new Vector(minX, minY), new Vector(maxX, maxY));
-            charRect.Width = rect.Width;
-            charRect.Height = rect.Height;
-
-            Thickness margin = charRect.Margin;
-            margin.Left = rect.Left;
-            margin.Top = rect.Top;
-
-            charRect.Margin = margin;
-
-            charRect.Stroke = new SolidColorBrush(Color.FromRgb(125, 125, 255));
-            charRect.StrokeThickness = 1;
-        }
-
-        private void LoadTestSkeleton()
-        {
-            string[] lines = File.ReadAllLines("skeleton.txt");
-
-            int lineNo = 0;
-            string jointTag = "";
-
-            int numElements = 0;
-
-            foreach (string line in lines)
-            {
-                bool isJointTag = lineNo % 2 == 0;
-                if (isJointTag)
-                {
-                    jointTag = line;
-                }
-                else
-                {
-                    string[] pos = line.Split(';');
-
-                    pos = pos.Select(v => v.Replace(',', '.')).ToArray();
-
-                    double x = double.Parse(pos[0]);
-                    double y = -double.Parse(pos[1]);
-
-                    foreach (var joint in JointLocations.Keys)
-                    {
-                        if (joint.ToString().Equals(jointTag))
-                        {
-                            TempJointLocations[joint] = (new Vector(x, y) + TempJointLocations[joint]) / 2;
-                            JointLocations[joint] = TempJointLocations[joint];
-
-                            break;
-                        }
-                    }
-                    numElements++;
-                }
-
-                lineNo++;
-            }
-        }
-
-        private void AddJoints()
-        {
-            IEnumerable<JointType> joints = Enum.GetValues(typeof(JointType)).Cast<JointType>();
-            foreach (JointType joint in joints)
-            {
-                this.joints.Add(joint, new DebugJoint(this));
             }
         }
 
@@ -186,19 +75,12 @@ namespace WpfApp1
         {
             if (switch02)
             {
-                MinX = -JointLocations[JointType.HandLeft].X;
-                MaxX = -JointLocations[JointType.HandRight].X;
-                Console.WriteLine("MinX: " + MinX);
-                Console.WriteLine("MaxX: " + MaxX);
+                skeleton.EndOfXCalibration();
+
                 calibrateX.Stop();
                 update.Tick += (sender, evt) => Render();
                 update.Interval = TimeSpan.FromMilliseconds(16.6);
                 ShowCenteredText("");
-
-                foreach (var x in joints)
-                {
-                    x.Value.IsVisible = true;
-                }
 
                 update.Start();
                 rectangle.Visibility = Visibility.Visible;
@@ -214,8 +96,7 @@ namespace WpfApp1
         {
             if (switch01)
             {
-                MaxY = -JointLocations[JointType.HandRight].Y;
-                Console.WriteLine("MaxY: " + MaxY);
+                skeleton.EndOfYCalibration();
                 calibrateY.Stop();
                 calibrateX.Tick += (sender, evt) => CalibrateX();
                 calibrateX.Interval = TimeSpan.FromSeconds(2);
@@ -254,27 +135,7 @@ namespace WpfApp1
 
                 if (isSkeletonDataAvailable)
                 {
-                    UpdateJointLocations(frame);
-                }
-            }
-        }
-
-        private void UpdateJointLocations(SkeletonFrame frame)
-        {
-            Skeleton[] skeletons = new Skeleton[frame.SkeletonArrayLength];
-            frame.CopySkeletonDataTo(skeletons);
-
-            if (skeletons.Length > 0)
-            {
-                user = skeletons.Where(u => u.TrackingState == SkeletonTrackingState.Tracked)
-                    .FirstOrDefault();
-
-                if (user != null)
-                {
-                    foreach (var x in user.Joints.Cast<Joint>())
-                    {
-                        JointLocations[x.JointType] = new Vector(x.Position.X, x.Position.Y);
-                    }
+                    skeleton.UpdateSkeleton(frame);
                 }
             }
         }
@@ -282,9 +143,9 @@ namespace WpfApp1
         private void Render()
         {
             ClearCanvas();
-            RenderEachJoint();
+            skeleton.RenderEachJoint();
+            FindActionType();
             UpdateGame();
-            FindSkeletonBounds();
         }
 
         private void UpdateGame()
@@ -320,42 +181,14 @@ namespace WpfApp1
             return isBone || isJoint;
         }
 
-        private void RenderEachJoint()
-        {
-            Color boneColor = Color.FromArgb(255, 0, 0, 0);
-
-            foreach (KeyValuePair<JointType, DebugJoint> joint in joints)
-            {
-                CalculateScaledBounds(scale, joint);
-
-                DebugJoint j = joint.Value;
-                j.DrawDebugJoint(TempJointLocations[joint.Key], jointSize, boneColor);
-            }
-
-            foreach (Connection connection in Connections)
-            {
-                connection.DrawConnection(TempJointLocations, this);
-            }
-
-            actionType = FindActionType();
-        }
-
-        private void CalculateScaledBounds(double scale, KeyValuePair<JointType, DebugJoint> joint)
-        {
-            double x = scale * (JointLocations[joint.Key].X) + 1.5 / (MaxX + 3);
-            double y = scale * (-JointLocations[joint.Key].Y) + 2 / (MaxY + 3);
-
-            TempJointLocations[joint.Key] = new Vector(x, y);
-        }
-
         private ActionType FindActionType()
         {
             ActionType actionType = ActionType.None;
 
-            Vector ankleLeft = TempJointLocations[JointType.AnkleLeft];
-            Vector kneeRight = TempJointLocations[JointType.KneeRight];
-            Vector ankleRight = TempJointLocations[JointType.AnkleRight];
-            Vector kneeLeft = TempJointLocations[JointType.KneeLeft];
+            Vector ankleLeft = skeleton[JointType.AnkleLeft];
+            Vector kneeRight = skeleton[JointType.KneeRight];
+            Vector ankleRight = skeleton[JointType.AnkleRight];
+            Vector kneeLeft = skeleton[JointType.KneeLeft];
 
             if (-ankleLeft.Y > -kneeRight.Y)
             {
@@ -371,15 +204,7 @@ namespace WpfApp1
 
         private void ClearCanvas()
         {
-            foreach (KeyValuePair<JointType, DebugJoint> joint in joints)
-            {
-                joint.Value.Clear();
-            }
-
-            foreach (Connection connection in Connections)
-            {
-                connection.ClearConnectionLine();
-            }
+            skeleton.Clear();
         }
     }
 }

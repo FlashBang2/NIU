@@ -46,7 +46,7 @@ namespace WpfApp1
 
             _window = new WeakReference<MainWindow>(window);
 
-            IsVisible = true;
+            _visible = true;
 
             Canvas canvas = window.canvas;
             canvas.Children.Add(_joint);
