@@ -39,6 +39,12 @@ namespace WpfApp1
         private Vector offset = new Vector(-2.46, 0.25);
         private ActionType actionType = ActionType.None;
 
+        private Rect rect;
+        private Rectangle charRect = new Rectangle();
+
+        Vector jointSize = new Vector(0.01f, 0.01f);
+        double scale = 0.15f;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -59,11 +65,43 @@ namespace WpfApp1
 
             StartKinect();
 
+            canvas.Children.Add(charRect);
             if (!IsKinnectAvailable)
             {
                 LoadTestSkeleton();
                 StartupCalibration();
             }
+        }
+
+        private void FindSkeletonBounds()
+        {
+            double minX = double.PositiveInfinity;
+            double minY = double.PositiveInfinity;
+            double maxX = double.NegativeInfinity;
+            double maxY = double.NegativeInfinity;
+
+            foreach (var i in joints)
+            {
+                Rect bounds = i.Value.Bounds;
+                minX = Math.Min(minX, bounds.Left);
+                minY = Math.Min(minY, bounds.Top);
+
+                maxX = Math.Max(maxX, bounds.Right);
+                maxY = Math.Max(maxY, bounds.Down);
+            }
+
+            rect = new Rect(new Vector(minX, minY), new Vector(maxX, maxY));
+            charRect.Width = rect.Width;
+            charRect.Height = rect.Height;
+
+            Thickness margin = charRect.Margin;
+            margin.Left = rect.Left;
+            margin.Top = rect.Top;
+
+            charRect.Margin = margin;
+
+            charRect.Stroke = new SolidColorBrush(Color.FromRgb(125, 125, 255));
+            charRect.StrokeThickness = 1;
         }
 
         private void LoadTestSkeleton()
@@ -72,6 +110,8 @@ namespace WpfApp1
 
             int lineNo = 0;
             string jointTag = "";
+
+            int numElements = 0;
 
             foreach (string line in lines)
             {
@@ -99,18 +139,11 @@ namespace WpfApp1
                             break;
                         }
                     }
+                    numElements++;
                 }
 
                 lineNo++;
             }
-
-            foreach (var i in joints)
-            {
-                i.Value.IsVisible = true;
-            }
-
-            int j = 0;
-
         }
 
         private void AddJoints()
@@ -118,7 +151,7 @@ namespace WpfApp1
             IEnumerable<JointType> joints = Enum.GetValues(typeof(JointType)).Cast<JointType>();
             foreach (JointType joint in joints)
             {
-                this.joints.Add(joint, new DebugJoint(this, joint));
+                this.joints.Add(joint, new DebugJoint(this));
             }
         }
 
@@ -161,6 +194,12 @@ namespace WpfApp1
                 update.Tick += (sender, evt) => Render();
                 update.Interval = TimeSpan.FromMilliseconds(16.6);
                 ShowCenteredText("");
+
+                foreach (var x in joints)
+                {
+                    x.Value.IsVisible = true;
+                }
+
                 update.Start();
                 rectangle.Visibility = Visibility.Visible;
             }
@@ -245,6 +284,7 @@ namespace WpfApp1
             ClearCanvas();
             RenderEachJoint();
             UpdateGame();
+            FindSkeletonBounds();
         }
 
         private void UpdateGame()
@@ -282,16 +322,11 @@ namespace WpfApp1
 
         private void RenderEachJoint()
         {
-            Vector jointSize = new Vector(0.01f, 0.01f);
             Color boneColor = Color.FromArgb(255, 0, 0, 0);
-            double scale = 0.15f;
 
             foreach (KeyValuePair<JointType, DebugJoint> joint in joints)
             {
-                double x = scale * (JointLocations[joint.Key].X) + 1.5 / (MaxX + 3);
-                double y = scale * (-JointLocations[joint.Key].Y) + 2 / (MaxY + 3);
-
-                TempJointLocations[joint.Key] = new Vector(x, y);
+                CalculateScaledBounds(scale, joint);
 
                 DebugJoint j = joint.Value;
                 j.DrawDebugJoint(TempJointLocations[joint.Key], jointSize, boneColor);
@@ -303,6 +338,14 @@ namespace WpfApp1
             }
 
             actionType = FindActionType();
+        }
+
+        private void CalculateScaledBounds(double scale, KeyValuePair<JointType, DebugJoint> joint)
+        {
+            double x = scale * (JointLocations[joint.Key].X) + 1.5 / (MaxX + 3);
+            double y = scale * (-JointLocations[joint.Key].Y) + 2 / (MaxY + 3);
+
+            TempJointLocations[joint.Key] = new Vector(x, y);
         }
 
         private ActionType FindActionType()

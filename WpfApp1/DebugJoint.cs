@@ -11,7 +11,11 @@ namespace WpfApp1
     {
         private Ellipse _joint;
         private WeakReference<MainWindow> _window;
-        private JointType _jointType;
+
+        public double PosX { get => _joint.Margin.Left; }
+        public double PosY { get => _joint.Margin.Top; }
+
+        public Rect Bounds { get => new Rect(new Vector(PosX, PosY), new Vector(PosX + _joint.Width, PosY + _joint.Height)); }
 
         public bool IsVisible
         {
@@ -23,6 +27,8 @@ namespace WpfApp1
                 }
                 else
                 {
+                    _joint.Width = 0;
+                    _joint.Height = 0;
                     _joint.Visibility = Visibility.Hidden;
                 }
 
@@ -31,16 +37,15 @@ namespace WpfApp1
         }
         private bool _visible;
 
-        public DebugJoint(MainWindow window, JointType type)
+        public DebugJoint(MainWindow window)
         {
             _joint = new Ellipse
             {
-                Margin = new Thickness(10)
+                Margin = new Thickness(0)
             };
-            
+
             _window = new WeakReference<MainWindow>(window);
 
-            _jointType = type;  
             IsVisible = true;
 
             Canvas canvas = window.canvas;
@@ -51,10 +56,9 @@ namespace WpfApp1
         {
             if (!IsVisible)
             {
-                _joint.Width = 0;
-                _joint.Height = 0;
                 return;
             }
+
             MainWindow w;
 
             if (!_window.TryGetTarget(out w))

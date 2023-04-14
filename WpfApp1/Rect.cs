@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace WpfApp1
@@ -14,9 +10,23 @@ namespace WpfApp1
 
         public Rect(Vector min, Vector max)
         {
+            bool hasUserMistakenMinAndMax = min.X > max.X && min.Y > max.Y;
+
+            if (hasUserMistakenMinAndMax)
+            {
+                (max, min) = (min, max);
+            }
+
             _min = min;
             _max = max;
         }
+
+        public double Width => _max.X - _min.X;
+        public double Height => _max.Y - _min.Y;
+        public double Left => _min.X;
+        public double Top => _min.Y;
+        public double Right => _min.X + Width;
+        public double Down => _min.Y + Height;
 
         public static Rect FromOriginAndExtend(Vector origin, Vector extend)
         {
