@@ -40,6 +40,18 @@ namespace WpfApp1
 
         private readonly Rectangle _characterDebugBounds = new Rectangle();
 
+        public bool IsVisible
+        {
+            get => _joints[JointType.Head].IsVisible;
+            set
+            {
+                foreach (var joint in _joints)
+                {
+                    joint.Value.IsVisible = value;
+                }
+            }
+        }
+
         public DebugSkeleton(Canvas canvas, MainWindow window)
         {
             _connections = Connection.Connections;
