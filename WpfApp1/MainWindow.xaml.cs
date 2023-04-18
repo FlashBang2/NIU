@@ -56,7 +56,7 @@ namespace WpfApp1
 
             if (e.Key == Key.Space && !skeleton.IsFalling)
             {
-                skeleton.Velocity = new Vector(skeleton.Velocity.X, 10);
+                skeleton.Velocity = new Vector(skeleton.Velocity.X, 30);
             }
         }
 

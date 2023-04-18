@@ -9,12 +9,20 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
 namespace WpfApp1
 {
-    internal class DebugSkeleton : IPhysicsBody
+    public class DebugSkeleton : IPhysicsBody
     {
+        public enum JumpState
+        {
+            None = 0,
+            DuringJump,
+            DuringFall
+        }
+
         private readonly Dictionary<JointType, Vector> _jointLocations = new Dictionary<JointType, Vector>();
         private readonly Dictionary<JointType, Vector> _tempJointLocations = new Dictionary<JointType, Vector>();
         private readonly Dictionary<JointType, DebugJoint> _joints = new Dictionary<JointType, DebugJoint>();
@@ -96,8 +104,8 @@ namespace WpfApp1
 
         public double MaxJumpHeight = 100;
 
-        public bool IsFalling { get => _isFalling; }
-        private bool _isFalling = false;
+        public bool IsFalling { get => _jumpState != JumpState.None; }
+        private JumpState _jumpState = JumpState.None;
 
         public DebugSkeleton(Canvas canvas, MainWindow window)
         {
@@ -316,8 +324,32 @@ namespace WpfApp1
                 _velocity.Y = 0;
             }
 
+            UpdateJumpState();
+        }
 
-            _isFalling = _velocity.Y != 0;
+        private void UpdateJumpState()
+        {
+            if (Velocity.Y > 0)
+            {
+                if (_jumpState == JumpState.None)
+                {
+                    _jumpState = JumpState.DuringJump;
+                }
+            }
+            else if (Velocity.Y < 0)
+            {
+                if (_jumpState == JumpState.DuringJump)
+                {
+                    _jumpState = JumpState.DuringFall;
+                }
+            }
+            else
+            {
+                if (_jumpState == JumpState.DuringFall)
+                {
+                    _jumpState = JumpState.None;
+                }
+            }
         }
 
         private void UndoLastMove(MainWindow w)
