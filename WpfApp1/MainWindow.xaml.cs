@@ -161,19 +161,6 @@ namespace WpfApp1
             ClearCanvas();
             skeleton.RenderEachJoint();
             FindActionType();
-            if (Keyboard.IsKeyDown(Key.D))
-            {
-                actionType = ActionType.MoveRight;
-            }
-            else if (Keyboard.IsKeyDown(Key.A))
-            {
-                actionType = ActionType.MoveLeft;
-            }
-            else
-            {
-                actionType = ActionType.None;
-            }
-
             UpdateGame();
         }
 
@@ -209,6 +196,22 @@ namespace WpfApp1
             else if (-ankleRight.Y > -kneeLeft.Y)
             {
                 actionType = ActionType.MoveLeft;
+            }
+
+            if (!IsKinnectAvailable)
+            {
+                if (Keyboard.IsKeyDown(Key.D))
+                {
+                    actionType = ActionType.MoveRight;
+                }
+                else if (Keyboard.IsKeyDown(Key.A))
+                {
+                    actionType = ActionType.MoveLeft;
+                }
+                else
+                {
+                    actionType = ActionType.None;
+                }
             }
 
             return actionType;

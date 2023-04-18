@@ -71,19 +71,28 @@ namespace WpfApp1
             if (!_isStatic)
             {
                 Thickness location = _uiElement.Margin;
-                location.Left += Velocity.X;
-                location.Top += Velocity.Y;
-
-                if (ShouldApplyGravity)
-                {
-                    location.Top -= Physics.Gravity * GravityScale;
-                }
-
-                _lastMove = _velocity - new Vector(0, 1) * _gravityScale * Physics.Gravity;
+                location.Left += _velocity.X;
+                location.Top += _velocity.Y;
 
                 if (Physics.IsCollidingWithAnyObject(this))
                 {
                     location = UndoLastMove(location);
+                }
+
+                _lastMove = _velocity;
+
+                if (ShouldApplyGravity)
+                {
+                    _velocity -= new Vector(0, 1) * Physics.Gravity * GravityScale;
+                    location.Top -= Physics.Gravity * GravityScale;
+
+                    _lastMove = -new Vector(0, 1) * Physics.Gravity * GravityScale;
+
+                    if (Physics.IsCollidingWithAnyObject(this))
+                    {
+                        location = UndoLastMove(location);
+                        _velocity.Y = 0;
+                    }
                 }
 
                 _uiElement.Margin = location;
