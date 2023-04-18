@@ -60,6 +60,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="DebugSkeleton.cs" />
+    <Compile Include="IPhysicsBody.cs" />
+    <Compile Include="Physics.cs" />
+    <Compile Include="WpfPhysicsBody.cs" />
     <Compile Include="Rect.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

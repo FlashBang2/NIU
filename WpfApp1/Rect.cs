@@ -28,6 +28,9 @@ namespace WpfApp1
         public double Right => _min.X + Width;
         public double Down => _min.Y + Height;
 
+        public Vector Extend => 0.5 * (_max - _min);
+        public Vector Center => 0.5 * (_max + _min);
+
         public static Rect FromOriginAndExtend(Vector origin, Vector extend)
         {
             var halfExtend = extend / 2;

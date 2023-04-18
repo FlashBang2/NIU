@@ -13,7 +13,7 @@ using System.Windows.Shapes;
 
 namespace WpfApp1
 {
-    internal class DebugSkeleton
+    internal class DebugSkeleton : IPhysicsBody
     {
         private readonly Dictionary<JointType, Vector> _jointLocations = new Dictionary<JointType, Vector>();
         private readonly Dictionary<JointType, Vector> _tempJointLocations = new Dictionary<JointType, Vector>();
@@ -40,6 +40,44 @@ namespace WpfApp1
 
         private readonly Rectangle _characterDebugBounds = new Rectangle();
 
+        public double PosX
+        {
+            get => _bounds.Center.X;
+            set
+            {
+            }
+        }
+
+        public double PosY
+        {
+            get => _bounds.Center.Y;
+            set
+            {
+            }
+        }
+
+        public bool IsStatic
+        {
+            get => _isStatic;
+            set
+            {
+                Physics.RemovePhysicsBody(this);
+                _isStatic = value;
+                Physics.AddPhysicsBody(this);
+            }
+        }
+
+        private bool _isStatic;
+
+        public Vector Velocity { get => _velocity; set => _velocity = value; }
+        private Vector _velocity = new Vector();
+
+        public bool ShouldApplyGravity { get => _shouldApplyGravity; set => _shouldApplyGravity = value; }
+
+        public bool _shouldApplyGravity = true;
+        public double GravityScale { get => _gravityScale; set => _gravityScale = value; }
+        public double _gravityScale = 1;
+
         public bool IsVisible
         {
             get => _joints[JointType.Head].IsVisible;
@@ -51,6 +89,15 @@ namespace WpfApp1
                 }
             }
         }
+
+        public Vector LastMove { get => _lastMove; }
+
+        private Vector _lastMove = new Vector();
+
+        public double MaxJumpHeight = 100;
+
+        public bool IsFalling { get => _isFalling; }
+        private bool _isFalling = false;
 
         public DebugSkeleton(Canvas canvas, MainWindow window)
         {
@@ -70,6 +117,8 @@ namespace WpfApp1
                 _jointLocations[x] = new Vector();
                 _tempJointLocations[x] = new Vector();
             }
+
+            Physics.AddPhysicsBody(this);
         }
 
         private void AddJoints(MainWindow window)
@@ -234,6 +283,81 @@ namespace WpfApp1
             {
                 connection.ClearConnectionLine();
             }
+        }
+
+        public bool IsOverlaping(IPhysicsBody other)
+        {
+            return _bounds.IsOverlaping(other.Bounds);
+        }
+
+        public void PhysicsUpdate()
+        {
+            MainWindow w;
+
+            _window.TryGetTarget(out w);
+
+            // first move objects
+            MoveByOffsetEachChild(_velocity);
+
+            // in a last position skeleton doesn't collide with anything
+            if (Physics.IsCollidingWithAnyObject(this))
+            {
+                UndoLastMove(w);
+            }
+
+            var offset = -new Vector(0, 1) * _gravityScale * Physics.Gravity;
+            _velocity += offset;
+
+            MoveByOffsetEachChild(offset);
+
+            if (Physics.IsCollidingWithAnyObject(this))
+            {
+                MoveByOffsetEachChild(-offset);
+                _velocity.Y = 0;
+            }
+
+
+            _isFalling = _velocity.Y != 0;
+        }
+
+        private void UndoLastMove(MainWindow w)
+        {
+            MoveByOffsetEachChild(-_velocity);
+        }
+
+        public void AddOffset(Vector offset)
+        {
+            MoveByOffsetEachChild(offset);
+        }
+
+        void MoveByOffsetEachChild(Vector offset)
+        {
+            _window.TryGetTarget(out MainWindow w);
+
+            foreach (var child in w.canvas.Children.Cast<FrameworkElement>())
+            {
+                if (IsPartOfSkeleton(child))
+                {
+                    continue;
+                }
+
+                Thickness thickness = child.Margin;
+
+                thickness.Left += offset.X;
+                thickness.Top += offset.Y;
+
+                child.Margin = thickness;
+            }
+
+            _lastMove = offset;
+        }
+
+        private bool IsPartOfSkeleton(FrameworkElement ch)
+        {
+            bool isBone = ch.GetType().Equals(typeof(Line));
+            bool isJoint = ch.GetType().Equals(typeof(Ellipse));
+
+            return isBone || isJoint || ch == _characterDebugBounds;
         }
     }
 }

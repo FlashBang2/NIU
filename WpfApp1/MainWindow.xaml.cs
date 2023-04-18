@@ -8,6 +8,7 @@ using System.Windows.Threading;
 using Microsoft.Kinect;
 using System.Windows.Controls;
 using System.IO;
+using System.Windows.Input;
 
 namespace WpfApp1
 {
@@ -37,10 +38,25 @@ namespace WpfApp1
 
             StartKinect();
 
+            var body = new WpfPhysicsBody(rectangle);
+            body.IsStatic = true;
+
             if (!IsKinnectAvailable)
             {
                 skeleton.LoadTestSkeleton();
                 StartupCalibration();
+                KeyDown += OnKeyDown;
+            }
+
+            skeleton.GravityScale = 0.5;
+        }
+
+        private void OnKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+
+            if (e.Key == Key.Space && !skeleton.IsFalling)
+            {
+                skeleton.Velocity = new Vector(skeleton.Velocity.X, 10);
             }
         }
 
@@ -145,40 +161,36 @@ namespace WpfApp1
             ClearCanvas();
             skeleton.RenderEachJoint();
             FindActionType();
+            if (Keyboard.IsKeyDown(Key.D))
+            {
+                actionType = ActionType.MoveRight;
+            }
+            else if (Keyboard.IsKeyDown(Key.A))
+            {
+                actionType = ActionType.MoveLeft;
+            }
+            else
+            {
+                actionType = ActionType.None;
+            }
+
             UpdateGame();
         }
 
         private void UpdateGame()
         {
-            foreach (FrameworkElement child in canvas.Children.Cast<FrameworkElement>())
+            switch (actionType)
             {
-                if (IsPartOfSkeleton(child))
-                {
-                    continue;
-                }
-
-                Thickness worldLocation = child.Margin;
-
-                switch (actionType)
-                {
-                    case ActionType.MoveLeft:
-                        worldLocation.Left += 10;
-                        break;
-                    case ActionType.MoveRight:
-                        worldLocation.Left -= 10;
-                        break;
-                }
-
-                child.Margin = worldLocation;
+                case ActionType.MoveLeft:
+                    skeleton.AddOffset(new Vector(10, 0));
+                    break;
+                case ActionType.MoveRight:
+                    skeleton.AddOffset(new Vector(-10, 0));
+                    break;
             }
-        }
 
-        private static bool IsPartOfSkeleton(FrameworkElement ch)
-        {
-            bool isBone = ch.GetType().Equals(typeof(Line));
-            bool isJoint = ch.GetType().Equals(typeof(Ellipse));
 
-            return isBone || isJoint;
+            Physics.Update();
         }
 
         private ActionType FindActionType()
