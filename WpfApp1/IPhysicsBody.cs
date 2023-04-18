@@ -23,7 +23,5 @@ namespace WpfApp1
         bool IsOverlaping(IPhysicsBody other);
         void PhysicsUpdate();
         void AddOffset(Vector offset);
-
-        Vector LastMove { get; }
     }
 }

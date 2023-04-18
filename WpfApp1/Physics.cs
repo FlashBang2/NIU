@@ -7,7 +7,9 @@ namespace WpfApp1
         private static readonly List<IPhysicsBody> _dynamicBodies = new List<IPhysicsBody>();
         private static readonly List<IPhysicsBody> _staticBodies = new List<IPhysicsBody>();
 
-        public static double Gravity = 5;
+        public static readonly double SecondsPerFrame = 1.0 / 60.0;
+
+        public static double Gravity = 10 * SecondsPerFrame;
 
         public static void Update()
         {

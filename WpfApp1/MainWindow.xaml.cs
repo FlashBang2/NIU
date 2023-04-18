@@ -47,16 +47,13 @@ namespace WpfApp1
                 StartupCalibration();
                 KeyDown += OnKeyDown;
             }
-
-            skeleton.GravityScale = 0.5;
         }
 
-        private void OnKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void OnKeyDown(object sender, KeyEventArgs e)
         {
-
-            if (e.Key == Key.Space && !skeleton.IsFalling)
+            if (e.Key == Key.Space)
             {
-                skeleton.Velocity = new Vector(skeleton.Velocity.X, 30);
+                skeleton.Jump();
             }
         }
 
@@ -160,7 +157,7 @@ namespace WpfApp1
         {
             ClearCanvas();
             skeleton.RenderEachJoint();
-            FindActionType();
+            actionType = FindActionType();
             UpdateGame();
         }
 

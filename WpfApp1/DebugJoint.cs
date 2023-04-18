@@ -14,7 +14,6 @@ namespace WpfApp1
 
         public double PosX { get => _joint.Margin.Left; }
         public double PosY { get => _joint.Margin.Top; }
-
         public Rect Bounds { get => new Rect(new Vector(PosX, PosY), new Vector(PosX + _joint.Width, PosY + _joint.Height)); }
 
         public bool IsVisible

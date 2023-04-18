@@ -7,7 +7,6 @@ namespace WpfApp1
     {
         public FrameworkElement UiElement { get => _uiElement; }
 
-        private FrameworkElement _uiElement;
 
         public double PosX
         {
@@ -30,7 +29,6 @@ namespace WpfApp1
                 _uiElement.Margin = margin;
             }
         }
-
         public Rect Bounds { get => new Rect(new Vector(PosX, PosY), new Vector(PosX + _uiElement.Width, PosY + _uiElement.Height)); }
 
         public bool IsStatic
@@ -43,21 +41,18 @@ namespace WpfApp1
                 Physics.AddPhysicsBody(this);
             }
         }
-
-        private bool _isStatic;
-
         public Vector Velocity { get => _velocity; set => _velocity = value; }
-        private Vector _velocity = new Vector();
-
         public bool ShouldApplyGravity { get => _shouldApplyGravity; set => _shouldApplyGravity = value; }
-
-        public bool _shouldApplyGravity = true;
         public double GravityScale { get => _gravityScale; set => _gravityScale = value; }
 
-        public Vector LastMove => _lastMove;
-        private Vector _lastMove = new Vector();
+        private bool _isStatic;
+        private FrameworkElement _uiElement;
 
-        public double _gravityScale = 1;
+        private Vector _velocity = new Vector();
+
+        private bool _shouldApplyGravity = true;
+        private Vector _lastMove = new Vector();
+        private double _gravityScale = 1;
 
         public WpfPhysicsBody(FrameworkElement element)
         {
@@ -83,22 +78,28 @@ namespace WpfApp1
 
                 if (ShouldApplyGravity)
                 {
-                    _velocity -= new Vector(0, 1) * Physics.Gravity * GravityScale;
-                    location.Top -= Physics.Gravity * GravityScale;
-
-                    _lastMove = -new Vector(0, 1) * Physics.Gravity * GravityScale;
-
-                    if (Physics.IsCollidingWithAnyObject(this))
-                    {
-                        location = UndoLastMove(location);
-                        _velocity.Y = 0;
-                    }
+                    location = ApplyGravity(location);
                 }
 
                 _uiElement.Margin = location;
             }
         }
 
+        private Thickness ApplyGravity(Thickness location)
+        {
+            _lastMove = -new Vector(0, 1) * Physics.Gravity * GravityScale;
+            _velocity += _lastMove;
+            location.Top -= Physics.Gravity * GravityScale;
+
+            if (Physics.IsCollidingWithAnyObject(this))
+            {
+                location = UndoLastMove(location);
+                _velocity.Y = 0;
+            }
+
+            return location;
+        }
+        
         private Thickness UndoLastMove(Thickness location)
         {
             location.Left -= _lastMove.X;
@@ -110,6 +111,11 @@ namespace WpfApp1
 
         public void AddOffset(Vector offset)
         {
+            if (_isStatic)
+            {
+                return;
+            }
+
             Thickness location = _uiElement.Margin;
             location.Left += offset.X;
             location.Top += offset.Y;

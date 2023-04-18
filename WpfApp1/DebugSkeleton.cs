@@ -3,13 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
 namespace WpfApp1
@@ -23,31 +19,13 @@ namespace WpfApp1
             DuringFall
         }
 
-        private readonly Dictionary<JointType, Vector> _jointLocations = new Dictionary<JointType, Vector>();
-        private readonly Dictionary<JointType, Vector> _tempJointLocations = new Dictionary<JointType, Vector>();
-        private readonly Dictionary<JointType, DebugJoint> _joints = new Dictionary<JointType, DebugJoint>();
-        private readonly Connection[] _connections;
-
         public Vector JointSize = new Vector(0.01, 0.01);
 
         public double Scale = 0.15;
-
-        private double _maxY = 0;
-        private double _minX = 0;
-        private double _maxX = 0;
-
         public double NormalizedMaxY { get => _maxY; }
         public double NormalizedMaxX { get => _maxX; }
         public double NormalizedMinX { get => _minX; }
-
-
-        private WeakReference<MainWindow> _window;
-
-        private Rect _bounds;
         public Rect Bounds { get => _bounds; }
-
-        private readonly Rectangle _characterDebugBounds = new Rectangle();
-
         public double PosX
         {
             get => _bounds.Center.X;
@@ -74,18 +52,9 @@ namespace WpfApp1
                 Physics.AddPhysicsBody(this);
             }
         }
-
-        private bool _isStatic;
-
         public Vector Velocity { get => _velocity; set => _velocity = value; }
-        private Vector _velocity = new Vector();
-
         public bool ShouldApplyGravity { get => _shouldApplyGravity; set => _shouldApplyGravity = value; }
-
-        public bool _shouldApplyGravity = true;
         public double GravityScale { get => _gravityScale; set => _gravityScale = value; }
-        public double _gravityScale = 1;
-
         public bool IsVisible
         {
             get => _joints[JointType.Head].IsVisible;
@@ -97,12 +66,27 @@ namespace WpfApp1
                 }
             }
         }
+        public double MaxJumpHeight = 7;
 
-        public Vector LastMove { get => _lastMove; }
+        private readonly Dictionary<JointType, Vector> _jointLocations = new Dictionary<JointType, Vector>();
+        private readonly Dictionary<JointType, Vector> _tempJointLocations = new Dictionary<JointType, Vector>();
+        private readonly Dictionary<JointType, DebugJoint> _joints = new Dictionary<JointType, DebugJoint>();
+        private readonly Connection[] _connections;
+        
+        private double _maxY = 0;
+        private double _minX = 0;
+        private double _maxX = 0;
+        
+        private WeakReference<MainWindow> _window;
+        private Rect _bounds;
+        private readonly Rectangle _characterDebugBounds = new Rectangle();
 
-        private Vector _lastMove = new Vector();
+        private bool _isStatic;
 
-        public double MaxJumpHeight = 100;
+        private Vector _velocity = new Vector();
+
+        private bool _shouldApplyGravity = true;
+        private double _gravityScale = 1;
 
         public bool IsFalling { get => _jumpState != JumpState.None; }
         private JumpState _jumpState = JumpState.None;
@@ -360,6 +344,11 @@ namespace WpfApp1
         public void AddOffset(Vector offset)
         {
             MoveByOffsetEachChild(offset);
+
+            if (Physics.IsCollidingWithAnyObject(this))
+            {
+                MoveByOffsetEachChild(-offset);
+            }
         }
 
         void MoveByOffsetEachChild(Vector offset)
@@ -380,8 +369,6 @@ namespace WpfApp1
 
                 child.Margin = thickness;
             }
-
-            _lastMove = offset;
         }
 
         private bool IsPartOfSkeleton(FrameworkElement ch)
@@ -390,6 +377,14 @@ namespace WpfApp1
             bool isJoint = ch.GetType().Equals(typeof(Ellipse));
 
             return isBone || isJoint || ch == _characterDebugBounds;
+        }
+
+        public void Jump()
+        {
+            if (!IsFalling)
+            {
+                Velocity = new Vector(Velocity.X, MaxJumpHeight);
+            }
         }
     }
 }
