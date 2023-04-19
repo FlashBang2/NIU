@@ -322,7 +322,7 @@ namespace WpfApp1
             }
             else if (Velocity.Y < 0)
             {
-                if (_jumpState == JumpState.DuringJump)
+                if (_jumpState == JumpState.DuringJump || _jumpState ==  JumpState.None)
                 {
                     _jumpState = JumpState.DuringFall;
                 }
