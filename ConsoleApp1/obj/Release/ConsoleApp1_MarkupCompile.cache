@@ -4,11 +4,11 @@
 exe
 C#
 .cs
-C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\ConsoleApp1\obj\Debug\
+C:\Users\macon\OneDrive\Dokumenty\GitHub\NIU\ConsoleApp1\obj\Release\
 ConsoleApp1
 none
 false
-DEBUG;TRACE
+TRACE
 
 11981197698
 

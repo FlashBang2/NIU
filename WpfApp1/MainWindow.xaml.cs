@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Microsoft.Kinect;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 namespace WpfApp1
 {
@@ -68,7 +70,12 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
+            Application.Current.MainWindow.Width = SystemParameters.WorkArea.Width;
+            Application.Current.MainWindow.Height = SystemParameters.WorkArea.Height;
+            Console.WriteLine(SystemParameters.WorkArea.Width);
+            Console.WriteLine(SystemParameters.WorkArea.Height);
             IEnumerable<JointType> joints = Enum.GetValues(typeof(JointType)).Cast<JointType>();
+            
             foreach (JointType joint in joints)
             {
                 Ellipse ellipse = new Ellipse
@@ -78,6 +85,7 @@ namespace WpfApp1
 
 
                 ellipses.Add(joint, ellipse);
+                
                 canvas.Children.Add(ellipse);
             }
 
@@ -123,10 +131,10 @@ namespace WpfApp1
                     TempJointLocations[x] = new Vector();
                 }
                     
-                foreach (Connection connection in Connections)
-                {
-                    Console.WriteLine(connection);
-                }
+                //foreach (Connection connection in Connections)
+                //{
+                //    Console.WriteLine(connection);
+                //}
 
                 // temp solution for testing
                 string text = "Podnieś ręce";
@@ -151,20 +159,42 @@ namespace WpfApp1
             }
         }
 
+        private void PlacePlatform(string ImagePath, double LeftMargin, double TopMargin)
+        {
+            BitmapImage image = new BitmapImage(new Uri(ImagePath, UriKind.Relative));
+            ImageBrush brush = new ImageBrush(image);
+            Canvas platform = new Canvas();
+            Thickness margin = platform.Margin;
+            platform.Width = image.Width;
+            platform.Height = image.Height;
+            platform.Background = brush;
+            canvas.Children.Add(platform);
+            margin.Left = LeftMargin;
+            margin.Top = TopMargin;
+            platform.Margin = margin;
+        }
+
         private void CalibrateX()
         {
             if (switch02)
             {
                 MinX = -JointLocations[JointType.HandLeft].X;
                 MaxX = -JointLocations[JointType.HandRight].X;
-                Console.WriteLine("MinX: " + MinX);
-                Console.WriteLine("MaxX: " + MaxX);
+                //Console.WriteLine("MinX: " + MinX);
+                //Console.WriteLine("MaxX: " + MaxX);
+                
                 calibrateX.Stop();
                 update.Tick += (sender, evt) => Render();
-                update.Interval = TimeSpan.FromMilliseconds(16.6);
+                update.Interval = TimeSpan.FromMilliseconds(16.67);
                 ShowCenteredText("");
                 update.Start();
-                rectangle.Visibility = Visibility.Visible;
+                canvas.Background = new SolidColorBrush(Color.FromArgb(255, 92, 148, 252));
+
+                PlacePlatform("firstPlatform.png", 0, SystemParameters.WorkArea.Height - 135);
+                PlacePlatform("secondPlatform.png", 3408, SystemParameters.WorkArea.Height - 135);
+                PlacePlatform("thirdPlatform.png", 4272, SystemParameters.WorkArea.Height - 135);
+                PlacePlatform("fourthPlatform.png", 7440, SystemParameters.WorkArea.Height - 135);
+
             }
             else
             {
@@ -178,7 +208,7 @@ namespace WpfApp1
             if (switch01)
             {
                 MaxY = -JointLocations[JointType.HandRight].Y;
-                Console.WriteLine("MaxY: " + MaxY);
+                //Console.WriteLine("MaxY: " + MaxY);
                 calibrateY.Stop();
                 calibrateX.Tick += (sender, evt) => CalibrateX();
                 calibrateX.Interval = TimeSpan.FromSeconds(2);
@@ -235,19 +265,49 @@ namespace WpfApp1
         private void Render()
         {
             ClearCanvas();
-            RenderEachJoint();
-            foreach (Connection connection in Connections)
-            {
-                connection.DrawConnection(TempJointLocations, MaxX, MaxY, this);
-            }
-
+            //RenderEachJoint();
+            //foreach (Connection connection in Connections)
+            //{
+            //    connection.DrawConnection(TempJointLocations, MaxX, MaxY, this);
+            //}
+            //Console.WriteLine("I am working");
             GameLoop();
+          
         }
 
         private void GameLoop()
         {
+            if (Keyboard.IsKeyDown(Key.D))
+            {
+                foreach (var child in canvas.Children)
+                {
+                    if (child.GetType().Equals(typeof(Canvas)))
+                    {
+                        var element = (FrameworkElement)child;
+                        Thickness margin = element.Margin;
+                        margin.Left -= 10;
+                        element.Margin = margin;
+                    }
+                }
+            }
+
+            if (Keyboard.IsKeyDown(Key.A))
+            {
+                foreach (var child in canvas.Children)
+                {
+                    if (child.GetType().Equals(typeof(Canvas)))
+                    {
+                        var element = (FrameworkElement)child;
+                        Thickness margin = element.Margin;
+                        margin.Left += 10;
+                        element.Margin = margin;
+                    }
+                }
+            } 
+
             foreach (var child in canvas.Children.Cast<FrameworkElement>())
             {
+                
                 if (IsPartOfSkeleton(child))
                 {
                     break;
@@ -255,7 +315,7 @@ namespace WpfApp1
 
                 Thickness worldLocation = child.Margin;
 
-                switch(actionType)
+                switch (actionType)
                 {
                     case ActionType.MoveLeft:
                         worldLocation.Left += 10;
@@ -267,6 +327,8 @@ namespace WpfApp1
 
                 child.Margin = worldLocation;
             }
+
+            
         }
 
         private static bool IsPartOfSkeleton(FrameworkElement ch)
@@ -285,7 +347,7 @@ namespace WpfApp1
 
                 var x = scale * (JointLocations[joint.Key].X + offset.X) + 1.5 / (MaxX + 3);
                 var y = scale * (-JointLocations[joint.Key].Y + offset.Y) + 2 / (MaxY + 3);
-                Console.WriteLine("x=" + x);
+                //Console.WriteLine("x=" + x);
 
                 TempJointLocations[joint.Key] = new Vector(x, y);
                 DrawEllipseAtLocation(joint.Key, new Vector(x, y), ellipseSize, boneColor);
@@ -332,7 +394,7 @@ namespace WpfApp1
 
         private void DrawEllipseAtLocation(JointType type, Vector normalizedPosition, Vector size, Color color)
         {
-            Console.WriteLine(normalizedPosition);
+            //Console.WriteLine(normalizedPosition);
 
             Ellipse joint = ellipses[type];
 

@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfApp1"
         mc:Ignorable="d"
-        Title="MainWindow" Height="720" Width="1280">
+		Height="{x:Static SystemParameters.PrimaryScreenWidth}"
+		Width="{x:Static SystemParameters.PrimaryScreenWidth}"
+        Title="MainWindow">
     <Canvas x:Name="canvas">
-        <Rectangle Visibility="Hidden" x:Name="rectangle" Width="1280" Height="120" Fill="ForestGreen" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,586,0,0"/>
     </Canvas>
 </Window>
