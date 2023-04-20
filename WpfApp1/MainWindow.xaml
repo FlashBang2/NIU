@@ -8,5 +8,6 @@
         Title="MainWindow" Height="720" Width="1280">
     <Canvas x:Name="canvas">
         <Rectangle Visibility="Hidden" x:Name="rectangle" Width="1280" Height="120" Fill="ForestGreen" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,586,0,0"/>
+        <Rectangle x:Name="obstacle" Width="64" Height="64" Fill="DarkSlateBlue" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="1142, 522, 0, 0"></Rectangle>
     </Canvas>
 </Window>

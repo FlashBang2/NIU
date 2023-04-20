@@ -19,7 +19,7 @@ namespace WpfApp1
             }
         }
 
-        public static bool IsCollidingWithAnyObject(IPhysicsBody physicsBody)
+        public static bool IsCollidingWithAnyObject(IPhysicsBody physicsBody, out IPhysicsBody firstHit)
         {
             foreach (var body in _dynamicBodies)
             {
@@ -27,6 +27,7 @@ namespace WpfApp1
                 {
                     if (physicsBody.IsOverlaping(body))
                     {
+                        firstHit = body;
                         return true;
                     }
                 }
@@ -38,11 +39,13 @@ namespace WpfApp1
                 {
                     if (physicsBody.IsOverlaping(body))
                     {
+                        firstHit = body;
                         return true;
                     }
                 }
             }
 
+            firstHit = null;
             return false;
         }
 

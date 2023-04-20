@@ -41,6 +41,9 @@ namespace WpfApp1
             var body = new WpfPhysicsBody(rectangle);
             body.IsStatic = true;
 
+            body = new WpfPhysicsBody(obstacle);
+            body.IsStatic = true;
+
             if (!IsKinnectAvailable)
             {
                 skeleton.LoadTestSkeleton();
@@ -166,10 +169,10 @@ namespace WpfApp1
             switch (actionType)
             {
                 case ActionType.MoveLeft:
-                    skeleton.AddOffset(new Vector(10, 0));
+                    skeleton.Velocity = new Vector(10, skeleton.Velocity.Y);
                     break;
                 case ActionType.MoveRight:
-                    skeleton.AddOffset(new Vector(-10, 0));
+                    skeleton.Velocity = new Vector(-10, skeleton.Velocity.Y);
                     break;
             }
 

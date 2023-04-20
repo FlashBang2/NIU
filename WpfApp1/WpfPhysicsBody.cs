@@ -69,7 +69,8 @@ namespace WpfApp1
                 location.Left += _velocity.X;
                 location.Top += _velocity.Y;
 
-                if (Physics.IsCollidingWithAnyObject(this))
+                IPhysicsBody hit;
+                if (Physics.IsCollidingWithAnyObject(this, out hit))
                 {
                     location = UndoLastMove(location);
                 }
@@ -91,7 +92,8 @@ namespace WpfApp1
             _velocity += _lastMove;
             location.Top -= Physics.Gravity * GravityScale;
 
-            if (Physics.IsCollidingWithAnyObject(this))
+            IPhysicsBody hit;
+            if (Physics.IsCollidingWithAnyObject(this, out hit))
             {
                 location = UndoLastMove(location);
                 _velocity.Y = 0;
@@ -122,7 +124,9 @@ namespace WpfApp1
 
             if (!_isStatic)
             {
-                if (Physics.IsCollidingWithAnyObject(this))
+                IPhysicsBody f;
+
+                if (Physics.IsCollidingWithAnyObject(this, out f))
                 {
                     location = UndoLastMove(location);
                 }

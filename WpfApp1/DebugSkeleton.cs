@@ -72,11 +72,11 @@ namespace WpfApp1
         private readonly Dictionary<JointType, Vector> _tempJointLocations = new Dictionary<JointType, Vector>();
         private readonly Dictionary<JointType, DebugJoint> _joints = new Dictionary<JointType, DebugJoint>();
         private readonly Connection[] _connections;
-        
+
         private double _maxY = 0;
         private double _minX = 0;
         private double _maxX = 0;
-        
+
         private WeakReference<MainWindow> _window;
         private Rect _bounds;
         private readonly Rectangle _characterDebugBounds = new Rectangle();
@@ -222,7 +222,7 @@ namespace WpfApp1
             {
                 _window.TryGetTarget(out MainWindow w);
 
-                connection.DrawConnection(_tempJointLocations, w);
+                connection.DrawConnection(_joints, w);
             }
         }
 
@@ -282,6 +282,8 @@ namespace WpfApp1
             return _bounds.IsOverlaping(other.Bounds);
         }
 
+        private bool isInFloor = false;
+
         public void PhysicsUpdate()
         {
             MainWindow w;
@@ -291,21 +293,38 @@ namespace WpfApp1
             // first move objects
             MoveByOffsetEachChild(_velocity);
 
+            IPhysicsBody hit;
+
+
             // in a last position skeleton doesn't collide with anything
-            if (Physics.IsCollidingWithAnyObject(this))
+            if (Physics.IsCollidingWithAnyObject(this, out hit))
             {
-                UndoLastMove(w);
+                if (hit.Bounds.IsOverlaping(Bounds))
+                {
+                    var rect = hit.Bounds.GetOverlap(Bounds);
+                    if (rect.Height >= 5)
+                    {
+                        MoveByOffsetEachChild(new Vector(0, Bounds.Down - hit.Bounds.Top + 0.01f));
+                    }
+
+                    if (Physics.IsCollidingWithAnyObject(this, out hit))
+                    {
+                        rect = hit.Bounds.GetOverlap(Bounds);
+
+                        if (rect.Width >= 5)
+                        {
+                            MoveByOffsetEachChild(new Vector(-_velocity.X, 0));
+                        }
+                    }
+                }
             }
 
             var offset = -new Vector(0, 1) * _gravityScale * Physics.Gravity;
             _velocity += offset;
-
-            MoveByOffsetEachChild(offset);
-
-            if (Physics.IsCollidingWithAnyObject(this))
+            _velocity.X -= 1;
+            if (_velocity.X <= 0)
             {
-                MoveByOffsetEachChild(-offset);
-                _velocity.Y = 0;
+                _velocity.X = 0;
             }
 
             UpdateJumpState();
@@ -322,7 +341,7 @@ namespace WpfApp1
             }
             else if (Velocity.Y < 0)
             {
-                if (_jumpState == JumpState.DuringJump || _jumpState ==  JumpState.None)
+                if (_jumpState == JumpState.DuringJump || _jumpState == JumpState.None)
                 {
                     _jumpState = JumpState.DuringFall;
                 }
@@ -345,7 +364,8 @@ namespace WpfApp1
         {
             MoveByOffsetEachChild(offset);
 
-            if (Physics.IsCollidingWithAnyObject(this))
+            IPhysicsBody hit;
+            if (Physics.IsCollidingWithAnyObject(this, out hit))
             {
                 MoveByOffsetEachChild(-offset);
             }
@@ -365,10 +385,17 @@ namespace WpfApp1
                 Thickness thickness = child.Margin;
 
                 thickness.Left += offset.X;
-                thickness.Top += offset.Y;
 
                 child.Margin = thickness;
             }
+
+            foreach (var joint in _joints)
+            {
+                joint.Value.AddOffset(new Vector(0, offset.Y));
+                joint.Value.DrawDebugJoint(_tempJointLocations[joint.Key], JointSize, Color.FromRgb(0, 0, 0));
+            }
+
+            FindSkeletonBounds();
         }
 
         private bool IsPartOfSkeleton(FrameworkElement ch)
@@ -381,10 +408,7 @@ namespace WpfApp1
 
         public void Jump()
         {
-            if (!IsFalling)
-            {
-                Velocity = new Vector(Velocity.X, MaxJumpHeight);
-            }
+            Velocity = new Vector(Velocity.X, MaxJumpHeight);
         }
     }
 }

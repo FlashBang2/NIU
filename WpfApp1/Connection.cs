@@ -29,16 +29,16 @@ namespace WpfApp1
             canvas.Children.Add(DrawLine);
         }
 
-        public void DrawConnection(Dictionary<JointType, Vector> jointLocations, FrameworkElement canvas)
+        public void DrawConnection(Dictionary<JointType, DebugJoint> joints, FrameworkElement canvas)
         {
-            var x = jointLocations[JointA].X;
-            var y = jointLocations[JointA].Y;
+            var x = joints[JointA].PosX;
+            var y = joints[JointA].PosY;
 
             DrawLine.X1 = x * canvas.Width;
             DrawLine.Y1 = y * canvas.Height;
 
-            x = jointLocations[JointB].X;
-            y = jointLocations[JointB].Y;
+            x = joints[JointB].PosX;
+            y = joints[JointB].PosY;
 
             DrawLine.X2 = x * canvas.Width;
             DrawLine.Y2 = y * canvas.Height;

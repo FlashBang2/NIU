@@ -16,6 +16,8 @@ namespace WpfApp1
         public double PosY { get => _joint.Margin.Top; }
         public Rect Bounds { get => new Rect(new Vector(PosX, PosY), new Vector(PosX + _joint.Width, PosY + _joint.Height)); }
 
+        private Vector _offset = new Vector();
+
         public bool IsVisible
         {
             get => _visible; set
@@ -73,8 +75,8 @@ namespace WpfApp1
 
             Thickness margin = _joint.Margin;
 
-            margin.Left = (normalizedPosition.X - size.X / 2) * w.Width;
-            margin.Top = (normalizedPosition.Y - size.Y / 2) * w.Height;
+            margin.Left = (normalizedPosition.X - size.X / 2) * w.Width + _offset.X;
+            margin.Top = (normalizedPosition.Y - size.Y / 2) * w.Height - _offset.Y;
             _joint.Margin = margin;
 
             _joint.Width = scaledWidth;
@@ -85,6 +87,11 @@ namespace WpfApp1
         public void Clear()
         {
             DrawDebugJoint(new Vector(), new Vector(), Color.FromArgb(0, 0, 0, 0));
+        }
+
+        public void AddOffset(Vector offset)
+        {
+            _offset += offset;
         }
     }
 }
