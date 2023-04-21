@@ -43,9 +43,12 @@ namespace WpfApp1
 
             body = new WpfPhysicsBody(obstacle);
             body.IsStatic = true;
+            body.IsTrigger = true;
             
             body = new WpfPhysicsBody(obstacle2);
             body.IsStatic = true;
+
+            Physics.OverlapedBody += overlap => Console.WriteLine(overlap.Trigger);
 
             if (!IsKinnectAvailable)
             {

@@ -15,6 +15,8 @@ namespace WpfApp1
         Rect Bounds { get; }
 
         bool IsStatic { get; set; }
+        bool IsTrigger { get; set; }
+
         Vector Velocity { get; set; }
 
         bool ShouldApplyGravity { get; set; }

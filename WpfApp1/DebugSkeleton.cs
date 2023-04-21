@@ -67,6 +67,7 @@ namespace WpfApp1
             }
         }
         public double MaxJumpHeight = 7;
+        public bool IsTrigger { get => _isTrigger; set => _isTrigger = value; }
 
         private readonly Dictionary<JointType, Vector> _jointLocations = new Dictionary<JointType, Vector>();
         private readonly Dictionary<JointType, Vector> _tempJointLocations = new Dictionary<JointType, Vector>();
@@ -81,6 +82,8 @@ namespace WpfApp1
         private Rect _bounds;
         private readonly Rectangle _characterDebugBounds = new Rectangle();
 
+
+        private bool _isTrigger;
         private bool _isStatic;
 
         private Vector _velocity = new Vector();
@@ -304,7 +307,7 @@ namespace WpfApp1
                 if (hasHitAGround)
                 {
                     var o = Bounds.Down - hit.Bounds.Top + 0.01;
-                    if (o > Bounds.Width || o < 0)
+                    if (o >= Bounds.Width)
                     {
                         o = -(hit.Bounds.Down - Bounds.Top + 0.01);
                         _velocity.Y = 0;

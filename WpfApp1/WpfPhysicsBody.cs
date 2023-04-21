@@ -44,8 +44,10 @@ namespace WpfApp1
         public Vector Velocity { get => _velocity; set => _velocity = value; }
         public bool ShouldApplyGravity { get => _shouldApplyGravity; set => _shouldApplyGravity = value; }
         public double GravityScale { get => _gravityScale; set => _gravityScale = value; }
+        public bool IsTrigger { get => _isTrigger; set => _isTrigger = value; }
 
         private bool _isStatic;
+        private bool _isTrigger;
         private FrameworkElement _uiElement;
 
         private Vector _velocity = new Vector();
@@ -141,6 +143,11 @@ namespace WpfApp1
         public bool IsOverlaping(IPhysicsBody other)
         {
             return Bounds.IsOverlaping(other.Bounds);
+        }
+
+        public override string ToString()
+        {
+            return _uiElement.Name;
         }
     }
 }
