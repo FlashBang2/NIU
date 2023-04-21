@@ -299,22 +299,28 @@ namespace WpfApp1
             // in a last position skeleton doesn't collide with anything
             if (Physics.IsCollidingWithAnyObject(this, out hit))
             {
-                if (hit.Bounds.IsOverlaping(Bounds))
+                var rect = hit.Bounds.GetOverlap(Bounds);
+                bool hasHitAGround = rect.Height >= 5;
+                if (hasHitAGround)
                 {
-                    var rect = hit.Bounds.GetOverlap(Bounds);
-                    if (rect.Height >= 5)
+                    var o = Bounds.Down - hit.Bounds.Top + 0.01;
+                    if (o > Bounds.Width || o < 0)
                     {
-                        MoveByOffsetEachChild(new Vector(0, Bounds.Down - hit.Bounds.Top + 0.01f));
+                        o = -(hit.Bounds.Down - Bounds.Top + 0.01);
+                        _velocity.Y = 0;
                     }
 
-                    if (Physics.IsCollidingWithAnyObject(this, out hit))
-                    {
-                        rect = hit.Bounds.GetOverlap(Bounds);
+                    MoveByOffsetEachChild(new Vector(0, o));    
+                }
 
-                        if (rect.Width >= 5)
-                        {
-                            MoveByOffsetEachChild(new Vector(-_velocity.X, 0));
-                        }
+                // test, are we colliding in x axis
+                if (Physics.IsCollidingWithAnyObject(this, out hit))
+                {
+                    rect = hit.Bounds.GetOverlap(Bounds);
+
+                    if (rect.Width >= 5)
+                    {
+                        MoveByOffsetEachChild(new Vector(-_velocity.X, 0));
                     }
                 }
             }

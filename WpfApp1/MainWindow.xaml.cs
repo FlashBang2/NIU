@@ -43,6 +43,9 @@ namespace WpfApp1
 
             body = new WpfPhysicsBody(obstacle);
             body.IsStatic = true;
+            
+            body = new WpfPhysicsBody(obstacle2);
+            body.IsStatic = true;
 
             if (!IsKinnectAvailable)
             {
