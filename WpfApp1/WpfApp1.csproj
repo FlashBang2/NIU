@@ -14,6 +14,8 @@
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -62,6 +64,11 @@
     <Compile Include="DebugSkeleton.cs" />
     <Compile Include="IPhysicsBody.cs" />
     <Compile Include="Physics.cs" />
+    <Compile Include="SDL2-CS\LPUtf8StrMarshaler.cs" />
+    <Compile Include="SDL2-CS\SDL2.cs" />
+    <Compile Include="SDL2-CS\SDL2_image.cs" />
+    <Compile Include="SDL2-CS\SDL2_mixer.cs" />
+    <Compile Include="SDL2-CS\SDL2_ttf.cs" />
     <Compile Include="WpfPhysicsBody.cs" />
     <Compile Include="Rect.cs" />
     <Page Include="MainWindow.xaml">
@@ -98,6 +105,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -114,4 +122,11 @@
     <PostBuildEvent>copy $(ProjectDir)skeleton.txt $(ProjectDir)$(OutDir)\skeleton.txt
 </PostBuildEvent>
   </PropertyGroup>
+  <Import Project="..\ConsoleApp1\packages\Sayers.SDL2.Core.1.0.11\build\Sayers.SDL2.Core.targets" Condition="Exists('..\ConsoleApp1\packages\Sayers.SDL2.Core.1.0.11\build\Sayers.SDL2.Core.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\ConsoleApp1\packages\Sayers.SDL2.Core.1.0.11\build\Sayers.SDL2.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\ConsoleApp1\packages\Sayers.SDL2.Core.1.0.11\build\Sayers.SDL2.Core.targets'))" />
+  </Target>
 </Project>
