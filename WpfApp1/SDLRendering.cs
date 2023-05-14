@@ -17,8 +17,8 @@ namespace WpfApp1
     static public class SDLRendering
     {
         private static IntPtr _renderer;
-        private static IDictionary<string, IntPtr> _fonts;
-        private static IDictionary<string, IntPtr> _textures;
+        private static IDictionary<string, IntPtr> _fonts = new Dictionary<string, IntPtr>();
+        private static IDictionary<string, IntPtr> _textures = new Dictionary<string, IntPtr>();
 
         public static void Init(IntPtr renderer)
         {
@@ -213,7 +213,7 @@ namespace WpfApp1
             SDL_Point p = new SDL_Point();
             p.x = p.y = 0;
 
-            SDL_RenderCopyEx(_renderer, texture, ref src, ref spriteRect, angle, p, SDL_RendererFlip.SDL_FLIP_NONE);
+            SDL_RenderCopyEx(_renderer, texture, ref src, ref spriteRect, angle, ref p, SDL_RendererFlip.SDL_FLIP_NONE);
         }
 
         public static void DrawLine(Vector start, Vector end, Color color)

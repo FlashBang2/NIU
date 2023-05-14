@@ -98,6 +98,11 @@ namespace WpfApp1
         public static void Main(string[] args)
         {
             SDLApp app = new SDLApp(960, 540, "NIU");
+            SDLApp.RenderFrame += (o, evt) =>
+            {
+                SDLRendering.RenderFillRect(120, 120, 70, 50, System.Windows.Media.Color.FromRgb(128, 235, 255));
+            };
+
             app.Run();
         }
     }
