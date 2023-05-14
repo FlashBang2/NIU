@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using static SDL2.SDL;
 
 namespace WpfApp1
 {
@@ -30,6 +31,17 @@ namespace WpfApp1
 
         public Vector Extend => 0.5 * (_max - _min);
         public Vector Center => 0.5 * (_max + _min);
+
+        public SDL_Rect AsSDLRect { get
+            {
+                SDL_Rect r = new SDL_Rect();
+                r.w = (int)Width;
+                r.h = (int)Height;
+                r.x = (int)Left;
+                r.y = (int)Top;
+
+                return r;
+            } } 
 
         public static Rect FromOriginAndExtend(Vector origin, Vector extend)
         {

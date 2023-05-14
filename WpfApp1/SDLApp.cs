@@ -17,6 +17,8 @@ namespace WpfApp1
         private IntPtr _renderer = IntPtr.Zero;
         private bool _isOpen = true;
 
+        public static event EventHandler RenderFrame;
+
         public SDLApp(int width, int height, string title)
         {
             if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
@@ -37,7 +39,7 @@ namespace WpfApp1
             }
 
             _window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WindowFlags.SDL_WINDOW_SHOWN); ;
-
+            
             if (_window.Equals(IntPtr.Zero))
             {
                 FreeResources();
@@ -51,6 +53,8 @@ namespace WpfApp1
                 FreeResources();
                 throw new ApplicationException(SDL_GetError());
             }
+
+            SDLRendering.Init(_renderer);
         }
 
         public void Run()
@@ -63,8 +67,8 @@ namespace WpfApp1
                     OnSystemEventOccured(evt);
                 }
 
-                SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
-                SDL_RenderClear(_renderer);
+                SDLRendering.OnFrameStarted();
+                RenderFrame?.Invoke(this, EventArgs.Empty);
                 SDL_RenderPresent(_renderer);
             }
 
@@ -80,6 +84,7 @@ namespace WpfApp1
             SDL_Quit();
             _window = IntPtr.Zero;
             _renderer = IntPtr.Zero;
+            SDLRendering.Quit();
         }
 
         private void OnSystemEventOccured(SDL_Event evt)
