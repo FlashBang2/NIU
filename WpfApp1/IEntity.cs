@@ -9,9 +9,10 @@ namespace WpfApp1
 {
     public interface IEntity
     {
-        IRenderable Renderable { get; }
+        IRenderable Renderable { get; set; }
+        ICollideable Collideable { get; set; }
 
-        IEntity Parent { get; }
+        IEntity Parent { get; set; }
 
         double PosX { get; set; }
         double PosY { get; set; }
@@ -31,8 +32,10 @@ namespace WpfApp1
         Vector Right { get; }
         Vector Left { get; }
 
-        Vector Up { get; set; }
-        Vector Down { get; set; }
+        Vector Up { get; }
+        Vector Down { get; }
+
+        Rect Bounds { get; }
 
         void AddLocalOffset(double x, double y);
         void AddWorldOffset(double x, double y);
@@ -40,7 +43,7 @@ namespace WpfApp1
         void Rotate(double angle);
 
         void AttachChild(IEntity entity);
-        void RemoveChild(IEntity entity);
+        bool RemoveChild(IEntity entity);
 
         bool IsActive { get; set; }
 
@@ -49,5 +52,6 @@ namespace WpfApp1
 
         void Tick(double dt);
         void Spawned();
+        void Destroyed();
     }
 }

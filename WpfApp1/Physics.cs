@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 
 namespace WpfApp1
 {
@@ -11,12 +12,14 @@ namespace WpfApp1
 
         private static readonly List<OverlapResult> _lastOverlaps = new List<OverlapResult>();
 
+        private static readonly Dictionary<int, List<ICollideable>> _collision = new Dictionary<int, List<ICollideable>>();
+
 
         public static readonly double SecondsPerFrame = 1.0 / 60.0;
 
         public static double Gravity = 10 * SecondsPerFrame;
 
-        public struct OverlapResult: IEquatable<OverlapResult>
+        public struct OverlapResult : IEquatable<OverlapResult>
         {
             public readonly IPhysicsBody DynamicBody;
             public readonly IPhysicsBody Trigger;
@@ -32,8 +35,8 @@ namespace WpfApp1
                 return this == other;
             }
 
-            public static bool operator==(OverlapResult lhs, OverlapResult rhs) { return lhs.DynamicBody == rhs.DynamicBody && rhs.Trigger == lhs.Trigger; }
-            public static bool operator!=(OverlapResult lhs, OverlapResult rhs) { return !(lhs.DynamicBody == rhs.DynamicBody && rhs.Trigger == lhs.Trigger); }
+            public static bool operator ==(OverlapResult lhs, OverlapResult rhs) { return lhs.DynamicBody == rhs.DynamicBody && rhs.Trigger == lhs.Trigger; }
+            public static bool operator !=(OverlapResult lhs, OverlapResult rhs) { return !(lhs.DynamicBody == rhs.DynamicBody && rhs.Trigger == lhs.Trigger); }
         }
 
         public static event Action<OverlapResult> OverlapedBody;
@@ -121,6 +124,19 @@ namespace WpfApp1
             }
         }
 
+        public static void AddPhysicsBody(ICollideable collideable)
+        {
+            if (!_collision.TryGetValue(collideable.CollisionGroup, out _))
+            {
+                _collision.Add(collideable.CollisionGroup, new List<ICollideable> { collideable });
+            }
+            else
+            {
+                _collision[collideable.CollisionGroup].Add(collideable);
+            }
+        }
+
+
         public static void RemovePhysicsBody(IPhysicsBody body)
         {
             if (body.IsStatic)
@@ -131,6 +147,30 @@ namespace WpfApp1
             {
                 _dynamicBodies.Remove(body);
             }
+        }
+
+        public static void RemovePhysicsBody(ICollideable collideable)
+        {
+            if (_collision.TryGetValue(collideable.CollisionGroup, out _))
+            {
+                _collision[collideable.CollisionGroup].Remove(collideable);
+            }
+        }
+
+        public static bool TestRay(Ray ray, ICollideable toIgnore)
+        {
+            foreach (var body in _collision[toIgnore.CollisionGroup])
+            {
+                if (body != toIgnore)
+                {
+                    if (body.TestCollision(ray, 0))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

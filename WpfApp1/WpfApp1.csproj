@@ -62,7 +62,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ICollideable.cs" />
+    <Compile Include="IEntity.cs" />
     <Compile Include="IRenderable.cs" />
+    <Compile Include="NullRenderable.cs" />
+    <Compile Include="Ray.cs" />
     <Compile Include="SDLApp.cs" />
     <Compile Include="DebugSkeleton.cs" />
     <Compile Include="IPhysicsBody.cs" />
