@@ -32,8 +32,15 @@ namespace WpfApp1
         public Vector Extend => 0.5 * (_max - _min);
         public Vector Center => 0.5 * (_max + _min);
 
+        public static readonly Rect Unlimited = new Rect(new Vector(int.MinValue, int.MinValue), new Vector(int.MaxValue, int.MaxValue));
+
         public SDL_Rect AsSDLRect { get
             {
+                if (this == Unlimited)
+                {
+                    return default;
+                }
+
                 SDL_Rect r = new SDL_Rect();
                 r.w = (int)Width;
                 r.h = (int)Height;
@@ -74,6 +81,16 @@ namespace WpfApp1
             maxVector.Y = Math.Min(_max.Y, rect._max.Y);
 
             return new Rect(minVector, maxVector);
+        }
+
+        public static bool operator==(Rect rect1, Rect rect2)
+        {
+            return rect1._min.Equals(rect2._min) && rect1._max.Equals(rect2._max);
+        }
+
+        public static bool operator!=(Rect rect1, Rect rect2)
+        {
+            return !(rect1._min.Equals(rect2._min) && rect1._max.Equals(rect2._max));
         }
     }
 }

@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
 using static SDL2.SDL;
 using static SDL2.SDL_image;
 using static SDL2.SDL_mixer;
@@ -16,8 +18,6 @@ namespace WpfApp1
         private IntPtr _window = IntPtr.Zero;
         private IntPtr _renderer = IntPtr.Zero;
         private bool _isOpen = true;
-
-        public static event EventHandler RenderFrame;
 
         public SDLApp(int width, int height, string title)
         {
@@ -62,14 +62,12 @@ namespace WpfApp1
             Debug.Assert(!_window.Equals(IntPtr.Zero));
             while (_isOpen)
             {
-                while (SDL_PollEvent(out SDL_Event evt) != 0)
+                while (SDL_PollEvent(out SDL_Event systemEvent) != 0)
                 {
-                    OnSystemEventOccured(evt);
+                    OnSystemEventOccured(systemEvent);
                 }
 
-                SDLRendering.OnFrameStarted();
-                RenderFrame?.Invoke(this, EventArgs.Empty);
-                SDL_RenderPresent(_renderer);
+                SDLRendering.RenderFrame();
             }
 
             FreeResources();
@@ -82,6 +80,7 @@ namespace WpfApp1
             IMG_Quit();
             TTF_Quit();
             SDL_Quit();
+
             _window = IntPtr.Zero;
             _renderer = IntPtr.Zero;
             SDLRendering.Quit();
@@ -95,14 +94,41 @@ namespace WpfApp1
             }
         }
 
+
+        class Test : IRenderable
+        {
+            public bool ShouldDraw => true;
+
+            public string SpriteTextureId => "";
+
+            public int ZIndex { get => 0; set => throw new NotImplementedException(); }
+            public Rect Bounds { get => new Rect(new Vector(120, 120), new Vector(240, 240)); set => throw new NotImplementedException(); }
+            public double PosX { get => 120; set => throw new NotImplementedException(); }
+            public double PosY { get => 120; set => throw new NotImplementedException(); }
+            public double RotationAngle { get => 0; set => throw new NotImplementedException(); }
+            public double CircleRadius { get => 0; set => throw new NotImplementedException(); }
+            public Color ProxyShapeColor { get => Color.FromRgb(125, 123, 255); set => throw new NotImplementedException(); }
+            public Rect SourceTextureBounds { get => new Rect(new Vector(), new Vector()); set => throw new NotImplementedException(); }
+
+            public object LinkedEntity => throw new NotImplementedException();
+
+            public RenderMode RenderingMode => RenderMode.Rect;
+
+            public event Action<int> ZIndexChanged;
+
+            public bool IsVisible(Rect cameraBounds)
+            {
+                return true;
+            }
+        }
+
+
         public static void Main(string[] args)
         {
             SDLApp app = new SDLApp(960, 540, "NIU");
-            SDLApp.RenderFrame += (o, evt) =>
-            {
-                SDLRendering.RenderFillRect(120, 120, 70, 50, System.Windows.Media.Color.FromRgb(128, 235, 255));
-            };
+            SDLRendering.AddRenderable(new Test());
 
+            IEntity e;
             app.Run();
         }
     }

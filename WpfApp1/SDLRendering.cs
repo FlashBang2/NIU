@@ -20,6 +20,8 @@ namespace WpfApp1
         private static IDictionary<string, IntPtr> _fonts = new Dictionary<string, IntPtr>();
         private static IDictionary<string, IntPtr> _textures = new Dictionary<string, IntPtr>();
 
+        private static List<IRenderable> _renderables = new List<IRenderable>();
+
         public static void Init(IntPtr renderer)
         {
             _renderer = renderer;
@@ -71,7 +73,7 @@ namespace WpfApp1
 
             return texture;
         }
-        
+
         public static SDL_Color CSharpColorToSDLColor(Color color)
         {
             SDL_Color c = new SDL_Color();
@@ -83,7 +85,7 @@ namespace WpfApp1
             return c;
         }
 
-        public static int RenderDrawCircle(IntPtr renderer, int x, int y, int radius)
+        public static int DrawCircle(int x, int y, int radius)
         {
             int offsetx, offsety, d;
             int status;
@@ -131,7 +133,7 @@ namespace WpfApp1
             return status;
         }
 
-        public static int RenderFillCircle(int x, int y, int radius)
+        public static int FillCircle(int x, int y, int radius)
         {
             int offsetx, offsety, d;
             int status;
@@ -180,8 +182,8 @@ namespace WpfApp1
 
             return status;
         }
-        
-        public static void RenderDrawRect(int x, int y, int w, int h, Color color)
+
+        public static void DrawRect(int x, int y, int w, int h, Color color)
         {
             SDL_SetRenderDrawColor(_renderer, color.R, color.G, color.B, color.A);
             SDL_Rect r = new SDL_Rect();
@@ -193,7 +195,7 @@ namespace WpfApp1
             SDL_RenderDrawRect(_renderer, ref r);
         }
 
-        public static void RenderFillRect(int x, int y, int w, int h, Color color)
+        public static void FillRect(int x, int y, int w, int h, Color color)
         {
             SDL_SetRenderDrawColor(_renderer, color.R, color.G, color.B, color.A);
             SDL_Rect r = new SDL_Rect();
@@ -250,10 +252,77 @@ namespace WpfApp1
             return texture;
         }
 
-        public static void OnFrameStarted()
+        public static void RenderFrame()
         {
             SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
             SDL_RenderClear(_renderer);
+
+            foreach (IRenderable renderable in _renderables)
+            {
+                RenderRenderable(renderable);
+            }
+
+            SDL_RenderPresent(_renderer);
+        }
+
+        private static void RenderRenderable(IRenderable renderable)
+        {
+            if (renderable.ShouldDraw)
+            {
+                ChooseRenderMethod(renderable);
+            }
+        }
+
+        private static void ChooseRenderMethod(IRenderable renderable)
+        {
+            switch (renderable.RenderingMode)
+            {
+                case RenderMode.Sprite:
+                    Debug.Assert(!string.IsNullOrEmpty(renderable.SpriteTextureId));
+                    DrawSprite(renderable.SpriteTextureId, renderable.Bounds, renderable.SourceTextureBounds, renderable.RotationAngle);
+                    break;
+                case RenderMode.Rect:
+                    DrawRect((int)renderable.PosX, (int)renderable.PosY, (int)renderable.Bounds.Width, (int)renderable.Bounds.Height, renderable.ProxyShapeColor);
+                    break;
+                case RenderMode.Circle:
+                    DrawCircle((int)renderable.PosX, (int)renderable.PosY, (int)renderable.CircleRadius);
+                    break;
+                case RenderMode.Line:
+                    DrawLine(new Vector(renderable.Bounds.Left, renderable.Bounds.Top), new Vector(renderable.Bounds.Right, renderable.Bounds.Down), renderable.ProxyShapeColor);
+                    break;
+                case RenderMode.Point:
+                    DrawPoint(new Vector(renderable.PosX, renderable.PosY), renderable.ProxyShapeColor);
+                    break;
+                case RenderMode.FilledRect:
+                    FillRect((int)renderable.PosX, (int)renderable.PosY, (int)renderable.Bounds.Width, (int)renderable.Bounds.Height, renderable.ProxyShapeColor);
+                    break;
+                case RenderMode.FilledCircle:
+                    FillCircle((int)renderable.PosX, (int)renderable.PosY, (int)renderable.CircleRadius);
+                    break;
+            }
+        }
+
+        public static void AddRenderable(IRenderable renderable)
+        {
+            Debug.Assert(renderable != null);
+
+            _renderables.Add(renderable);
+            renderable.ZIndexChanged += SortByZIndex;
+            SortByZIndex(0);
+        }
+
+        public static void RemoveRenderable(IRenderable renderable)
+        {
+            Debug.Assert(renderable != null);
+            
+            _renderables.Remove(renderable);
+            renderable.ZIndexChanged -= SortByZIndex;
+            SortByZIndex(0);
+        }
+
+        private static void SortByZIndex(int index)
+        {
+            _renderables.Sort((a, b) => a.ZIndex - b.ZIndex);
         }
     }
 }
