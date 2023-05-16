@@ -163,9 +163,18 @@ namespace WpfApp1
             {
                 if (body != toIgnore)
                 {
-                    if (body.TestCollision(ray, 0))
+                    var rect = body.Bounds;
+
+                    if (!ray.IsRay)
                     {
-                        return true;
+                        if (rect.IsOverlaping(new Rect(ray.Start, ray.Delta)))
+                        {
+                            return true;
+                        }
+                    }
+                    else
+                    {
+
                     }
                 }
             }
