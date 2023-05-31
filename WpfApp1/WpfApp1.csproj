@@ -135,7 +135,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(ProjectDir)skeleton.txt" "$(ProjectDir)$(OutDir)\skeleton.txt"
-</PostBuildEvent>
+copy "$(ProjectDir)arial.ttf" "$(ProjectDir)$(OutDir)\arial.ttf"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\ConsoleApp1\packages\Sayers.SDL2.Core.1.0.11\build\Sayers.SDL2.Core.targets" Condition="Exists('..\ConsoleApp1\packages\Sayers.SDL2.Core.1.0.11\build\Sayers.SDL2.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
