@@ -22,7 +22,7 @@ namespace WpfApp1
         private Skeleton user = null;
         private DebugSkeleton skeleton;
         private bool IsKinnectAvailable = false;
-        private SkeletonComponentState _state = SkeletonComponentState.GameRunning;
+        private SkeletonComponentState _state = SkeletonComponentState.CalibrateX;
 
 
         public bool ShouldDrawDebugBounds = true;
@@ -44,6 +44,8 @@ namespace WpfApp1
             }
             else
             {
+                _state = SkeletonComponentState.CalibrateX;
+
                 SDLTimer timer = new SDLTimer(2, false);
                 timer.TimeElapsed += () =>
                 {
@@ -130,21 +132,13 @@ namespace WpfApp1
 
             SDL.SDL_GetMouseState(out x, out y);
 
-            if (!Owner.GetComponent<CollisionComponent>().IsOverlaping && _state != SkeletonComponentState.GameRunning)
-            {
-                Owner.PosX = x;
-                Owner.PosY = y;
-            }
-
             switch (_state)
             {
                 case SkeletonComponentState.CalibrateX:
-                    SDLRendering.DrawTextOnCenterPivot("Podnieś ręce", "arial-32", Owner.PosX, Owner.PosY, Color.FromRgb(0, 0, 0));
-
-
+                    SDLRendering.DrawTextOnCenterPivot("Podnieś ręce", "arial-32", SDLApp.GetInstance().GetAppWidth() / 2, SDLApp.GetInstance().GetAppHeight() / 2, Color.FromRgb(0, 0, 0));
                     break;
                 case SkeletonComponentState.CalibrateY:
-                    SDLRendering.DrawTextOnCenterPivot("Podnieś ręce", "arial-32", 20, 20, Color.FromRgb(0, 0, 0));
+                    SDLRendering.DrawTextOnCenterPivot("Rozłóż Ręce", "arial-32", SDLApp.GetInstance().GetAppWidth() / 2, SDLApp.GetInstance().GetAppHeight() / 2, Color.FromRgb(0, 0, 0));
                     break;
                 case SkeletonComponentState.GameRunning:
                     skeleton.RenderEachJoint();
