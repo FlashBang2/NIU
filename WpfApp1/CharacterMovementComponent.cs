@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 
 namespace WpfApp1
 {
@@ -14,6 +15,8 @@ namespace WpfApp1
         public bool IsControlledByPlayer = false;
 
         public float AccumulatedY = 0;
+
+        public bool IsFalling { get; private set; }
 
         public override void OnTick(float dt)
         {
@@ -29,13 +32,24 @@ namespace WpfApp1
             CollisionComponent collision = Owner.GetComponent<CollisionComponent>();
             collision.TestCollision();
 
-            AccumulatedY += (float) Velocity.Y;
+            AccumulatedY += (float)Velocity.Y;
 
             if (collision.IsOverlaping)
             {
-                AccumulatedY -= (float) Velocity.Y;
+                AccumulatedY -= (float)Velocity.Y;
                 Velocity.Y = 0;
             }
+
+            Ray ray = new Ray();
+            List<IEntity> ignore = new List<IEntity>
+            {
+                Owner
+            };
+
+            ray.Init(new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height), new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height) + 10 * Owner.Down);
+            CollisionComponent.OverlapEvent overlap;
+            IsFalling = !CollisionComponent.RayCast(ray, ignore, out overlap);
+            SDLRendering.DrawLine(ray.Start, overlap.ContactPoint, Color.FromRgb(20, 80, 123));
         }
 
         public override void Deactivated()

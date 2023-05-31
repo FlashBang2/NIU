@@ -179,18 +179,11 @@ namespace WpfApp1
 
         public bool IsOverlaping(Vector point)
         {
-            double separation = double.MinValue;
+            var _min = _vertices[TopLeftIndex];
+            var _max = _vertices[BottomRightIndex];
 
-            foreach (Vector vertexA in _vertices)
-            {
-                Vector normal = PendicularVector(vertexA);
-                double minSep = double.MaxValue;
-
-                minSep = Math.Min(minSep, (point - vertexA) * normal);
-                separation = Math.Min(separation, minSep);
-            }
-
-            return !(Area > 0) && separation <= 0;
+            return (point.X >= _min.X && point.X <= _max.X)
+                && (point.Y >= _min.Y && point.Y <= _max.Y);
         }
 
         public Rect GetOverlap(Rect rect)

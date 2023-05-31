@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Ink;
 
 namespace WpfApp1
@@ -18,12 +19,53 @@ namespace WpfApp1
         {
             public IEntity LastContact;
             public IEntity Self;
+            public Vector ContactPoint;
         }
 
         public event Action<OverlapEvent> Overlaped;
         public event Action<OverlapEvent> StopOverlaping;
 
         public float AccumulatedY = 0;
+
+        public static bool RayCast(Ray ray, out OverlapEvent evt)
+        {
+            List<IEntity> ignored = new List<IEntity>();
+            return RayCast(ray, ignored, out evt);
+        }
+
+        public static bool RayCast(Ray ray, List<IEntity> ignored, out OverlapEvent evt)
+        {
+            evt = new OverlapEvent();
+
+            double t = 0.00;
+            IEntity[] children = Entity.RootEntity.GetChildren();
+
+
+            while (t < 1)
+            {
+                Vector current = (1 - t) * ray.Start + t * (ray.Start + ray.Delta);
+
+                foreach (var child in children)
+                {
+                    if (child.HasComponent<CollisionComponent>() && child.IsActive && ignored.Find(e => e == child) == null)
+                    {
+                        var bounds = child.Bounds;
+
+                        if (bounds.IsOverlaping(current))
+                        {
+                            evt.Self = null;
+                            evt.LastContact = child;
+                            evt.ContactPoint = current;
+                            return true;
+                        }
+                    }
+
+                }
+                t += 0.01f;
+            }
+
+            return false;
+        }
 
         public override void Spawned()
         {
@@ -107,7 +149,7 @@ namespace WpfApp1
                             {
                                 AccumulatedY = (float)-rect.Height - Math.Sign(rect.Height) * 0.01f;
                                 Owner.AddWorldOffset(0, AccumulatedY);
-                                IsOverlaping = true;   
+                                IsOverlaping = true;
                             }
                         }
 

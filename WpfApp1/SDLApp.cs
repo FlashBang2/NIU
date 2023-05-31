@@ -214,8 +214,6 @@ namespace WpfApp1
             e3.GetComponent<CollisionComponent>().StopOverlaping += evt => Console.WriteLine("Stop overlaping " + evt.LastContact.Name);
             
             e3.GetComponent<RectRenderable>().blockColor = Color.FromRgb(0, 100, 150);
-            SDLTimer t = new SDLTimer(1.0f, true);
-            t.Tick += evt => Console.WriteLine(e3.Name);
 
             app.Run();
         }

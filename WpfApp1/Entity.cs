@@ -122,7 +122,7 @@ namespace WpfApp1
 
         public Vector Left => -Right;
 
-        public Vector Up => new Vector(-Math.Sin(_angle / 180.0 * Math.PI), Math.Cos(_angle / 180.0 * Math.PI));
+        public Vector Up => new Vector(-Math.Sin(_angle / 180.0 * Math.PI), -Math.Cos(_angle / 180.0 * Math.PI));
         public Vector Down => -Up;
 
         public bool IsActive { get => _active; set => SetActive(value); }

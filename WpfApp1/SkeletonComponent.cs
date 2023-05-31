@@ -165,14 +165,85 @@ namespace WpfApp1
                 SDLRendering.DrawRect((int)Owner.PosX, (int)Owner.PosY, (int)Owner.Width, (int)Owner.Height, Color.FromRgb(255, 0, 0));
             }
 
-            if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_d))
+            if (!IsKinnectAvailable)
             {
-                Owner.AddWorldOffset(2, 0);
-                totalOffset += 2;
-                skeleton.offset = new Vector(totalOffset, Owner.PosY -Owner.Height / 6);
+
+                if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_d))
+                {
+                    Owner.AddWorldOffset(2, 0);
+                    totalOffset += 2;
+                    skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
+                }
+
+                if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_a))
+                {
+                    Owner.AddWorldOffset(-2, 0);
+                    totalOffset += -2;
+                    skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
+                }
+
+                if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_SPACE) && !Owner.GetComponent<CharacterMovementComponent>().IsFalling)
+                {
+                    Owner.GetComponent<CharacterMovementComponent>().Velocity = new Vector(Owner.GetComponent<CharacterMovementComponent>().Velocity.X, -30);
+                }
+            }
+            else
+            {
+                var actionType = FindActionType();
+
+                switch (actionType)
+                {
+                    case ActionType.MoveLeft:
+                        Owner.AddWorldOffset(-2, 0);
+                        totalOffset += -2;
+                        skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
+                        break;
+                    case ActionType.MoveRight:
+                        Owner.AddWorldOffset(2, 0);
+                        totalOffset += 2;
+                        skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
+                        break;
+                }
             }
 
             SDLRendering.SetCameraFollow(Owner);
+        }
+
+        private ActionType FindActionType()
+        {
+            ActionType actionType = ActionType.None;
+
+            Vector ankleLeft = skeleton[JointType.AnkleLeft];
+            Vector kneeRight = skeleton[JointType.KneeRight];
+            Vector ankleRight = skeleton[JointType.AnkleRight];
+            Vector kneeLeft = skeleton[JointType.KneeLeft];
+
+            if (-ankleLeft.Y > -kneeRight.Y)
+            {
+                actionType = ActionType.MoveRight;
+            }
+            else if (-ankleRight.Y > -kneeLeft.Y)
+            {
+                actionType = ActionType.MoveLeft;
+            }
+
+            if (!IsKinnectAvailable)
+            {
+                if (Keyboard.IsKeyDown(Key.D))
+                {
+                    actionType = ActionType.MoveRight;
+                }
+                else if (Keyboard.IsKeyDown(Key.A))
+                {
+                    actionType = ActionType.MoveLeft;
+                }
+                else
+                {
+                    actionType = ActionType.None;
+                }
+            }
+
+            return actionType;
         }
     }
 }
