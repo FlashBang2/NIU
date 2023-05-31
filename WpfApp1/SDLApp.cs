@@ -206,7 +206,7 @@ namespace WpfApp1
 
             e3.PosX = 600;
                 e3.PosY = 540 - 80;
-
+            
             e2.AddComponent<CollisionComponent>();
             e3.AddComponent<CollisionComponent>();
             e3.GetComponent<CollisionComponent>().IsTrigger = true;
@@ -214,6 +214,9 @@ namespace WpfApp1
             e3.GetComponent<CollisionComponent>().StopOverlaping += evt => Console.WriteLine("Stop overlaping " + evt.LastContact.Name);
             
             e3.GetComponent<RectRenderable>().blockColor = Color.FromRgb(0, 100, 150);
+
+            SDLTimer timer = new SDLTimer(3, true);
+            timer.Tick += () => Console.WriteLine("CC");
 
             app.Run();
         }

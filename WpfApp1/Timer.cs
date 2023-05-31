@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Timers;
 
 namespace ConsoleApp1
 {
@@ -22,37 +22,36 @@ namespace ConsoleApp1
     public class SDLTimer
     {
         public event Action TimeElapsed;
-        public event Action<TimeEvent> Tick;
+        public event Action Tick;
 
         public bool ShouldLoop;
 
         private int _id;
         private float _totalTime;
 
+        private Timer _Handle;
+
         public SDLTimer(float seconds, bool shouldLoop)
         {
+            _Handle = new Timer(seconds * 1000);
+            _Handle.AutoReset = shouldLoop;
+            _Handle.Elapsed += OnState;
+            _Handle.Start();
+
             ShouldLoop = false;
-            _id = SDL.SDL_AddTimer((uint)(seconds * 1000.0f), OnTimerTick, IntPtr.Zero);
             _totalTime = 0;
             ShouldLoop = shouldLoop; 
         }
 
-        private uint OnTimerTick(uint inverval, IntPtr param)
+        private void OnState(object o, ElapsedEventArgs args)
         {
-            float secondsSinceLastTick = inverval / 1000.0f;
-
-            _totalTime += secondsSinceLastTick;
-            
-            Tick?.Invoke(new TimeEvent(secondsSinceLastTick, _totalTime));
-
             if (!ShouldLoop)
             {
-                _id = -1;
                 TimeElapsed?.Invoke();
-                return 0;
+                _Handle.Stop();
             }
 
-            return inverval;
+            Tick?.Invoke();
         }
     }
 }
