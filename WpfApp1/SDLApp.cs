@@ -133,11 +133,14 @@ namespace WpfApp1
                 Owner.PosY = GetInstance().GetAppHeight() - Owner.Height;
             }
 
+
+            public Color blockColor = Color.FromRgb(120, 40,30);
+
             public override void ReceiveRender()
             {
                 base.ReceiveRender();
 
-                SDLRendering.FillRect((int)Owner.PosX, (int)Owner.PosY, (int)Owner.Width, (int)Owner.Height, Color.FromRgb(40, 128, 30));
+                SDLRendering.FillRect((int)Owner.PosX, (int)Owner.PosY, (int)Owner.Width, (int)Owner.Height, blockColor);
             }
         }
 
@@ -161,11 +164,13 @@ namespace WpfApp1
                 Owner.PosY = y;
             }
 
+            public Color blockColor = Color.FromRgb(120, 40, 40);
+
             public override void ReceiveRender()
             {
                 base.ReceiveRender();
 
-                SDLRendering.FillCircle((int)Owner.PosX, (int)Owner.PosY, (int)(Owner.Width / 2), Color.FromRgb(120, 40, 40));
+                SDLRendering.FillCircle((int)Owner.PosX, (int)Owner.PosY, (int)(Owner.Width / 2), blockColor);
             }
         }
 
@@ -187,6 +192,7 @@ namespace WpfApp1
 
             Entity e = Entity.CreateEntity("Skeleton");
             Entity e2 = Entity.CreateEntity("FF");
+            Entity e3 = Entity.CreateEntity("FF2");
             e.AddComponent<SkeletonComponent>();
             e.AddComponent<CharacterMovementComponent>();
             e.GetComponent<CharacterMovementComponent>().IsControlledByPlayer = true;
@@ -194,10 +200,22 @@ namespace WpfApp1
             e.GetComponent<CollisionComponent>().IsStatic = false;
 
             e2.AddComponent<RectRenderable>();
-            e2.AddComponent<CollisionComponent>();
+            e3.AddComponent<RectRenderable>();
+            e3.Width = 40;
+            e3.Height = 40;
 
-            SDLTimer t = new SDLTimer(2.0f, false);
-            t.Tick += evt => Console.WriteLine(evt.TotalSeconds);
+            e3.PosX = 600;
+                e3.PosY = 540 - 80;
+
+            e2.AddComponent<CollisionComponent>();
+            e3.AddComponent<CollisionComponent>();
+            e3.GetComponent<CollisionComponent>().IsTrigger = true;
+            e3.GetComponent<CollisionComponent>().Overlaped += evt => Console.WriteLine(evt.LastContact.Name);
+            e3.GetComponent<CollisionComponent>().StopOverlaping += evt => Console.WriteLine("Stop overlaping " + evt.LastContact.Name);
+            
+            e3.GetComponent<RectRenderable>().blockColor = Color.FromRgb(0, 100, 150);
+            SDLTimer t = new SDLTimer(1.0f, true);
+            t.Tick += evt => Console.WriteLine(e3.Name);
 
             app.Run();
         }

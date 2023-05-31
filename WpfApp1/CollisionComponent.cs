@@ -11,6 +11,17 @@ namespace WpfApp1
     {
         public bool IsStatic = true;
         public bool IsOverlaping = false;
+        public bool IsTrigger = false;
+        private List<IEntity> _contacts = new List<IEntity>();
+
+        public struct OverlapEvent
+        {
+            public IEntity LastContact;
+            public IEntity Self;
+        }
+
+        public event Action<OverlapEvent> Overlaped;
+        public event Action<OverlapEvent> StopOverlaping;
 
         public float AccumulatedY = 0;
 
@@ -35,13 +46,49 @@ namespace WpfApp1
 
             foreach (var child in children)
             {
-                if (child.HasComponent<CollisionComponent>() && child != Owner)
+                if (child.HasComponent<CollisionComponent>() && child != Owner && child.IsActive)
                 {
+                    if (IsTrigger)
+                    {
+                        Rect cb = child.Bounds;
+
+                        if (_contacts.Find(e => e == child) != null)
+                        {
+                            if (cb.IsOverlaping(ownerBounds) && ownerBounds.IsOverlaping(cb))
+                            {
+                            }
+                            else
+                            {
+                                OverlapEvent evt = new OverlapEvent();
+                                evt.Self = Owner;
+                                evt.LastContact = child;
+
+                                StopOverlaping?.Invoke(evt);
+
+                                _contacts.Remove(child);
+                            }
+                        }
+                        else
+                        {
+                            if (cb.IsOverlaping(ownerBounds) && ownerBounds.IsOverlaping(cb))
+                            {
+                                OverlapEvent evt = new OverlapEvent();
+                                evt.Self = Owner;
+                                evt.LastContact = child;
+
+                                Overlaped?.Invoke(evt);
+                                _contacts.Add(child);
+                            }
+                        }
+
+                        continue;
+                    }
+
                     CollisionComponent c = child.GetComponent<CollisionComponent>();
 
                     Rect childBounds = child.Bounds;
 
-                    if (childBounds.IsOverlaping(ownerBounds) && ownerBounds.IsOverlaping(childBounds))
+                    if (childBounds.IsOverlaping(ownerBounds) && ownerBounds.IsOverlaping(childBounds) && !c.IsTrigger)
                     {
                         Rect rect = childBounds.GetOverlap(ownerBounds);
 
