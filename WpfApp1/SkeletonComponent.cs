@@ -39,8 +39,12 @@ namespace WpfApp1
 
             if (!IsKinnectAvailable)
             {
+                _state = SkeletonComponentState.GameRunning;
                 skeleton.LoadTestSkeleton();
                 StartupCalibration();
+
+                skeleton.EndOfXCalibration();
+                skeleton.EndOfYCalibration();
             }
             else
             {
@@ -78,11 +82,6 @@ namespace WpfApp1
 
             skeleton.EndOfYCalibration();
             skeleton.EndOfXCalibration();
-        }
-
-        private void SwitchToCalibrateY()
-        {
-
         }
 
         private void OnKeyDown(object sender, KeyEventArgs e)
