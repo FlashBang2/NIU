@@ -27,6 +27,14 @@ namespace WpfApp1
 
         private void ApplyMovement()
         {
+            if (Owner.HasComponent<SkeletonComponent>())
+            {
+                if (Owner.GetComponent<SkeletonComponent>().State != SkeletonComponentState.GameRunning)
+                {
+                    return;
+                }
+            }
+
             Owner.AddWorldOffset(Velocity.X, Velocity.Y);
             Velocity.Y += 9.81 * GravityScale;
             CollisionComponent collision = Owner.GetComponent<CollisionComponent>();

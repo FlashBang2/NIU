@@ -22,7 +22,7 @@ namespace WpfApp1
         private Skeleton user = null;
         private DebugSkeleton skeleton;
         private bool IsKinnectAvailable = false;
-        private SkeletonComponentState _state = SkeletonComponentState.CalibrateX;
+        public SkeletonComponentState State = SkeletonComponentState.CalibrateX;
 
 
         public bool ShouldDrawDebugBounds = true;
@@ -39,7 +39,7 @@ namespace WpfApp1
 
             if (!IsKinnectAvailable)
             {
-                _state = SkeletonComponentState.GameRunning;
+                State = SkeletonComponentState.GameRunning;
                 skeleton.LoadTestSkeleton();
                 StartupCalibration();
 
@@ -48,16 +48,16 @@ namespace WpfApp1
             }
             else
             {
-                _state = SkeletonComponentState.CalibrateX;
+                State = SkeletonComponentState.CalibrateX;
 
-                SDLTimer timer = new SDLTimer(2, false);
+                SDLTimer timer = new SDLTimer(5, false);
                 timer.TimeElapsed += () =>
                 {
                     skeleton.EndOfXCalibration();
 
-                    _state = SkeletonComponentState.CalibrateY;
-                    SDLTimer t = new SDLTimer(2, false);
-                    t.TimeElapsed += () => { skeleton.EndOfYCalibration(); _state = SkeletonComponentState.GameRunning; };
+                    State = SkeletonComponentState.CalibrateY;
+                    SDLTimer t = new SDLTimer(5, false);
+                    t.TimeElapsed += () => { skeleton.EndOfYCalibration(); State = SkeletonComponentState.GameRunning; };
                 };
             }
 
@@ -65,15 +65,6 @@ namespace WpfApp1
             SDLRendering.GetTextTexture("Podnieś ręce", "arial-32", Color.FromRgb(0, 0, 0));
             Owner.Width = SDLRendering.GetTextSize("Podnieś ręce", "arial-32").X;
             Owner.Height = SDLRendering.GetTextSize("Podnieś ręce", "arial-32").Y;
-
-            SDL.SDL_GetMouseState(out int x, out int y);
-            Owner.PosX = x;
-            Owner.PosY = y;
-
-            Owner.PosX = x;
-            Owner.PosY = y;
-            Owner.Width = skeleton.Bounds.Width;
-            Owner.Height = skeleton.Bounds.Height;
         }
 
         private void StartupCalibration()
@@ -127,16 +118,12 @@ namespace WpfApp1
         {
             base.ReceiveRender();
 
-            int x, y;
-
-            SDL.SDL_GetMouseState(out x, out y);
-
-            switch (_state)
+            switch (State)
             {
-                case SkeletonComponentState.CalibrateX:
+                case SkeletonComponentState.CalibrateY:
                     SDLRendering.DrawTextOnCenterPivot("Podnieś ręce", "arial-32", SDLApp.GetInstance().GetAppWidth() / 2, SDLApp.GetInstance().GetAppHeight() / 2, Color.FromRgb(0, 0, 0));
                     break;
-                case SkeletonComponentState.CalibrateY:
+                case SkeletonComponentState.CalibrateX:
                     SDLRendering.DrawTextOnCenterPivot("Rozłóż Ręce", "arial-32", SDLApp.GetInstance().GetAppWidth() / 2, SDLApp.GetInstance().GetAppHeight() / 2, Color.FromRgb(0, 0, 0));
                     break;
                 case SkeletonComponentState.GameRunning:
@@ -156,12 +143,12 @@ namespace WpfApp1
 
             skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
 
-            if (ShouldDrawDebugBounds)
+            if (ShouldDrawDebugBounds && State == SkeletonComponentState.GameRunning)
             {
                 SDLRendering.DrawRect((int)Owner.PosX, (int)Owner.PosY, (int)Owner.Width, (int)Owner.Height, Color.FromRgb(255, 0, 0));
             }
 
-            if (!IsKinnectAvailable)
+            if (!IsKinnectAvailable && State == SkeletonComponentState.GameRunning)
             {
 
                 if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_d))
