@@ -42,6 +42,18 @@ namespace WpfApp1
                 skeleton.LoadTestSkeleton();
                 StartupCalibration();
             }
+            else
+            {
+                SDLTimer timer = new SDLTimer(2, false);
+                timer.TimeElapsed += () =>
+                {
+                    skeleton.EndOfXCalibration();
+
+                    _state = SkeletonComponentState.CalibrateY;
+                    SDLTimer t = new SDLTimer(2, false);
+                    t.TimeElapsed += () => { skeleton.EndOfYCalibration(); _state = SkeletonComponentState.GameRunning; };
+                };
+            }
 
             SDLRendering.LoadFont("arial.ttf", 16, "arial-32");
             SDLRendering.GetTextTexture("Podnieś ręce", "arial-32", Color.FromRgb(0, 0, 0));
@@ -56,15 +68,6 @@ namespace WpfApp1
             Owner.PosY = y;
             Owner.Width = skeleton.Bounds.Width;
             Owner.Height = skeleton.Bounds.Height;
-#if false
-            SDLTimer timer = new SDLTimer(2, false);
-            timer.TimeElapsed += () =>
-            {
-                _state = SkeletonComponentState.CalibrateY;
-                SDLTimer t = new SDLTimer(2, false);
-                t.TimeElapsed += () => { _state = SkeletonComponentState.GameRunning; };
-            };
-#endif
         }
 
         private void StartupCalibration()
@@ -184,7 +187,7 @@ namespace WpfApp1
 
                 if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_SPACE) && !Owner.GetComponent<CharacterMovementComponent>().IsFalling)
                 {
-                    Owner.GetComponent<CharacterMovementComponent>().Velocity = new Vector(Owner.GetComponent<CharacterMovementComponent>().Velocity.X, -30);
+                    Owner.GetComponent<CharacterMovementComponent>().Velocity = new Vector(Owner.GetComponent<CharacterMovementComponent>().Velocity.X, -15);
                 }
             }
             else
