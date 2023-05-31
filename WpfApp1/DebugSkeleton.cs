@@ -4,13 +4,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace WpfApp1
 {
-    public class DebugSkeleton : IPhysicsBody
+    public class DebugSkeleton
     {
         public enum JumpState
         {
@@ -42,16 +40,6 @@ namespace WpfApp1
             }
         }
 
-        public bool IsStatic
-        {
-            get => _isStatic;
-            set
-            {
-                Physics.RemovePhysicsBody(this);
-                _isStatic = value;
-                Physics.AddPhysicsBody(this);
-            }
-        }
         public Vector Velocity { get => _velocity; set => _velocity = value; }
         public bool ShouldApplyGravity { get => _shouldApplyGravity; set => _shouldApplyGravity = value; }
         public double GravityScale { get => _gravityScale; set => _gravityScale = value; }
@@ -78,9 +66,7 @@ namespace WpfApp1
         private double _minX = 0;
         private double _maxX = 0;
 
-        private WeakReference<MainWindow> _window;
         private Rect _bounds;
-        private readonly Rectangle _characterDebugBounds = new Rectangle();
 
 
         private bool _isTrigger;
@@ -94,34 +80,25 @@ namespace WpfApp1
         public bool IsFalling { get => _jumpState != JumpState.None; }
         private JumpState _jumpState = JumpState.None;
 
-        public DebugSkeleton(Canvas canvas, MainWindow window)
+        public DebugSkeleton()
         {
             _connections = Connection.Connections;
-            _window = new WeakReference<MainWindow>(window);
-            AddJoints(window);
+            AddJoints();
             _bounds = new Rect(new Vector(), new Vector());
-            canvas.Children.Add(_characterDebugBounds);
-
-            foreach (Connection connection in _connections)
-            {
-                connection.AttachToCanvas(canvas);
-            }
 
             foreach (var x in Enum.GetValues(typeof(JointType)).Cast<JointType>())
             {
                 _jointLocations[x] = new Vector();
                 _tempJointLocations[x] = new Vector();
             }
-
-            Physics.AddPhysicsBody(this);
         }
 
-        private void AddJoints(MainWindow window)
+        private void AddJoints()
         {
             IEnumerable<JointType> joints = Enum.GetValues(typeof(JointType)).Cast<JointType>();
             foreach (JointType joint in joints)
             {
-                _joints.Add(joint, new DebugJoint(window));
+                _joints.Add(joint, new DebugJoint());
             }
         }
 
@@ -207,6 +184,11 @@ namespace WpfApp1
             Console.WriteLine("MaxX: " + _maxX);
         }
 
+        static public double Map(double value, double istart, double istop, double ostart, double ostop)
+        {
+            return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
+        }
+
         public void RenderEachJoint()
         {
             Color boneColor = Color.FromArgb(255, 0, 0, 0);
@@ -216,16 +198,14 @@ namespace WpfApp1
                 CalculateScaledBounds(Scale, joint);
 
                 DebugJoint j = joint.Value;
-                j.DrawDebugJoint(_tempJointLocations[joint.Key], JointSize, boneColor);
+                j.DrawDebugJoint(_tempJointLocations[joint.Key], Scale * JointSize, boneColor);
             }
 
             FindSkeletonBounds();
 
             foreach (Connection connection in _connections)
             {
-                _window.TryGetTarget(out MainWindow w);
-
-                connection.DrawConnection(_joints, w);
+                connection.DrawConnection(_joints);
             }
         }
 
@@ -247,22 +227,12 @@ namespace WpfApp1
             }
 
             _bounds = new Rect(new Vector(minX, minY), new Vector(maxX, maxY));
-            _characterDebugBounds.Width = _bounds.Width;
-            _characterDebugBounds.Height = _bounds.Height;
-
-            Thickness margin = _characterDebugBounds.Margin;
-            margin.Left = _bounds.Left;
-            margin.Top = _bounds.Top;
-            _characterDebugBounds.Margin = margin;
-
-            _characterDebugBounds.Stroke = new SolidColorBrush(Color.FromRgb(125, 125, 255));
-            _characterDebugBounds.StrokeThickness = 1;
         }
 
         private void CalculateScaledBounds(double scale, KeyValuePair<JointType, DebugJoint> joint)
         {
-            double x = scale * (_jointLocations[joint.Key].X) + 1.5 / (_maxX + 3);
-            double y = scale * (-_jointLocations[joint.Key].Y) + 2 / (_maxY + 3);
+            double x = Map((_jointLocations[joint.Key].X) + 1.5 / scale * _maxX, -1, 1, 0, 1);
+            double y = Map((-_jointLocations[joint.Key].Y) - _maxY, -1, 1, 0, 1);
 
             _tempJointLocations[joint.Key] = new Vector(x, y);
         }
@@ -289,52 +259,6 @@ namespace WpfApp1
 
         public void PhysicsUpdate()
         {
-            MainWindow w;
-
-            _window.TryGetTarget(out w);
-
-            // first move objects
-            MoveByOffsetEachChild(_velocity);
-
-            IPhysicsBody hit;
-
-
-            // in a last position skeleton doesn't collide with anything
-            if (Physics.IsCollidingWithAnyObject(this, out hit))
-            {
-                var rect = hit.Bounds.GetOverlap(Bounds);
-                bool hasHitAGround = rect.Height >= 5;
-                if (hasHitAGround)
-                {
-                    var o = Bounds.Down - hit.Bounds.Top + 0.01;
-                    if (o >= Bounds.Width)
-                    {
-                        o = -(hit.Bounds.Down - Bounds.Top + 0.01);
-                        _velocity.Y = 0;
-                    }
-
-                    MoveByOffsetEachChild(new Vector(0, o));    
-                }
-
-                // test, are we colliding in x axis
-                if (Physics.IsCollidingWithAnyObject(this, out hit))
-                {
-                    rect = hit.Bounds.GetOverlap(Bounds);
-
-                    if (rect.Width >= 5)
-                    {
-                        MoveByOffsetEachChild(new Vector(-_velocity.X, 0));
-                    }
-                }
-            }
-
-            var offset = -new Vector(0, 1) * _gravityScale * Physics.Gravity;
-            _velocity += offset;
-            _velocity.X -= 1;
-            if (_velocity.X <= 0)
-            {
-                _velocity.X = 0;
-            }
 
             UpdateJumpState();
         }
@@ -374,30 +298,10 @@ namespace WpfApp1
             MoveByOffsetEachChild(offset);
 
             IPhysicsBody hit;
-            if (Physics.IsCollidingWithAnyObject(this, out hit))
-            {
-                MoveByOffsetEachChild(-offset);
-            }
         }
 
         void MoveByOffsetEachChild(Vector offset)
         {
-            _window.TryGetTarget(out MainWindow w);
-
-            foreach (var child in w.canvas.Children.Cast<FrameworkElement>())
-            {
-                if (IsPartOfSkeleton(child))
-                {
-                    continue;
-                }
-
-                Thickness thickness = child.Margin;
-
-                thickness.Left += offset.X;
-
-                child.Margin = thickness;
-            }
-
             foreach (var joint in _joints)
             {
                 joint.Value.AddOffset(new Vector(0, offset.Y));
@@ -405,14 +309,6 @@ namespace WpfApp1
             }
 
             FindSkeletonBounds();
-        }
-
-        private bool IsPartOfSkeleton(FrameworkElement ch)
-        {
-            bool isBone = ch.GetType().Equals(typeof(Line));
-            bool isJoint = ch.GetType().Equals(typeof(Ellipse));
-
-            return isBone || isJoint || ch == _characterDebugBounds;
         }
 
         public void Jump()

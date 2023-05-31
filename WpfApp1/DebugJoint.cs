@@ -9,12 +9,13 @@ namespace WpfApp1
 {
     public class DebugJoint
     {
-        private Ellipse _joint;
-        private WeakReference<MainWindow> _window;
+        public double PosX { get => _posX; }
+        public double PosY { get => _posY; }
 
-        public double PosX { get => _joint.Margin.Left; }
-        public double PosY { get => _joint.Margin.Top; }
-        public Rect Bounds { get => new Rect(new Vector(PosX, PosY), new Vector(PosX + _joint.Width, PosY + _joint.Height)); }
+        private double _posX = 0;
+        private double _posY = 0;
+
+        public Rect Bounds { get => new Rect(new Vector(PosX, PosY), new Vector(PosX + 0, PosY + 0)); }
 
         private Vector _offset = new Vector();
 
@@ -22,35 +23,15 @@ namespace WpfApp1
         {
             get => _visible; set
             {
-                if (_visible)
-                {
-                    _joint.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    _joint.Width = 0;
-                    _joint.Height = 0;
-                    _joint.Visibility = Visibility.Hidden;
-                }
-
                 _visible = value;
             }
         }
+
         private bool _visible;
 
-        public DebugJoint(MainWindow window)
+        public DebugJoint()
         {
-            _joint = new Ellipse
-            {
-                Margin = new Thickness(0)
-            };
-
-            _window = new WeakReference<MainWindow>(window);
-
             _visible = true;
-
-            Canvas canvas = window.canvas;
-            canvas.Children.Add(_joint);
         }
 
         public void DrawDebugJoint(Vector normalizedPosition, Vector size, Color color)
@@ -60,33 +41,14 @@ namespace WpfApp1
                 return;
             }
 
-            MainWindow w;
+            _posX = ((normalizedPosition.X - size.X / 2) * SDLApp.GetInstance().GetAppWidth() + _offset.X);
+            _posY = ((normalizedPosition.Y - size.Y / 2) * SDLApp.GetInstance().GetAppHeight() - _offset.Y);
 
-            if (!_window.TryGetTarget(out w))
-            {
-                throw new NullReferenceException();
-            }
-
-            double scaledWidth = size.X * w.Width;
-            double scaledHeight = size.Y * w.Height;
-
-            _joint.Width = scaledWidth;
-            _joint.Height = scaledWidth;
-
-            Thickness margin = _joint.Margin;
-
-            margin.Left = (normalizedPosition.X - size.X / 2) * w.Width + _offset.X;
-            margin.Top = (normalizedPosition.Y - size.Y / 2) * w.Height - _offset.Y;
-            _joint.Margin = margin;
-
-            _joint.Width = scaledWidth;
-            _joint.Height = scaledHeight;
-            _joint.Fill = new SolidColorBrush(color);
+            SDLRendering.FillCircle((int)_posX, (int)_posY, (int)2, color);
         }
 
         public void Clear()
         {
-            DrawDebugJoint(new Vector(), new Vector(), Color.FromArgb(0, 0, 0, 0));
         }
 
         public void AddOffset(Vector offset)

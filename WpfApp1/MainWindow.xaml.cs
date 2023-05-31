@@ -34,7 +34,7 @@ namespace WpfApp1
         public MainWindow()
         {
             InitializeComponent();
-            skeleton = new DebugSkeleton(canvas, this);
+            skeleton = new DebugSkeleton();
 
             StartKinect();
 

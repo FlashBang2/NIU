@@ -11,6 +11,7 @@ using static SDL2.SDL_ttf;
 using System.Windows.Media;
 using System.Diagnostics;
 using System.Windows;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace WpfApp1
 {
@@ -69,9 +70,29 @@ namespace WpfApp1
             IntPtr surface = TTF_RenderText_Solid(_fonts[fontId], text, c);
 
             IntPtr texture = SDL_CreateTextureFromSurface(_renderer, surface);
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(text).Append('.').Append(fontId).Append(".").Append(color.ToString());
+
+            _textures.Add(sb.ToString(), texture);
+
             SDL_FreeSurface(surface);
 
             return texture;
+        }
+
+        public static IntPtr GetTextTexture(string text, string fontId, Color color)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(text).Append('.').Append(fontId).Append(".").Append(color.ToString());
+
+            if (_textures.Any(v => v.Key.Equals(sb.ToString())))
+            {
+                return _textures[sb.ToString()];
+            }
+
+            return GenerateTextTexture(text, fontId, color);
         }
 
         public static SDL_Color CSharpColorToSDLColor(Color color)
@@ -85,7 +106,7 @@ namespace WpfApp1
             return c;
         }
 
-        public static int DrawCircle(int x, int y, int radius)
+        public static int DrawCircle(int x, int y, int radius, Color color)
         {
             int offsetx, offsety, d;
             int status;
@@ -94,6 +115,8 @@ namespace WpfApp1
             offsety = radius;
             d = radius - 1;
             status = 0;
+
+            SDL_SetRenderDrawColor(_renderer, color.R, color.G, color.B, color.A);
 
             while (offsety >= offsetx)
             {
@@ -133,7 +156,7 @@ namespace WpfApp1
             return status;
         }
 
-        public static int FillCircle(int x, int y, int radius)
+        public static int FillCircle(int x, int y, int radius, Color color)
         {
             int offsetx, offsety, d;
             int status;
@@ -143,6 +166,8 @@ namespace WpfApp1
             offsety = radius;
             d = radius - 1;
             status = 0;
+
+            SDL_SetRenderDrawColor(_renderer, color.R, color.G, color.B, color.A);
 
             while (offsety >= offsetx)
             {
@@ -218,6 +243,50 @@ namespace WpfApp1
             SDL_RenderCopyEx(_renderer, texture, ref src, ref spriteRect, angle, ref p, SDL_RendererFlip.SDL_FLIP_NONE);
         }
 
+        public static void DrawSprite(IntPtr texture, Rect spriteBounds, Rect sourceRect, double angle)
+        {
+            SDL_Rect spriteRect = spriteBounds.AsSDLRect;
+            SDL_Rect src = sourceRect.AsSDLRect;
+            SDL_Point p = new SDL_Point();
+            p.x = p.y = 0;
+
+            SDL_RenderCopyEx(_renderer, texture, ref src, ref spriteRect, angle, ref p, SDL_RendererFlip.SDL_FLIP_NONE);
+        }
+
+        public static void DrawSprite(IntPtr texture, Vector center, Rect spriteBounds, Rect sourceRect, double angle)
+        {
+            SDL_Rect spriteRect = spriteBounds.AsSDLRect;
+            SDL_Rect src = sourceRect.AsSDLRect;
+            SDL_Point p = new SDL_Point();
+            p.x = (int)center.X;
+            p.y = (int)center.Y;
+
+            SDL_RenderCopyEx(_renderer, texture, ref src, ref spriteRect, angle, ref p, SDL_RendererFlip.SDL_FLIP_NONE);
+        }
+
+        public static void DrawText(string text, string fontId, double posX, double posY, Color color)
+        {
+            var texture = GetTextTexture(text, fontId, color);
+
+            TTF_SizeText(_fonts[fontId], text, out int w, out int h);
+
+            DrawSprite(texture, new Rect(posX, posY, w, h), Rect.Unlimited, 0);
+        }
+
+        public static void DrawTextOnCenterPivot(string text, string fontId, double posX, double posY, Color color)
+        {
+            var texture = GetTextTexture(text, fontId, color);
+
+            TTF_SizeText(_fonts[fontId], text, out int w, out int h);
+
+            DrawSprite(texture, Rect.FromOriginAndExtend(new Vector(posX, posY), new Vector(w, h)), Rect.Unlimited, 0);
+        }
+
+        public static Vector GetTextSize(string text, string fontId)
+        {
+            TTF_SizeText(_fonts[fontId], text, out int w, out int h);
+            return new Vector(w, h);
+        }
         public static void DrawLine(Vector start, Vector end, Color color)
         {
             SDL_SetRenderDrawColor(_renderer, color.R, color.G, color.B, color.A);
@@ -254,18 +323,16 @@ namespace WpfApp1
 
         public static void RenderFrame()
         {
-            SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
-            SDL_RenderClear(_renderer);
-
-            foreach (IRenderable renderable in _renderables)
-            {
-                RenderRenderable(renderable);
-            }
-
             SDL_RenderPresent(_renderer);
         }
 
-        private static void RenderRenderable(IRenderable renderable)
+        public static void ClearFrame()
+        {
+            SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 255);
+            SDL_RenderClear(_renderer);
+        }
+
+        public static void RenderRenderable(IRenderable renderable)
         {
             if (renderable.ShouldDraw)
             {
@@ -285,7 +352,7 @@ namespace WpfApp1
                     DrawRect((int)renderable.PosX, (int)renderable.PosY, (int)renderable.Bounds.Width, (int)renderable.Bounds.Height, renderable.ProxyShapeColor);
                     break;
                 case RenderMode.Circle:
-                    DrawCircle((int)renderable.PosX, (int)renderable.PosY, (int)renderable.CircleRadius);
+                    DrawCircle((int)renderable.PosX, (int)renderable.PosY, (int)renderable.CircleRadius, renderable.ProxyShapeColor);
                     break;
                 case RenderMode.Line:
                     DrawLine(new Vector(renderable.Bounds.Left, renderable.Bounds.Top), new Vector(renderable.Bounds.Right, renderable.Bounds.Down), renderable.ProxyShapeColor);
@@ -297,7 +364,7 @@ namespace WpfApp1
                     FillRect((int)renderable.PosX, (int)renderable.PosY, (int)renderable.Bounds.Width, (int)renderable.Bounds.Height, renderable.ProxyShapeColor);
                     break;
                 case RenderMode.FilledCircle:
-                    FillCircle((int)renderable.PosX, (int)renderable.PosY, (int)renderable.CircleRadius);
+                    FillCircle((int)renderable.PosX, (int)renderable.PosY, (int)renderable.CircleRadius, renderable.ProxyShapeColor);
                     break;
             }
         }
@@ -314,7 +381,7 @@ namespace WpfApp1
         public static void RemoveRenderable(IRenderable renderable)
         {
             Debug.Assert(renderable != null);
-            
+
             _renderables.Remove(renderable);
             renderable.ZIndexChanged -= SortByZIndex;
             SortByZIndex(0);

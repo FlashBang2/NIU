@@ -62,6 +62,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CollisionComponent.cs" />
+    <Compile Include="Component.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="ICollideable.cs" />
     <Compile Include="IEntity.cs" />
@@ -79,6 +81,8 @@
     <Compile Include="SDL2-CS\SDL2_mixer.cs" />
     <Compile Include="SDL2-CS\SDL2_ttf.cs" />
     <Compile Include="SDLRendering.cs" />
+    <Compile Include="SkeletonComponent.cs" />
+    <Compile Include="Timer.cs" />
     <Compile Include="WpfPhysicsBody.cs" />
     <Compile Include="Rect.cs" />
     <Page Include="MainWindow.xaml">

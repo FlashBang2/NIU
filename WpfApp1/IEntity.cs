@@ -9,11 +9,6 @@ namespace WpfApp1
 {
     public interface IEntity
     {
-        IRenderable Renderable { get; set; }
-        ICollideable Collideable { get; set; }
-
-        IEntity Parent { get; set; }
-
         double PosX { get; set; }
         double PosY { get; set; }
 
@@ -51,7 +46,15 @@ namespace WpfApp1
         IEntity FindChild(string name);
 
         void Tick(double dt);
-        void Spawned();
-        void Destroyed();
+
+        T GetComponent<T>();
+        bool HasComponent<T>();
+
+        void AddComponent<T>() where T : Component;
+
+        void ReceiveRender();
+
+        IEntity[] GetChildren();
+        void UndoLastTranslation();
     }
 }

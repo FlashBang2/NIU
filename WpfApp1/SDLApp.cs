@@ -1,8 +1,10 @@
-﻿using System;
+﻿using ConsoleApp1;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -18,6 +20,13 @@ namespace WpfApp1
         private IntPtr _window = IntPtr.Zero;
         private IntPtr _renderer = IntPtr.Zero;
         private bool _isOpen = true;
+
+        private static SDLApp _instance;
+
+        public static SDLApp GetInstance()
+        {
+            return _instance;
+        }
 
         public SDLApp(int width, int height, string title)
         {
@@ -39,7 +48,7 @@ namespace WpfApp1
             }
 
             _window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WindowFlags.SDL_WINDOW_SHOWN); ;
-            
+
             if (_window.Equals(IntPtr.Zero))
             {
                 FreeResources();
@@ -55,7 +64,21 @@ namespace WpfApp1
             }
 
             SDLRendering.Init(_renderer);
+            _instance = this;
         }
+
+        public int GetAppWidth()
+        {
+            SDL_GetWindowSize(_window, out int w, out _);
+            return w;
+        }
+
+        public int GetAppHeight()
+        {
+            SDL_GetWindowSize(_window, out _, out int h);
+            return h;
+        }
+
 
         public void Run()
         {
@@ -66,7 +89,10 @@ namespace WpfApp1
                 {
                     OnSystemEventOccured(systemEvent);
                 }
+                Entity.RootEntity.Tick(0);
 
+                SDLRendering.ClearFrame();
+                Entity.RootEntity.ReceiveRender();
                 SDLRendering.RenderFrame();
             }
 
@@ -75,6 +101,7 @@ namespace WpfApp1
 
         private void FreeResources()
         {
+            SDLRendering.Quit();
             SDL_DestroyRenderer(_renderer);
             SDL_DestroyWindow(_window);
             IMG_Quit();
@@ -83,7 +110,6 @@ namespace WpfApp1
 
             _window = IntPtr.Zero;
             _renderer = IntPtr.Zero;
-            SDLRendering.Quit();
         }
 
         private void OnSystemEventOccured(SDL_Event evt)
@@ -95,40 +121,69 @@ namespace WpfApp1
         }
 
 
-        class Test : IRenderable
+        class RectRenderable : Component
         {
-            public bool ShouldDraw => true;
-
-            public string SpriteTextureId => "";
-
-            public int ZIndex { get => 0; set => throw new NotImplementedException(); }
-            public Rect Bounds { get => new Rect(new Vector(120, 120), new Vector(240, 240)); set => throw new NotImplementedException(); }
-            public double PosX { get => 120; set => throw new NotImplementedException(); }
-            public double PosY { get => 120; set => throw new NotImplementedException(); }
-            public double RotationAngle { get => 0; set => throw new NotImplementedException(); }
-            public double CircleRadius { get => 0; set => throw new NotImplementedException(); }
-            public Color ProxyShapeColor { get => Color.FromRgb(125, 123, 255); set => throw new NotImplementedException(); }
-            public Rect SourceTextureBounds { get => new Rect(new Vector(), new Vector()); set => throw new NotImplementedException(); }
-
-            public object LinkedEntity => throw new NotImplementedException();
-
-            public RenderMode RenderingMode => RenderMode.Rect;
-
-            public event Action<int> ZIndexChanged;
-
-            public bool IsVisible(Rect cameraBounds)
+            public override void Spawned()
             {
-                return true;
+                base.Spawned();
+                Owner.Width = GetInstance().GetAppWidth();
+                Owner.Height = 40;
+                Owner.PosX = 0;
+                Owner.PosY = GetInstance().GetAppHeight() - Owner.Height;
+            }
+
+            public override void ReceiveRender()
+            {
+                base.ReceiveRender();
+
+                SDLRendering.FillRect((int)Owner.PosX, (int)Owner.PosY, (int)Owner.Width, (int)Owner.Height, Color.FromRgb(40, 128, 30));
             }
         }
 
+        class Temp : Component
+        {
+
+            public override void Spawned()
+            {
+                base.Spawned();
+                Owner.Width = 40;
+                Owner.Height = 40;
+            }
+
+            public override void OnTick(float dt)
+            {
+                int x, y;
+
+                SDL_GetMouseState(out x, out y);
+
+                Owner.PosX = x;
+                Owner.PosY = y;
+            }
+
+            public override void ReceiveRender()
+            {
+                base.ReceiveRender();
+
+                SDLRendering.FillCircle((int)Owner.PosX, (int)Owner.PosY, (int)(Owner.Width / 2), Color.FromRgb(120, 40, 40));
+            }
+        }
 
         public static void Main(string[] args)
         {
             SDLApp app = new SDLApp(960, 540, "NIU");
-            SDLRendering.AddRenderable(new Test());
 
-            IEntity e;
+            Entity e = Entity.CreateEntity("Skeleton");
+            Entity e2 = Entity.CreateEntity("FF");
+            e.AddComponent<CollisionComponent>();
+            e.AddComponent<SkeletonComponent>();
+            e.GetComponent<CollisionComponent>().IsStatic = false;
+
+            e2.AddComponent<RectRenderable>();
+            e2.AddComponent<CollisionComponent>();
+
+            SDLTimer t = new SDLTimer(2.0f, false);
+            t.Tick += evt => Console.WriteLine(evt.TotalSeconds);
+
             app.Run();
         }
     }

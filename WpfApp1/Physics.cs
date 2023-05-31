@@ -44,6 +44,7 @@ namespace WpfApp1
 
         public static void Update()
         {
+#if false
             foreach (var body in _dynamicBodies)
             {
                 body.PhysicsUpdate();
@@ -80,6 +81,7 @@ namespace WpfApp1
                 _lastOverlaps.Remove(overlap);
                 StopOverlaping?.Invoke(overlap);
             }
+#endif
         }
 
         public static bool IsCollidingWithAnyObject(IPhysicsBody physicsBody, out IPhysicsBody firstHit)

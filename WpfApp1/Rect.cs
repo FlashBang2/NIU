@@ -59,6 +59,19 @@ namespace WpfApp1
             _center = 0.5 * (_vertices[TopLeftIndex] + _vertices[BottomRightIndex]);
         }
 
+        public Rect(double x, double y, double w, double h)
+        {
+            _vertices = new Vector[BottomRightIndex + 1];
+
+            _vertices[TopLeftIndex] = new Vector(x, y);
+            _vertices[TopRightIndex] = new Vector(x + w, y);
+            _vertices[BottomLeftIndex] = new Vector(x, y + h);
+            _vertices[BottomRightIndex] = new Vector(x + w, y + h);
+
+            _center = new Vector(x + w/2, y + h/2);
+            _angle = 0;
+        }
+
         public Rect(Vector[] vertices)
         {
             Debug.Assert(vertices.Length >= 4);
@@ -77,8 +90,8 @@ namespace WpfApp1
             _center = 0.5 * (_vertices[TopLeftIndex] + _vertices[BottomRightIndex]);
         }
 
-        public double Width => (_vertices[TopLeftIndex] + _vertices[TopRightIndex]).Length;
-        public double Height => (_vertices[TopLeftIndex] + _vertices[BottomLeftIndex]).Length;
+        public double Width => (_vertices[TopRightIndex] - _vertices[TopLeftIndex]).Length;
+        public double Height => (_vertices[BottomLeftIndex] - _vertices[TopLeftIndex]).Length;
 
         public double Left => _vertices[TopLeftIndex].X;
         public double Top => _vertices[TopLeftIndex].Y;
@@ -88,6 +101,7 @@ namespace WpfApp1
         public Vector Extend => new Vector(Width, Height) / 2;
         public Vector Center => _center;
 
+        public double Area => Width * Height;
         public static readonly Rect Unlimited = new Rect(new Vector(int.MinValue, int.MinValue), new Vector(int.MaxValue, int.MaxValue));
         public double Angle => _angle;
 
@@ -97,7 +111,12 @@ namespace WpfApp1
             {
                 if (this == Unlimited)
                 {
-                    return default;
+                    SDL_Rect rect = new SDL_Rect();
+                    rect.w = 99999;
+                    rect.h = 99999;
+                    rect.x = 0;
+                    rect.y = 0;
+                    return rect;
                 }
 
                 SDL_Rect r = new SDL_Rect();
@@ -119,6 +138,18 @@ namespace WpfApp1
 
         public bool IsOverlaping(Rect rect)
         {
+            var _min = _vertices[TopLeftIndex];
+            var rect_min = rect._vertices[TopLeftIndex];
+            var _max = _vertices[BottomRightIndex];
+            var rect_max = rect._vertices[BottomRightIndex];
+
+
+            return Area > 0 && rect.Area > 0 && (_min.X <= rect_max.X) && (_max.X >= rect_min.X) &&
+               (_min.Y <= rect_max.Y) && (_max.Y >= rect_min.Y);
+        }
+
+        private double FindSeparation(Rect rect)
+        {
             // SAT method
             double separation = double.MinValue;
 
@@ -132,15 +163,18 @@ namespace WpfApp1
                     minSep = Math.Min(minSep, (vertexB - vertexA) * normal);
                 }
 
-                separation = Math.Min(separation, minSep);
+                if (minSep > separation)
+                {
+                    separation = minSep;
+                }
             }
 
-            return separation <= 0;
+            return separation;
         }
 
         public static Vector PendicularVector(Vector v)
         {
-            return new Vector(v.Y, -v.X);
+            return new Vector(-v.Y, v.X);
         }
 
         public bool IsOverlaping(Vector point)
@@ -156,7 +190,28 @@ namespace WpfApp1
                 separation = Math.Min(separation, minSep);
             }
 
-            return separation <= 0;
+            return !(Area > 0) && separation <= 0;
+        }
+
+        public Rect GetOverlap(Rect rect)
+        {
+            var _min = _vertices[TopLeftIndex];
+            var rect_min = rect._vertices[TopLeftIndex];
+            var _max = _vertices[BottomRightIndex];
+            var rect_max = rect._vertices[BottomRightIndex];
+
+
+
+            Vector minVector = new Vector();
+            Vector maxVector = new Vector();
+
+            minVector.X = Math.Max(_min.X, rect_min.X);
+            maxVector.X = Math.Min(_max.X, rect_max.X);
+
+            minVector.Y = Math.Max(_min.Y, rect_min.Y);
+            maxVector.Y = Math.Min(_max.Y, rect_max.Y);
+
+            return new Rect(minVector, maxVector);
         }
 
         public override bool Equals(object obj)

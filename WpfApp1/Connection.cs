@@ -14,45 +14,26 @@ namespace WpfApp1
     {
         public JointType JointA;
         public JointType JointB;
-        public Line DrawLine;
 
         public Connection(JointType a, JointType b)
         {
             JointA = a;
             JointB = b;
-            DrawLine = new Line();
-            DrawLine.Stroke = new SolidColorBrush(Color.FromArgb(255, 27, 58, 65));
         }
 
-        public void AttachToCanvas(Canvas canvas)
-        {
-            canvas.Children.Add(DrawLine);
-        }
-
-        public void DrawConnection(Dictionary<JointType, DebugJoint> joints, FrameworkElement canvas)
+        public void DrawConnection(Dictionary<JointType, DebugJoint> joints)
         {
             var x = joints[JointA].PosX;
             var y = joints[JointA].PosY;
 
-            DrawLine.X1 = x * canvas.Width;
-            DrawLine.Y1 = y * canvas.Height;
+            var x2 = joints[JointB].PosX;
+            var y2 = joints[JointB].PosY;
 
-            x = joints[JointB].PosX;
-            y = joints[JointB].PosY;
-
-            DrawLine.X2 = x * canvas.Width;
-            DrawLine.Y2 = y * canvas.Height;
-            DrawLine.Stroke = new SolidColorBrush(Color.FromArgb(255, 27, 58, 65));
-            DrawLine.StrokeThickness = 2;
+            SDLRendering.DrawLine(new Vector(x, y), new Vector(x2, y2), Color.FromRgb(0, 0, 0));
         }
 
         public void ClearConnectionLine()
         {
-            DrawLine.X1 = 0;
-            DrawLine.Y1 = 0;
-
-            DrawLine.X2 = 0;
-            DrawLine.Y2 = 0;
         }
 
         public override string ToString()
