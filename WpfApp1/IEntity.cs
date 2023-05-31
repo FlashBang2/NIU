@@ -42,6 +42,8 @@ namespace WpfApp1
 
         bool IsActive { get; set; }
 
+        void SetActive(bool active);
+
         void Destroy();
         IEntity FindChild(string name);
 

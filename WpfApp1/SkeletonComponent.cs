@@ -1,6 +1,10 @@
-﻿using Microsoft.Kinect;
+﻿using ConsoleApp1;
+using Microsoft.Kinect;
 using SDL2;
+using System;
 using System.Linq;
+using System.Threading;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -18,7 +22,10 @@ namespace WpfApp1
         private Skeleton user = null;
         private DebugSkeleton skeleton;
         private bool IsKinnectAvailable = false;
-        private SkeletonComponentState _state = SkeletonComponentState.CalibrateX;
+        private SkeletonComponentState _state = SkeletonComponentState.GameRunning;
+
+
+        public bool ShouldDrawDebugBounds = true;
 
         public override void Spawned()
         {
@@ -47,6 +54,17 @@ namespace WpfApp1
 
             Owner.PosX = x;
             Owner.PosY = y;
+            Owner.Width = skeleton.Bounds.Width;
+            Owner.Height = skeleton.Bounds.Height;
+#if false
+            SDLTimer timer = new SDLTimer(2, false);
+            timer.TimeElapsed += () =>
+            {
+                _state = SkeletonComponentState.CalibrateY;
+                SDLTimer t = new SDLTimer(2, false);
+                t.TimeElapsed += () => { _state = SkeletonComponentState.GameRunning; };
+            };
+#endif
         }
 
         private void StartupCalibration()
@@ -97,6 +115,10 @@ namespace WpfApp1
             }
         }
 
+        private bool _once = false;
+
+        float totalOffset = 0;
+
         public override void ReceiveRender()
         {
             base.ReceiveRender();
@@ -105,7 +127,7 @@ namespace WpfApp1
 
             SDL.SDL_GetMouseState(out x, out y);
 
-            if (!Owner.GetComponent<CollisionComponent>().IsOverlaping)
+            if (!Owner.GetComponent<CollisionComponent>().IsOverlaping && _state != SkeletonComponentState.GameRunning)
             {
                 Owner.PosX = x;
                 Owner.PosY = y;
@@ -123,10 +145,34 @@ namespace WpfApp1
                     break;
                 case SkeletonComponentState.GameRunning:
                     skeleton.RenderEachJoint();
+
+                    if (!_once)
+                    {
+                        Owner.PosX = skeleton.Bounds.Left;
+                        Owner.PosY = skeleton.Bounds.Top;
+                        _once = true;
+                    }
+                    Owner.Width = skeleton.Bounds.Width;
+                    Owner.Height = skeleton.Bounds.Height;
+
                     break;
             }
 
+            skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
 
+            if (ShouldDrawDebugBounds)
+            {
+                SDLRendering.DrawRect((int)Owner.PosX, (int)Owner.PosY, (int)Owner.Width, (int)Owner.Height, Color.FromRgb(255, 0, 0));
+            }
+
+            if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_d))
+            {
+                Owner.AddWorldOffset(2, 0);
+                totalOffset += 2;
+                skeleton.offset = new Vector(totalOffset, Owner.PosY -Owner.Height / 6);
+            }
+
+            SDLRendering.SetCameraFollow(Owner);
         }
     }
 }

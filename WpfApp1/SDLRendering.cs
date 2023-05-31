@@ -21,11 +21,16 @@ namespace WpfApp1
         private static IDictionary<string, IntPtr> _fonts = new Dictionary<string, IntPtr>();
         private static IDictionary<string, IntPtr> _textures = new Dictionary<string, IntPtr>();
 
+        // TODO GetWindowDimensions
         private static List<IRenderable> _renderables = new List<IRenderable>();
 
+        private static Vector _cameraCenter = new Vector();
+        private static int _screenWidth = 0;   
+        private static int _screenHeight = 0;   
         public static void Init(IntPtr renderer)
         {
             _renderer = renderer;
+            SDL_GetRendererOutputSize(renderer, out _screenWidth, out _screenHeight);
         }
 
         public static void Quit()
@@ -116,6 +121,9 @@ namespace WpfApp1
             d = radius - 1;
             status = 0;
 
+            x = x - (int)_cameraCenter.X;
+            y = y - (int)_cameraCenter.Y;
+
             SDL_SetRenderDrawColor(_renderer, color.R, color.G, color.B, color.A);
 
             while (offsety >= offsetx)
@@ -161,6 +169,8 @@ namespace WpfApp1
             int offsetx, offsety, d;
             int status;
 
+            x = x - (int)_cameraCenter.X;
+            y = y - (int)_cameraCenter.Y;
 
             offsetx = 0;
             offsety = radius;
@@ -212,8 +222,8 @@ namespace WpfApp1
         {
             SDL_SetRenderDrawColor(_renderer, color.R, color.G, color.B, color.A);
             SDL_Rect r = new SDL_Rect();
-            r.x = x;
-            r.y = y;
+            r.x = x - (int)_cameraCenter.X;
+            r.y = y - (int)_cameraCenter.Y;
             r.w = w;
             r.h = h;
 
@@ -224,8 +234,8 @@ namespace WpfApp1
         {
             SDL_SetRenderDrawColor(_renderer, color.R, color.G, color.B, color.A);
             SDL_Rect r = new SDL_Rect();
-            r.x = x;
-            r.y = y;
+            r.x = x - (int)_cameraCenter.X;
+            r.y = y - (int)_cameraCenter.Y;
             r.w = w;
             r.h = h;
 
@@ -240,6 +250,9 @@ namespace WpfApp1
             SDL_Point p = new SDL_Point();
             p.x = p.y = 0;
 
+            spriteRect.x = spriteRect.x - (int)_cameraCenter.X;
+            spriteRect.y = spriteRect.y - (int)_cameraCenter.Y;
+
             SDL_RenderCopyEx(_renderer, texture, ref src, ref spriteRect, angle, ref p, SDL_RendererFlip.SDL_FLIP_NONE);
         }
 
@@ -250,6 +263,8 @@ namespace WpfApp1
             SDL_Point p = new SDL_Point();
             p.x = p.y = 0;
 
+            spriteRect.x = spriteRect.x - (int)_cameraCenter.X;
+            spriteRect.y = spriteRect.y - (int)_cameraCenter.Y;
             SDL_RenderCopyEx(_renderer, texture, ref src, ref spriteRect, angle, ref p, SDL_RendererFlip.SDL_FLIP_NONE);
         }
 
@@ -261,6 +276,9 @@ namespace WpfApp1
             p.x = (int)center.X;
             p.y = (int)center.Y;
 
+            spriteRect.x = spriteRect.x - (int)_cameraCenter.X;
+            spriteRect.y = spriteRect.y - (int)_cameraCenter.Y;
+
             SDL_RenderCopyEx(_renderer, texture, ref src, ref spriteRect, angle, ref p, SDL_RendererFlip.SDL_FLIP_NONE);
         }
 
@@ -270,7 +288,7 @@ namespace WpfApp1
 
             TTF_SizeText(_fonts[fontId], text, out int w, out int h);
 
-            DrawSprite(texture, new Rect(posX, posY, w, h), Rect.Unlimited, 0);
+            DrawSprite(texture, new Rect(posX - _cameraCenter.X, posY - _cameraCenter.Y, w, h), Rect.Unlimited, 0);
         }
 
         public static void DrawTextOnCenterPivot(string text, string fontId, double posX, double posY, Color color)
@@ -279,7 +297,7 @@ namespace WpfApp1
 
             TTF_SizeText(_fonts[fontId], text, out int w, out int h);
 
-            DrawSprite(texture, Rect.FromOriginAndExtend(new Vector(posX, posY), new Vector(w, h)), Rect.Unlimited, 0);
+            DrawSprite(texture, Rect.FromOriginAndExtend(new Vector(posX - _cameraCenter.X, posY - _cameraCenter.Y), new Vector(w, h)), Rect.Unlimited, 0);
         }
 
         public static Vector GetTextSize(string text, string fontId)
@@ -290,13 +308,13 @@ namespace WpfApp1
         public static void DrawLine(Vector start, Vector end, Color color)
         {
             SDL_SetRenderDrawColor(_renderer, color.R, color.G, color.B, color.A);
-            SDL_RenderDrawLine(_renderer, (int)start.X, (int)start.Y, (int)end.X, (int)end.Y);
+            SDL_RenderDrawLine(_renderer, (int)start.X - (int)_cameraCenter.X, (int)start.Y - (int)_cameraCenter.Y, (int)end.X - (int)_cameraCenter.X, (int)end.Y - (int)_cameraCenter.Y);
         }
 
         public static void DrawPoint(Vector point, Color color)
         {
             SDL_SetRenderDrawColor(_renderer, color.R, color.G, color.B, color.A);
-            SDL_RenderDrawPoint(_renderer, (int)point.X, (int)point.Y);
+            SDL_RenderDrawPoint(_renderer, (int)point.X - (int)_cameraCenter.X, (int)point.Y - (int)_cameraCenter.Y);
         }
 
         public static void AddTexture(IntPtr texture, string id)
@@ -390,6 +408,36 @@ namespace WpfApp1
         private static void SortByZIndex(int index)
         {
             _renderables.Sort((a, b) => a.ZIndex - b.ZIndex);
+        }
+
+        public static void SetCameraFollow(IEntity entity)
+        {
+            SDL_Rect rect = new SDL_Rect();
+            SDL_RenderGetViewport(_renderer, out rect);
+            _cameraCenter.X = entity.PosX + entity.Bounds.Width / 2 - _screenWidth / 2;
+            _cameraCenter.Y = entity.PosY + entity.Bounds.Height / 2 - 100 - _screenHeight / 2;
+            
+            if (_cameraCenter.X  < 0)
+            {
+                _cameraCenter.X = 0;
+            }
+
+            if (_cameraCenter.Y < 0)
+            {
+                _cameraCenter.Y = 0;
+            }
+
+            if (_cameraCenter.X > 2 * _screenWidth - rect.w)
+            {
+                _cameraCenter.X = 2 * _screenWidth - rect.w;
+            }
+
+            if (_cameraCenter.Y > 2 * _screenHeight - rect.h)
+            {
+                _cameraCenter.Y = 2 * _screenHeight - rect.h;
+                Entity.RootEntity.FindChild("Skeleton").SetActive(false);
+            }
+            _cameraCenter.Y = 0;
         }
     }
 }

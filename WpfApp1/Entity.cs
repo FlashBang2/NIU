@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -124,10 +125,34 @@ namespace WpfApp1
         public Vector Up => new Vector(-Math.Sin(_angle / 180.0 * Math.PI), Math.Cos(_angle / 180.0 * Math.PI));
         public Vector Down => -Up;
 
-        public bool IsActive { get => _active; set => _active = value; }
+        public bool IsActive { get => _active; set => SetActive(value); }
 
         public Rect Bounds { get => new Rect(_posX, _posY, Width, Height); }
 
+        public void SetActive(bool active)
+        {
+            if (_active)
+            {
+                if (_active != active)
+                {
+                    foreach (var component in _components)
+                    {
+                        component.Deactivated();
+                    }
+                }
+            }
+            else
+            {
+                if (_active != active)
+                {
+                    foreach (var component in _components)
+                    {
+                        component.Activated();
+                    }
+                }
+            }
+            _active = active;
+        }
         public void AddComponent<T>() where T : Component
         {
             ConstructorInfo info = typeof(T).GetConstructors().Where(constructor => constructor.GetParameters().Length == 0).FirstOrDefault();
@@ -222,6 +247,11 @@ namespace WpfApp1
 
         public void ReceiveRender()
         {
+            if (!_active)
+            {
+                return;
+            }
+
             foreach (var component in _components)
             {
                 component.ReceiveRender();
@@ -254,6 +284,11 @@ namespace WpfApp1
 
         public virtual void Tick(double dt)
         {
+            if (!_active)
+            {
+                return;
+            }
+
             foreach (var component in _components)
             {
                 component.OnTick((float)dt);

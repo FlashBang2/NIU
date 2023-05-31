@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -168,14 +169,28 @@ namespace WpfApp1
             }
         }
 
+        public static bool GetKey(SDL_Keycode _keycode)
+        {
+            int arraySize;
+            bool isKeyPressed = false;
+            IntPtr origArray = SDL_GetKeyboardState(out arraySize);
+            byte[] keys = new byte[arraySize];
+            byte keycode = (byte)SDL_GetScancodeFromKey(_keycode);
+            Marshal.Copy(origArray, keys, 0, arraySize);
+            isKeyPressed = keys[keycode] == 1;
+            return isKeyPressed;
+        }
+
         public static void Main(string[] args)
         {
             SDLApp app = new SDLApp(960, 540, "NIU");
 
             Entity e = Entity.CreateEntity("Skeleton");
             Entity e2 = Entity.CreateEntity("FF");
-            e.AddComponent<CollisionComponent>();
             e.AddComponent<SkeletonComponent>();
+            e.AddComponent<CharacterMovementComponent>();
+            e.GetComponent<CharacterMovementComponent>().IsControlledByPlayer = true;
+            e.AddComponent<CollisionComponent>();
             e.GetComponent<CollisionComponent>().IsStatic = false;
 
             e2.AddComponent<RectRenderable>();

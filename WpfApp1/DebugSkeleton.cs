@@ -74,6 +74,7 @@ namespace WpfApp1
 
         private Vector _velocity = new Vector();
 
+        public Vector offset = new Vector();
         private bool _shouldApplyGravity = true;
         private double _gravityScale = 1;
 
@@ -142,6 +143,8 @@ namespace WpfApp1
 
                 lineNo++;
             }
+
+            this.FindSkeletonBounds();
         }
 
         public Vector this[JointType type]
@@ -198,7 +201,7 @@ namespace WpfApp1
                 CalculateScaledBounds(Scale, joint);
 
                 DebugJoint j = joint.Value;
-                j.DrawDebugJoint(_tempJointLocations[joint.Key], Scale * JointSize, boneColor);
+                j.DrawDebugJoint(_tempJointLocations[joint.Key], Scale * JointSize, offset, boneColor);
             }
 
             FindSkeletonBounds();
@@ -305,7 +308,7 @@ namespace WpfApp1
             foreach (var joint in _joints)
             {
                 joint.Value.AddOffset(new Vector(0, offset.Y));
-                joint.Value.DrawDebugJoint(_tempJointLocations[joint.Key], JointSize, Color.FromRgb(0, 0, 0));
+                joint.Value.DrawDebugJoint(_tempJointLocations[joint.Key], JointSize, this.offset, Color.FromRgb(0, 0, 0));
             }
 
             FindSkeletonBounds();

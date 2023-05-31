@@ -12,6 +12,8 @@ namespace WpfApp1
         public bool IsStatic = true;
         public bool IsOverlaping = false;
 
+        public float AccumulatedY = 0;
+
         public override void Spawned()
         {
             base.Spawned();
@@ -45,9 +47,9 @@ namespace WpfApp1
 
                         if (Math.Abs(rect.Width) < Math.Abs(rect.Height))
                         {
-                            if (!IsStatic && rect.Height > 0.01)
+                            if (!IsStatic && rect.Width > 0.01)
                             {
-                                Owner.AddWorldOffset(-rect.Width, 0);
+                                Owner.AddWorldOffset(-rect.Width - Math.Sign(rect.Width) * 0.01f, 0);
 
                                 IsOverlaping = true;
                             }
@@ -56,7 +58,8 @@ namespace WpfApp1
                         {
                             if (!IsStatic && rect.Height > 0.01)
                             {
-                                Owner.AddWorldOffset(0, -rect.Height - Math.Sign(rect.Height) * 0.01);
+                                AccumulatedY = (float)-rect.Height - Math.Sign(rect.Height) * 0.01f;
+                                Owner.AddWorldOffset(0, AccumulatedY);
                                 IsOverlaping = true;   
                             }
                         }
