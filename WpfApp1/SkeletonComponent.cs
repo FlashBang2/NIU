@@ -170,7 +170,7 @@ namespace WpfApp1
                     Owner.GetComponent<CharacterMovementComponent>().Velocity = new Vector(Owner.GetComponent<CharacterMovementComponent>().Velocity.X, -15);
                 }
             }
-            else
+            else if (State == SkeletonComponentState.GameRunning)
             {
                 var actionType = FindActionType();
 

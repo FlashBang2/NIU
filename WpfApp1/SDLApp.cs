@@ -140,6 +140,14 @@ namespace WpfApp1
             {
                 base.ReceiveRender();
 
+
+                var e = Entity.RootEntity.FindChild("Skeleton");
+
+                if (e.GetComponent<SkeletonComponent>().State != SkeletonComponentState.GameRunning)
+                {
+                    return;
+                }
+
                 SDLRendering.FillRect((int)Owner.PosX, (int)Owner.PosY, (int)Owner.Width, (int)Owner.Height, blockColor);
             }
         }
@@ -170,6 +178,12 @@ namespace WpfApp1
             {
                 base.ReceiveRender();
 
+                var e = Entity.RootEntity.FindChild("Skeleton");
+
+                if (e.GetComponent<SkeletonComponent>().State != SkeletonComponentState.GameRunning)
+                {
+                    return;
+                }
                 SDLRendering.FillCircle((int)Owner.PosX, (int)Owner.PosY, (int)(Owner.Width / 2), blockColor);
             }
         }
@@ -214,9 +228,6 @@ namespace WpfApp1
             e3.GetComponent<CollisionComponent>().StopOverlaping += evt => Console.WriteLine("Stop overlaping " + evt.LastContact.Name);
             
             e3.GetComponent<RectRenderable>().blockColor = Color.FromRgb(0, 100, 150);
-
-            SDLTimer timer = new SDLTimer(3, true);
-            timer.Tick += () => Console.WriteLine("CC");
 
             app.Run();
         }
