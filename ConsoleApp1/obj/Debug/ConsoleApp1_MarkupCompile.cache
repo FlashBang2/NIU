@@ -4,7 +4,7 @@
 exe
 C#
 .cs
-D:\Projects\C#\NIU\ConsoleApp1\obj\Debug\
+C:\Users\pawel\Documents\GitHub\NIU\ConsoleApp1\obj\Debug\
 ConsoleApp1
 none
 false
@@ -12,9 +12,9 @@ DEBUG;TRACE
 
 11417238737
 
-101274048182
+92116407549
 14-904181667
 Window.xaml;
 
-True
+False
 

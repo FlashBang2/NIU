@@ -62,6 +62,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="SpriteAnim\AnimationData.cs" />
+    <Compile Include="SpriteAnim\AnimationDataCache.cs" />
+    <Compile Include="SpriteAnim\AnimationType.cs" />
     <Compile Include="CharacterMovementComponent.cs" />
     <Compile Include="CollisionComponent.cs" />
     <Compile Include="Component.cs" />
