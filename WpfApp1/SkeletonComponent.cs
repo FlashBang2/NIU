@@ -130,14 +130,13 @@ namespace WpfApp1
             switch (State)
             {
                 case SkeletonComponentState.CalibrateY:
-                    SDLRendering.DrawTextOnCenterPivot("Podnieś ręce", "arial-32", SDLApp.GetInstance().GetAppWidth() / 2, SDLApp.GetInstance().GetAppHeight() / 2, Color.FromRgb(0, 0, 0));
+                    SDLRendering.DrawTextOnCenterPivot("Podnies rece", "arial-32", SDLApp.GetInstance().GetAppWidth() / 2, SDLApp.GetInstance().GetAppHeight() / 2, Color.FromRgb(0, 0, 0));
                     break;
                 case SkeletonComponentState.CalibrateX:
-                    SDLRendering.DrawTextOnCenterPivot("Rozłóż Ręce", "arial-32", SDLApp.GetInstance().GetAppWidth() / 2, SDLApp.GetInstance().GetAppHeight() / 2, Color.FromRgb(0, 0, 0));
+                    SDLRendering.DrawTextOnCenterPivot("Rozloz Rece", "arial-32", SDLApp.GetInstance().GetAppWidth() / 2, SDLApp.GetInstance().GetAppHeight() / 2, Color.FromRgb(0, 0, 0));
                     break;
                 case SkeletonComponentState.GameRunning:
                     skeleton.RenderEachJoint();
-
                     break;
             }
 
