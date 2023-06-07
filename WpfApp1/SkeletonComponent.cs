@@ -17,14 +17,14 @@ namespace WpfApp1
         GameRunning
     }
 
-    public class SkeletonComponent : Component
+    public class SkeletonComponent : Component, IRenderable
     {
         private Skeleton user = null;
         private DebugSkeleton skeleton;
         private bool IsKinnectAvailable = false;
         public SkeletonComponentState State = SkeletonComponentState.CalibrateX;
 
-
+        public static bool IsPostCalibrationStage = false;
         public bool ShouldDrawDebugBounds = true;
 
         public override void Spawned()
@@ -44,23 +44,28 @@ namespace WpfApp1
 
                 skeleton.EndOfXCalibration();
                 skeleton.EndOfYCalibration();
+
+                IsPostCalibrationStage = true;
             }
             else
             {
                 State = SkeletonComponentState.CalibrateX;
 
+                Console.WriteLine("Starting calibrating X");
+
                 SDLTimer timer = new SDLTimer(5, false);
                 timer.TimeElapsed += () =>
                 {
                     skeleton.EndOfXCalibration();
+                    Console.WriteLine("Starting calibrating Y");
 
                     State = SkeletonComponentState.CalibrateY;
                     SDLTimer t = new SDLTimer(5, false);
-                    t.TimeElapsed += () => { skeleton.EndOfYCalibration(); State = SkeletonComponentState.GameRunning; };
+                    t.TimeElapsed += () => { skeleton.EndOfYCalibration(); Console.WriteLine("Starting game..."); IsPostCalibrationStage = true; State = SkeletonComponentState.GameRunning; };
                 };
             }
 
-            SDLRendering.LoadFont("arial.ttf", 16, "arial-32");
+            SDLRendering.LoadFont("arial.ttf", 32, "arial-32");
             SDLRendering.GetTextTexture("Podnieś ręce", "arial-32", Color.FromRgb(0, 0, 0));
             Owner.Width = SDLRendering.GetTextSize("Podnieś ręce", "arial-32").X;
             Owner.Height = SDLRendering.GetTextSize("Podnieś ręce", "arial-32").Y;
@@ -112,6 +117,11 @@ namespace WpfApp1
         private bool _once = false;
 
         float totalOffset = 0;
+
+        public bool ShouldDraw => IsPostCalibrationStage;
+
+        public double RotationAngle { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Rect SourceTextureBounds { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public override void ReceiveRender()
         {

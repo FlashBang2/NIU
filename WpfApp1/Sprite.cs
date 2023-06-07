@@ -8,7 +8,7 @@ namespace WpfApp1
         {
             public double RotationAngle { get => 0; set => throw new NotImplementedException(); }
 
-            bool IRenderable.ShouldDraw => true;
+            bool IRenderable.ShouldDraw => SkeletonComponent.IsPostCalibrationStage;
 
             Rect IRenderable.SourceTextureBounds { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 

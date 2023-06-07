@@ -250,7 +250,15 @@ namespace WpfApp1
 
             foreach (var component in _components)
             {
-                component.ReceiveRender();
+                if (component is IRenderable)
+                {
+                    IRenderable renderable = (IRenderable)component;
+
+                    if (renderable.ShouldDraw)
+                    {
+                        component.ReceiveRender();
+                    }
+                }
             }
 
             foreach (var child in _children)
