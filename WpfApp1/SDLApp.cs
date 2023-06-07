@@ -284,7 +284,7 @@ namespace WpfApp1
             thirdPlatform.Width = 3072;
             thirdPlatform.Height = 96;
 
-            thirdPlatform.PosX = secondPlatform.PosX + secondPlatform.Width + 96;
+            thirdPlatform.PosX = secondPlatform.PosX + secondPlatform.Width + 144;
             thirdPlatform.PosY = firstPlatform.PosY;
 
             Entity fourthPlatform = Entity.CreateEntity("fourth_platform");
