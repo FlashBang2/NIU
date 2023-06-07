@@ -213,13 +213,18 @@ namespace WpfApp1
         {
             SDLApp app = new SDLApp(1920, 1080, "NIU");
 
+            
+            LoadTextures();
+
+            AddPlatforms(app);
+
             Entity skeleton = Entity.CreateEntity("Skeleton");
             skeleton.AddComponent<SkeletonComponent>();
             skeleton.AddComponent<CharacterMovementComponent>();
             skeleton.GetComponent<CharacterMovementComponent>().IsControlledByPlayer = true;
             skeleton.AddComponent<CollisionComponent>();
             skeleton.AddComponent<Sprite>();
-            skeleton.GetComponent<Sprite>().spriteId = "mario_big"; 
+            skeleton.GetComponent<Sprite>().spriteId = "mario_big";
             skeleton.GetComponent<CollisionComponent>().IsStatic = false;
             skeleton.Width = 48;
             skeleton.Height = 96;
@@ -233,10 +238,6 @@ namespace WpfApp1
 
             skeleton.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, data);
             skeleton.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-
-            LoadTextures();
-
-            AddPlatforms(app);
 
             app.Run();
         }
