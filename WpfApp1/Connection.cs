@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Shapes;
-using System.Windows.Threading;
 using Microsoft.Kinect;
-using System.Windows.Controls;
 
 namespace WpfApp1
 {

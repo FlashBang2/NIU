@@ -11,7 +11,7 @@ namespace WpfApp1
     public class CharacterMovementComponent : Component
     {
         public Vector Velocity = new Vector();
-        public float GravityScale = 0.1f;
+        public float GravityScale = 6.0f;
         public bool IsControlledByPlayer = false;
 
         public float AccumulatedY = 0;
@@ -22,10 +22,10 @@ namespace WpfApp1
         {
             base.OnTick(dt);
 
-            ApplyMovement();
+            ApplyMovement(dt);
         }
 
-        private void ApplyMovement()
+        private void ApplyMovement(float dt)
         {
             if (Owner.HasComponent<SkeletonComponent>())
             {
@@ -36,15 +36,15 @@ namespace WpfApp1
             }
 
             Owner.AddWorldOffset(Velocity.X, Velocity.Y);
-            Velocity.Y += 9.81 * GravityScale;
+            Velocity.Y += 9.81 * GravityScale * dt;
             CollisionComponent collision = Owner.GetComponent<CollisionComponent>();
             collision.TestCollision();
 
-            AccumulatedY += (float)Velocity.Y;
+            AccumulatedY += (float)Velocity.Y * dt;
 
             if (collision.IsOverlaping)
             {
-                AccumulatedY -= (float)Velocity.Y;
+                AccumulatedY -= (float)Velocity.Y * dt;
                 Velocity.Y = 0;
             }
 
@@ -55,9 +55,7 @@ namespace WpfApp1
             };
 
             ray.Init(new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height), new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height) + 10 * Owner.Down);
-            CollisionComponent.OverlapEvent overlap;
-            IsFalling = !CollisionComponent.RayCast(ray, ignore, out overlap);
-            SDLRendering.DrawLine(ray.Start, overlap.ContactPoint, Color.FromRgb(20, 80, 123));
+            IsFalling = !CollisionComponent.RayCast(ray, ignore, out _);
         }
 
         public override void Deactivated()

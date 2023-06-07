@@ -276,8 +276,8 @@ namespace WpfApp1
             p.x = (int)center.X;
             p.y = (int)center.Y;
 
-            spriteRect.x = spriteRect.x - (int)_cameraCenter.X;
-            spriteRect.y = spriteRect.y - (int)_cameraCenter.Y;
+            spriteRect.x -= (int)_cameraCenter.X;
+            spriteRect.y -= (int)_cameraCenter.Y;
 
             SDL_RenderCopyEx(_renderer, texture, ref src, ref spriteRect, angle, ref p, SDL_RendererFlip.SDL_FLIP_NONE);
         }
@@ -346,7 +346,7 @@ namespace WpfApp1
 
         public static void ClearFrame()
         {
-            SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 255);
+            SDL_SetRenderDrawColor(_renderer, 142, 140, 237, 255);
             SDL_RenderClear(_renderer);
         }
 
@@ -360,31 +360,6 @@ namespace WpfApp1
 
         private static void ChooseRenderMethod(IRenderable renderable)
         {
-            switch (renderable.RenderingMode)
-            {
-                case RenderMode.Sprite:
-                    Debug.Assert(!string.IsNullOrEmpty(renderable.SpriteTextureId));
-                    DrawSprite(renderable.SpriteTextureId, renderable.Bounds, renderable.SourceTextureBounds, renderable.RotationAngle);
-                    break;
-                case RenderMode.Rect:
-                    DrawRect((int)renderable.PosX, (int)renderable.PosY, (int)renderable.Bounds.Width, (int)renderable.Bounds.Height, renderable.ProxyShapeColor);
-                    break;
-                case RenderMode.Circle:
-                    DrawCircle((int)renderable.PosX, (int)renderable.PosY, (int)renderable.CircleRadius, renderable.ProxyShapeColor);
-                    break;
-                case RenderMode.Line:
-                    DrawLine(new Vector(renderable.Bounds.Left, renderable.Bounds.Top), new Vector(renderable.Bounds.Right, renderable.Bounds.Down), renderable.ProxyShapeColor);
-                    break;
-                case RenderMode.Point:
-                    DrawPoint(new Vector(renderable.PosX, renderable.PosY), renderable.ProxyShapeColor);
-                    break;
-                case RenderMode.FilledRect:
-                    FillRect((int)renderable.PosX, (int)renderable.PosY, (int)renderable.Bounds.Width, (int)renderable.Bounds.Height, renderable.ProxyShapeColor);
-                    break;
-                case RenderMode.FilledCircle:
-                    FillCircle((int)renderable.PosX, (int)renderable.PosY, (int)renderable.CircleRadius, renderable.ProxyShapeColor);
-                    break;
-            }
         }
 
         public static void AddRenderable(IRenderable renderable)
@@ -392,8 +367,6 @@ namespace WpfApp1
             Debug.Assert(renderable != null);
 
             _renderables.Add(renderable);
-            renderable.ZIndexChanged += SortByZIndex;
-            SortByZIndex(0);
         }
 
         public static void RemoveRenderable(IRenderable renderable)
@@ -401,13 +374,6 @@ namespace WpfApp1
             Debug.Assert(renderable != null);
 
             _renderables.Remove(renderable);
-            renderable.ZIndexChanged -= SortByZIndex;
-            SortByZIndex(0);
-        }
-
-        private static void SortByZIndex(int index)
-        {
-            _renderables.Sort((a, b) => a.ZIndex - b.ZIndex);
         }
 
         public static void SetCameraFollow(IEntity entity)

@@ -16,7 +16,7 @@ using static SDL2.SDL_ttf;
 
 namespace WpfApp1
 {
-    public class SDLApp
+    public partial class SDLApp
     {
         private IntPtr _window = IntPtr.Zero;
         private IntPtr _renderer = IntPtr.Zero;
@@ -84,13 +84,22 @@ namespace WpfApp1
         public void Run()
         {
             Debug.Assert(!_window.Equals(IntPtr.Zero));
+
+            uint lastTick = SDL_GetTicks();
+            float delta = 0.0f;
+
             while (_isOpen)
             {
                 while (SDL_PollEvent(out SDL_Event systemEvent) != 0)
                 {
                     OnSystemEventOccured(systemEvent);
                 }
-                Entity.RootEntity.Tick(0);
+
+                uint tick_time = SDL_GetTicks();
+                delta = tick_time - lastTick;
+                lastTick = tick_time;
+
+                Entity.RootEntity.Tick(delta / 1000.0f);
 
                 SDLRendering.ClearFrame();
                 Entity.RootEntity.ReceiveRender();
@@ -134,7 +143,7 @@ namespace WpfApp1
             }
 
 
-            public Color blockColor = Color.FromRgb(120, 40,30);
+            public Color blockColor = Color.FromRgb(120, 40, 30);
 
             public override void ReceiveRender()
             {
@@ -202,7 +211,7 @@ namespace WpfApp1
 
         public static void Main(string[] args)
         {
-            SDLApp app = new SDLApp(960, 540, "NIU");
+            SDLApp app = new SDLApp(1920, 1080, "NIU");
 
             Entity e = Entity.CreateEntity("Skeleton");
             Entity e2 = Entity.CreateEntity("FF");
@@ -213,21 +222,26 @@ namespace WpfApp1
             e.AddComponent<CollisionComponent>();
             e.GetComponent<CollisionComponent>().IsStatic = false;
 
-            e2.AddComponent<RectRenderable>();
-            e3.AddComponent<RectRenderable>();
+            e2.Width = 3312;
+            e2.Height = 96;
+            e2.PosX = 0;
+            e2.PosY = app.GetAppHeight() - 96;
+
+            e2.AddComponent<Sprite>();
             e3.Width = 40;
             e3.Height = 40;
 
             e3.PosX = 600;
-                e3.PosY = 540 - 80;
-            
+            e3.PosY = 540 - 80;
+
+            SDLRendering.LoadTexture("secondPlatform.png", "secondPlatform");
+            SDLRendering.LoadTexture("firstPlatform.png", "firstPlatform");
+
             e2.AddComponent<CollisionComponent>();
             e3.AddComponent<CollisionComponent>();
             e3.GetComponent<CollisionComponent>().IsTrigger = true;
             e3.GetComponent<CollisionComponent>().Overlaped += evt => Console.WriteLine(evt.LastContact.Name);
             e3.GetComponent<CollisionComponent>().StopOverlaping += evt => Console.WriteLine("Stop overlaping " + evt.LastContact.Name);
-            
-            e3.GetComponent<RectRenderable>().blockColor = Color.FromRgb(0, 100, 150);
 
             app.Run();
         }

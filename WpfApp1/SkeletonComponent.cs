@@ -32,10 +32,9 @@ namespace WpfApp1
             base.Spawned();
 
             skeleton = new DebugSkeleton();
+            skeleton.Scale = 1;
 
             StartKinect();
-
-            skeleton.Scale = 2;
 
             if (!IsKinnectAvailable)
             {
@@ -167,7 +166,7 @@ namespace WpfApp1
 
                 if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_SPACE) && !Owner.GetComponent<CharacterMovementComponent>().IsFalling)
                 {
-                    Owner.GetComponent<CharacterMovementComponent>().Velocity = new Vector(Owner.GetComponent<CharacterMovementComponent>().Velocity.X, -15);
+                    Owner.GetComponent<CharacterMovementComponent>().Velocity = new Vector(Owner.GetComponent<CharacterMovementComponent>().Velocity.X, -20);
                 }
             }
             else if (State == SkeletonComponentState.GameRunning)

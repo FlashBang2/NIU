@@ -66,16 +66,11 @@
     <Compile Include="CollisionComponent.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="Entity.cs" />
-    <Compile Include="ICollideable.cs" />
     <Compile Include="IEntity.cs" />
     <Compile Include="IRenderable.cs" />
-    <Compile Include="NullCollision.cs" />
-    <Compile Include="NullRenderable.cs" />
     <Compile Include="Ray.cs" />
     <Compile Include="SDLApp.cs" />
     <Compile Include="DebugSkeleton.cs" />
-    <Compile Include="IPhysicsBody.cs" />
-    <Compile Include="Physics.cs" />
     <Compile Include="SDL2-CS\LPUtf8StrMarshaler.cs" />
     <Compile Include="SDL2-CS\SDL2.cs" />
     <Compile Include="SDL2-CS\SDL2_image.cs" />
@@ -83,6 +78,7 @@
     <Compile Include="SDL2-CS\SDL2_ttf.cs" />
     <Compile Include="SDLRendering.cs" />
     <Compile Include="SkeletonComponent.cs" />
+    <Compile Include="Sprite.cs" />
     <Compile Include="Timer.cs" />
     <Compile Include="WpfPhysicsBody.cs" />
     <Compile Include="Rect.cs" />

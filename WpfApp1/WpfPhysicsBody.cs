@@ -3,7 +3,7 @@ using System.Windows;
 
 namespace WpfApp1
 {
-    public class WpfPhysicsBody : IPhysicsBody
+    public class WpfPhysicsBody 
     {
         public FrameworkElement UiElement { get => _uiElement; }
 
@@ -36,9 +36,7 @@ namespace WpfApp1
             get => _isStatic;
             set
             {
-                Physics.RemovePhysicsBody(this);
                 _isStatic = value;
-                Physics.AddPhysicsBody(this);
             }
         }
         public Vector Velocity { get => _velocity; set => _velocity = value; }
@@ -60,7 +58,6 @@ namespace WpfApp1
         {
             _uiElement = element;
             _isStatic = false;
-            Physics.AddPhysicsBody(this);
         }
 
         public void PhysicsUpdate()
@@ -70,12 +67,6 @@ namespace WpfApp1
                 Thickness location = _uiElement.Margin;
                 location.Left += _velocity.X;
                 location.Top += _velocity.Y;
-
-                IPhysicsBody hit;
-                if (Physics.IsCollidingWithAnyObject(this, out hit))
-                {
-                    location = UndoLastMove(location);
-                }
 
                 _lastMove = _velocity;
 
@@ -90,17 +81,6 @@ namespace WpfApp1
 
         private Thickness ApplyGravity(Thickness location)
         {
-            _lastMove = -new Vector(0, 1) * Physics.Gravity * GravityScale;
-            _velocity += _lastMove;
-            location.Top -= Physics.Gravity * GravityScale;
-
-            IPhysicsBody hit;
-            if (Physics.IsCollidingWithAnyObject(this, out hit))
-            {
-                location = UndoLastMove(location);
-                _velocity.Y = 0;
-            }
-
             return location;
         }
         
@@ -126,23 +106,11 @@ namespace WpfApp1
 
             if (!_isStatic)
             {
-                IPhysicsBody f;
-
-                if (Physics.IsCollidingWithAnyObject(this, out f))
-                {
-                    location = UndoLastMove(location);
-                }
-
                 _uiElement.Margin = location;
             }
 
             _uiElement.Margin = location;
             _lastMove = offset;
-        }
-
-        public bool IsOverlaping(IPhysicsBody other)
-        {
-            return Bounds.IsOverlaping(other.Bounds);
         }
 
         public override string ToString()

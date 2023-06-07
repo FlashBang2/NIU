@@ -48,8 +48,6 @@ namespace WpfApp1
             body = new WpfPhysicsBody(obstacle2);
             body.IsStatic = true;
 
-            Physics.OverlapedBody += overlap => Console.WriteLine(overlap.Trigger);
-
             if (!IsKinnectAvailable)
             {
                 skeleton.LoadTestSkeleton();
@@ -181,9 +179,6 @@ namespace WpfApp1
                     skeleton.Velocity = new Vector(-10, skeleton.Velocity.Y);
                     break;
             }
-
-
-            Physics.Update();
         }
 
         private ActionType FindActionType()

@@ -123,7 +123,7 @@ namespace WpfApp1
                 {
                     string[] pos = line.Split(';');
 
-                    pos = pos.Select(v => v.Replace(',', '.')).ToArray();
+                    //pos = pos.Select(v => v.Replace(',', '.')).ToArray();
 
                     double x = double.Parse(pos[0]);
                     double y = -double.Parse(pos[1]);
@@ -253,11 +253,6 @@ namespace WpfApp1
             }
         }
 
-        public bool IsOverlaping(IPhysicsBody other)
-        {
-            return _bounds.IsOverlaping(other.Bounds);
-        }
-
         private bool isInFloor = false;
 
         public void PhysicsUpdate()
@@ -291,16 +286,9 @@ namespace WpfApp1
             }
         }
 
-        private void UndoLastMove(MainWindow w)
-        {
-            MoveByOffsetEachChild(-_velocity);
-        }
-
         public void AddOffset(Vector offset)
         {
             MoveByOffsetEachChild(offset);
-
-            IPhysicsBody hit;
         }
 
         void MoveByOffsetEachChild(Vector offset)
