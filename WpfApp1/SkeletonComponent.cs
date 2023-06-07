@@ -65,7 +65,7 @@ namespace WpfApp1
                 };
             }
 
-            SDLRendering.LoadFont("arial.ttf", 32, "arial-32");
+            SDLRendering.LoadFont("arial.ttf", 96, "arial-32");
             SDLRendering.GetTextTexture("Podnieś ręce", "arial-32", Color.FromRgb(0, 0, 0));
             Owner.Width = SDLRendering.GetTextSize("Podnieś ręce", "arial-32").X;
             Owner.Height = SDLRendering.GetTextSize("Podnieś ręce", "arial-32").Y;
