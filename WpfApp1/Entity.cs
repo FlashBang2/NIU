@@ -312,7 +312,8 @@ namespace WpfApp1
 
         public bool HasComponent<T>()
         {
-            return GetComponent<T>() != null;
+            var x = (T)(object)_components.FindAll(v => typeof(T).IsInstanceOfType(v)).FirstOrDefault();
+            return x != null;
         }
 
         public void UndoLastTranslation()

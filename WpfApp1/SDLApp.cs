@@ -213,37 +213,104 @@ namespace WpfApp1
         {
             SDLApp app = new SDLApp(1920, 1080, "NIU");
 
-            Entity e = Entity.CreateEntity("Skeleton");
-            Entity e2 = Entity.CreateEntity("FF");
-            Entity e3 = Entity.CreateEntity("FF2");
-            e.AddComponent<SkeletonComponent>();
-            e.AddComponent<CharacterMovementComponent>();
-            e.GetComponent<CharacterMovementComponent>().IsControlledByPlayer = true;
-            e.AddComponent<CollisionComponent>();
-            e.GetComponent<CollisionComponent>().IsStatic = false;
+            Entity skeleton = Entity.CreateEntity("Skeleton");
+            skeleton.AddComponent<SkeletonComponent>();
+            skeleton.AddComponent<CharacterMovementComponent>();
+            skeleton.GetComponent<CharacterMovementComponent>().IsControlledByPlayer = true;
+            skeleton.AddComponent<CollisionComponent>();
+            skeleton.AddComponent<Sprite>();
+            skeleton.GetComponent<Sprite>().spriteId = "mario_big"; 
+            skeleton.GetComponent<CollisionComponent>().IsStatic = false;
+            skeleton.Width = 48;
+            skeleton.Height = 96;
 
-            e2.Width = 3312;
-            e2.Height = 96;
-            e2.PosX = 0;
-            e2.PosY = app.GetAppHeight() - 96;
+            AnimationData data = new AnimationData();
+            data.EndFrame = 7;
+            data.StartFrame = 0;
+            data.FrameRatePerSecond = 8;
+            data.Width = 48;
+            data.Height = 96;
 
-            e2.AddComponent<Sprite>();
-            e3.Width = 40;
-            e3.Height = 40;
+            skeleton.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, data);
+            skeleton.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
 
-            e3.PosX = 600;
-            e3.PosY = 540 - 80;
+            LoadTextures();
 
-            SDLRendering.LoadTexture("secondPlatform.png", "secondPlatform");
-            SDLRendering.LoadTexture("firstPlatform.png", "firstPlatform");
-
-            e2.AddComponent<CollisionComponent>();
-            e3.AddComponent<CollisionComponent>();
-            e3.GetComponent<CollisionComponent>().IsTrigger = true;
-            e3.GetComponent<CollisionComponent>().Overlaped += evt => Console.WriteLine(evt.LastContact.Name);
-            e3.GetComponent<CollisionComponent>().StopOverlaping += evt => Console.WriteLine("Stop overlaping " + evt.LastContact.Name);
+            AddPlatforms(app);
 
             app.Run();
+        }
+
+        private static void LoadTextures()
+        {
+            SDLRendering.LoadTexture("second_platform.png", "second_platform");
+            SDLRendering.LoadTexture("firstPlatform.png", "firstPlatform");
+            SDLRendering.LoadTexture("third_platform.png", "third_platform");
+            SDLRendering.LoadTexture("fourth_platform.png", "fourth_platform");
+            backgroundTexture = SDLRendering.LoadTexture("background_objects.png", "background_objects");
+            SDLRendering.LoadTexture("mario_big.png", "mario_big");
+        }
+
+        static IntPtr backgroundTexture = IntPtr.Zero;
+
+        private static void AddPlatforms(SDLApp app)
+        {
+            //32
+
+            Entity firstPlatform = Entity.CreateEntity("firstPlatform");
+            firstPlatform.Width = 3312;
+            firstPlatform.Height = 96;
+            firstPlatform.PosX = 0;
+            firstPlatform.PosY = app.GetAppHeight() - 96;
+            firstPlatform.AddComponent<Sprite>();
+            firstPlatform.AddComponent<CollisionComponent>();
+
+            Entity secondPlatform = Entity.CreateEntity("secondPlatform");
+            secondPlatform.AddComponent<CollisionComponent>();
+            secondPlatform.AddComponent<Sprite>();
+            secondPlatform.GetComponent<Sprite>().spriteId = "second_platform";
+
+            secondPlatform.Width = 720;
+            secondPlatform.Height = 96;
+
+            secondPlatform.PosX = firstPlatform.Width + firstPlatform.PosX + 96;
+            secondPlatform.PosY = firstPlatform.PosY;
+
+            Entity thirdPlatform = Entity.CreateEntity("third_platform");
+            thirdPlatform.AddComponent<CollisionComponent>();
+            thirdPlatform.AddComponent<Sprite>();
+            thirdPlatform.GetComponent<Sprite>().spriteId = "third_platform";
+
+            thirdPlatform.Width = 3072;
+            thirdPlatform.Height = 96;
+
+            thirdPlatform.PosX = secondPlatform.PosX + secondPlatform.Width + 96;
+            thirdPlatform.PosY = firstPlatform.PosY;
+
+            Entity fourthPlatform = Entity.CreateEntity("fourth_platform");
+            fourthPlatform.AddComponent<CollisionComponent>();
+            fourthPlatform.AddComponent<Sprite>();
+            fourthPlatform.GetComponent<Sprite>().spriteId = "fourth_platform";
+
+            fourthPlatform.Width = 3216;
+            fourthPlatform.Height = 96;
+
+            fourthPlatform.PosX = thirdPlatform.PosX + thirdPlatform.Width + 96;
+            fourthPlatform.PosY = firstPlatform.PosY;
+
+            Entity background = Entity.CreateEntity("background");
+            background.AddComponent<Sprite>();
+            background.GetComponent<Sprite>().spriteId = "background_objects";
+
+            uint format;
+            int a, w, h;
+
+            h = 982;
+            SDL_QueryTexture(backgroundTexture, out format, out a, out w, out h);
+            background.Width = w;
+            background.Height = 982;
+
+            SDLRendering.SetWorldBounds(w, h);
         }
     }
 }

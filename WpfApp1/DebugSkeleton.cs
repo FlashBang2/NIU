@@ -92,6 +92,8 @@ namespace WpfApp1
                 _jointLocations[x] = new Vector();
                 _tempJointLocations[x] = new Vector();
             }
+
+            IsVisible = false;
         }
 
         private void AddJoints()

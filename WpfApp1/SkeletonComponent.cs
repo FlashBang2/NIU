@@ -25,7 +25,7 @@ namespace WpfApp1
         public SkeletonComponentState State = SkeletonComponentState.CalibrateX;
 
         public static bool IsPostCalibrationStage = false;
-        public bool ShouldDrawDebugBounds = true;
+        public bool ShouldDrawDebugBounds = false;
 
         public override void Spawned()
         {
@@ -138,15 +138,6 @@ namespace WpfApp1
                 case SkeletonComponentState.GameRunning:
                     skeleton.RenderEachJoint();
 
-                    if (!_once)
-                    {
-                        Owner.PosX = skeleton.Bounds.Left;
-                        Owner.PosY = skeleton.Bounds.Top;
-                        _once = true;
-                    }
-                    Owner.Width = skeleton.Bounds.Width;
-                    Owner.Height = skeleton.Bounds.Height;
-
                     break;
             }
 
@@ -162,7 +153,7 @@ namespace WpfApp1
 
                 if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_d))
                 {
-                    Owner.AddWorldOffset(2, 0);
+                    Owner.AddWorldOffset(20, 0);
                     totalOffset += 2;
                     skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
                 }

@@ -15,18 +15,18 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace WpfApp1
 {
-    static public class SDLRendering
+    public static class SDLRendering
     {
         private static IntPtr _renderer;
-        private static IDictionary<string, IntPtr> _fonts = new Dictionary<string, IntPtr>();
-        private static IDictionary<string, IntPtr> _textures = new Dictionary<string, IntPtr>();
+        private static readonly IDictionary<string, IntPtr> _fonts = new Dictionary<string, IntPtr>();
+        private static readonly IDictionary<string, IntPtr> _textures = new Dictionary<string, IntPtr>();
 
         // TODO GetWindowDimensions
-        private static List<IRenderable> _renderables = new List<IRenderable>();
+        private static readonly List<IRenderable> _renderables = new List<IRenderable>();
 
         private static Vector _cameraCenter = new Vector();
-        private static int _screenWidth = 0;   
-        private static int _screenHeight = 0;   
+        private static int _screenWidth = 0;
+        private static int _screenHeight = 0;
         public static void Init(IntPtr renderer)
         {
             _renderer = renderer;
@@ -121,8 +121,8 @@ namespace WpfApp1
             d = radius - 1;
             status = 0;
 
-            x = x - (int)_cameraCenter.X;
-            y = y - (int)_cameraCenter.Y;
+            x -= (int)_cameraCenter.X;
+            y -= (int)_cameraCenter.Y;
 
             SDL_SetRenderDrawColor(_renderer, color.R, color.G, color.B, color.A);
 
@@ -169,8 +169,8 @@ namespace WpfApp1
             int offsetx, offsety, d;
             int status;
 
-            x = x - (int)_cameraCenter.X;
-            y = y - (int)_cameraCenter.Y;
+            x -= (int)_cameraCenter.X;
+            y -= (int)_cameraCenter.Y;
 
             offsetx = 0;
             offsety = radius;
@@ -221,11 +221,13 @@ namespace WpfApp1
         public static void DrawRect(int x, int y, int w, int h, Color color)
         {
             SDL_SetRenderDrawColor(_renderer, color.R, color.G, color.B, color.A);
-            SDL_Rect r = new SDL_Rect();
-            r.x = x - (int)_cameraCenter.X;
-            r.y = y - (int)_cameraCenter.Y;
-            r.w = w;
-            r.h = h;
+            SDL_Rect r = new SDL_Rect
+            {
+                x = x - (int)_cameraCenter.X,
+                y = y - (int)_cameraCenter.Y,
+                w = w,
+                h = h
+            };
 
             SDL_RenderDrawRect(_renderer, ref r);
         }
@@ -233,16 +235,18 @@ namespace WpfApp1
         public static void FillRect(int x, int y, int w, int h, Color color)
         {
             SDL_SetRenderDrawColor(_renderer, color.R, color.G, color.B, color.A);
-            SDL_Rect r = new SDL_Rect();
-            r.x = x - (int)_cameraCenter.X;
-            r.y = y - (int)_cameraCenter.Y;
-            r.w = w;
-            r.h = h;
+            SDL_Rect r = new SDL_Rect
+            {
+                x = x - (int)_cameraCenter.X,
+                y = y - (int)_cameraCenter.Y,
+                w = w,
+                h = h
+            };
 
             SDL_RenderFillRect(_renderer, ref r);
         }
 
-        public static void DrawSprite(string textureId, Rect spriteBounds, Rect sourceRect, double angle)
+        public static void DrawSprite(string textureId, Rect spriteBounds, Rect sourceRect, double angle, SDL_RendererFlip flipMode = SDL_RendererFlip.SDL_FLIP_NONE)
         {
             IntPtr texture = _textures[textureId];
             SDL_Rect spriteRect = spriteBounds.AsSDLRect;
@@ -250,10 +254,10 @@ namespace WpfApp1
             SDL_Point p = new SDL_Point();
             p.x = p.y = 0;
 
-            spriteRect.x = spriteRect.x - (int)_cameraCenter.X;
-            spriteRect.y = spriteRect.y - (int)_cameraCenter.Y;
+            spriteRect.x -= (int)_cameraCenter.X;
+            spriteRect.y -= (int)_cameraCenter.Y;
 
-            SDL_RenderCopyEx(_renderer, texture, ref src, ref spriteRect, angle, ref p, SDL_RendererFlip.SDL_FLIP_NONE);
+            SDL_RenderCopyEx(_renderer, texture, ref src, ref spriteRect, angle, ref p, flipMode);
         }
 
         public static void DrawSprite(IntPtr texture, Rect spriteBounds, Rect sourceRect, double angle)
@@ -263,7 +267,7 @@ namespace WpfApp1
             SDL_Point p = new SDL_Point();
             p.x = p.y = 0;
 
-            spriteRect.x = spriteRect.x - (int)_cameraCenter.X;
+            spriteRect.x -= (int)_cameraCenter.X;
             spriteRect.y = spriteRect.y - (int)_cameraCenter.Y;
             SDL_RenderCopyEx(_renderer, texture, ref src, ref spriteRect, angle, ref p, SDL_RendererFlip.SDL_FLIP_NONE);
         }
@@ -272,9 +276,11 @@ namespace WpfApp1
         {
             SDL_Rect spriteRect = spriteBounds.AsSDLRect;
             SDL_Rect src = sourceRect.AsSDLRect;
-            SDL_Point p = new SDL_Point();
-            p.x = (int)center.X;
-            p.y = (int)center.Y;
+            SDL_Point p = new SDL_Point
+            {
+                x = (int)center.X,
+                y = (int)center.Y
+            };
 
             spriteRect.x -= (int)_cameraCenter.X;
             spriteRect.y -= (int)_cameraCenter.Y;
@@ -284,7 +290,7 @@ namespace WpfApp1
 
         public static void DrawText(string text, string fontId, double posX, double posY, Color color)
         {
-            var texture = GetTextTexture(text, fontId, color);
+            IntPtr texture = GetTextTexture(text, fontId, color);
 
             TTF_SizeText(_fonts[fontId], text, out int w, out int h);
 
@@ -293,7 +299,7 @@ namespace WpfApp1
 
         public static void DrawTextOnCenterPivot(string text, string fontId, double posX, double posY, Color color)
         {
-            var texture = GetTextTexture(text, fontId, color);
+            IntPtr texture = GetTextTexture(text, fontId, color);
 
             TTF_SizeText(_fonts[fontId], text, out int w, out int h);
 
@@ -393,17 +399,25 @@ namespace WpfApp1
                 _cameraCenter.Y = 0;
             }
 
-            if (_cameraCenter.X > 2 * _screenWidth - rect.w)
+            if (_cameraCenter.X > 2 * worldWidth - rect.w)
             {
-                _cameraCenter.X = 2 * _screenWidth - rect.w;
+                _cameraCenter.X = 2 * worldWidth - rect.w;
             }
-
-            if (_cameraCenter.Y > 2 * _screenHeight - rect.h)
+            if (_cameraCenter.Y > 2 * worldHeight - rect.h)
             {
-                _cameraCenter.Y = 2 * _screenHeight - rect.h;
+                _cameraCenter.Y = 2 * worldHeight - rect.h;
                 Entity.RootEntity.FindChild("Skeleton").SetActive(false);
             }
             _cameraCenter.Y = 0;
+        }
+
+        private static int worldWidth;
+        private static int worldHeight;
+
+        public static void SetWorldBounds(int w, int h)
+        {
+            worldWidth = w;
+            worldHeight = h;
         }
     }
 }
