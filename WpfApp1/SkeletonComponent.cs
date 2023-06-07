@@ -118,7 +118,7 @@ namespace WpfApp1
 
         float totalOffset = 0;
 
-        public bool ShouldDraw => IsPostCalibrationStage;
+        public bool ShouldDraw => true;
 
         public double RotationAngle { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public Rect SourceTextureBounds { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
