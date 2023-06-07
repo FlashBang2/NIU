@@ -19,7 +19,7 @@ namespace WpfApp1
 
         public Vector JointSize = new Vector(0.01, 0.01);
 
-        public double Scale = 0.15;
+        public double Scale = 1;
         public double NormalizedMaxY { get => _maxY; }
         public double NormalizedMaxX { get => _maxX; }
         public double NormalizedMinX { get => _minX; }
