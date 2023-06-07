@@ -67,7 +67,11 @@ namespace WpfApp1
 
                 SDLRendering.DrawSprite(spriteId, Owner.Bounds, r, 0);
 
-                _currentFrame++;
+                if (_lastFrameTime > deltaAnimTime)
+                {
+                    _currentFrame++;
+                    _lastFrameTime = 0;
+                }
 
                 if (_currentFrame > data.EndFrame)
                 {
