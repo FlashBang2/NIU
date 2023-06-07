@@ -177,13 +177,13 @@ namespace WpfApp1
                 switch (actionType)
                 {
                     case ActionType.MoveLeft:
-                        Owner.AddWorldOffset(-2, 0);
-                        totalOffset += -2;
+                        Owner.AddWorldOffset(2, 0);
+                        totalOffset += 2;
                         skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
                         break;
                     case ActionType.MoveRight:
-                        Owner.AddWorldOffset(2, 0);
-                        totalOffset += 2;
+                        Owner.AddWorldOffset(-2, 0);
+                        totalOffset += -2;
                         skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
                         break;
                 }
