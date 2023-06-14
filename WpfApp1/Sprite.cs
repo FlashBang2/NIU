@@ -13,7 +13,7 @@ namespace WpfApp1
 
             Rect IRenderable.SourceTextureBounds { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-            public string spriteId = "firstPlatform";
+            public string spriteId;
 
             private readonly Dictionary<AnimationType, AnimationDataCache> _animData = new Dictionary<AnimationType, AnimationDataCache>();
             private int _currentFrame = 0;

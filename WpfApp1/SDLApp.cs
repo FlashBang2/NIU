@@ -212,7 +212,6 @@ namespace WpfApp1
         public static void Main(string[] args)
         {
             SDLApp app = new SDLApp(1920, 1080, "NIU");
-
             
             LoadTextures();
 
@@ -244,74 +243,83 @@ namespace WpfApp1
 
         private static void LoadTextures()
         {
+            SDLRendering.LoadTexture("firstPlatform.png", "first_platform");
             SDLRendering.LoadTexture("second_platform.png", "second_platform");
-            SDLRendering.LoadTexture("firstPlatform.png", "firstPlatform");
             SDLRendering.LoadTexture("third_platform.png", "third_platform");
             SDLRendering.LoadTexture("fourth_platform.png", "fourth_platform");
-            backgroundTexture = SDLRendering.LoadTexture("background_objects.png", "background_objects");
             SDLRendering.LoadTexture("mario_big.png", "mario_big");
+            SDLRendering.LoadTexture("brick.png", "brick");
+            SDLRendering.LoadTexture("questionmark.png", "question_block");
+            backgroundTexture = SDLRendering.LoadTexture("background_objects.png", "background_objects");
+
         }
 
         static IntPtr backgroundTexture = IntPtr.Zero;
 
         private static void AddPlatforms(SDLApp app)
         {
-            //32
+            createDownPlatform(app);
 
+            uint format;
+            int access, width, height;
+
+            Entity background = Entity.CreateEntity("background");
+            background.AddComponent<Sprite>();
+            background.GetComponent<Sprite>().spriteId = "background_objects";
+            SDL_QueryTexture(backgroundTexture, out format, out access, out width, out height);
+            background.Width = width;
+            background.Height = height;
+            background.PosY = 40;
+            SDLRendering.SetWorldBounds(width, height);
+        }
+
+        private static void createDownPlatform (SDLApp app)
+        {
             Entity firstPlatform = Entity.CreateEntity("firstPlatform");
+            firstPlatform.AddComponent<CollisionComponent>();
+            firstPlatform.AddComponent<Sprite>();
+            firstPlatform.GetComponent<Sprite>().spriteId = "first_platform";
             firstPlatform.Width = 3312;
             firstPlatform.Height = 96;
             firstPlatform.PosX = 0;
             firstPlatform.PosY = app.GetAppHeight() - 96;
-            firstPlatform.AddComponent<Sprite>();
-            firstPlatform.AddComponent<CollisionComponent>();
 
             Entity secondPlatform = Entity.CreateEntity("secondPlatform");
             secondPlatform.AddComponent<CollisionComponent>();
             secondPlatform.AddComponent<Sprite>();
             secondPlatform.GetComponent<Sprite>().spriteId = "second_platform";
-
             secondPlatform.Width = 720;
             secondPlatform.Height = 96;
-
             secondPlatform.PosX = firstPlatform.Width + firstPlatform.PosX + 96;
             secondPlatform.PosY = firstPlatform.PosY;
 
-            Entity thirdPlatform = Entity.CreateEntity("third_platform");
+            Entity thirdPlatform = Entity.CreateEntity("thirdPlatform");
             thirdPlatform.AddComponent<CollisionComponent>();
             thirdPlatform.AddComponent<Sprite>();
             thirdPlatform.GetComponent<Sprite>().spriteId = "third_platform";
-
             thirdPlatform.Width = 3072;
             thirdPlatform.Height = 96;
-
             thirdPlatform.PosX = secondPlatform.PosX + secondPlatform.Width + 144;
             thirdPlatform.PosY = firstPlatform.PosY;
 
-            Entity fourthPlatform = Entity.CreateEntity("fourth_platform");
+            Entity fourthPlatform = Entity.CreateEntity("fourthPlatform");
             fourthPlatform.AddComponent<CollisionComponent>();
             fourthPlatform.AddComponent<Sprite>();
             fourthPlatform.GetComponent<Sprite>().spriteId = "fourth_platform";
-
             fourthPlatform.Width = 3216;
             fourthPlatform.Height = 96;
-
             fourthPlatform.PosX = thirdPlatform.PosX + thirdPlatform.Width + 96;
             fourthPlatform.PosY = firstPlatform.PosY;
+        }
 
-            Entity background = Entity.CreateEntity("background");
-            background.AddComponent<Sprite>();
-            background.GetComponent<Sprite>().spriteId = "background_objects";
+        private static void spawnEnemiesAtStartLocation()
+        {
 
-            uint format;
-            int a, w, h;
+        }
 
-            h = 982;
-            SDL_QueryTexture(backgroundTexture, out format, out a, out w, out h);
-            background.Width = w;
-            background.Height = 982;
+        private static void spawnBackground() 
+        {
 
-            SDLRendering.SetWorldBounds(w, h);
         }
     }
 }
