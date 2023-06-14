@@ -183,6 +183,7 @@ namespace WpfApp1
             else if (State == SkeletonComponentState.GameRunning)
             {
                 var actionType = FindActionType();
+                bool isJumping = CheckIfJumping();
 
                 switch (actionType)
                 {
@@ -309,5 +310,26 @@ namespace WpfApp1
 
             return actionType;
         }
+
+        private bool CheckIfJumping()
+        {
+            bool isJumping = false;
+
+            Vector head = skeleton[JointType.Head];
+            Vector leftHand = skeleton[JointType.HandLeft];
+            Vector rightHand = skeleton[JointType.HandRight];
+
+            if (head.Y > leftHand.Y || head.Y > rightHand.Y)
+            {
+                isJumping = true;
+            }
+            else
+            {
+                isJumping = false;
+            }
+
+            return isJumping;
+        }
+
     }
 }
