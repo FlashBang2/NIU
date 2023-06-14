@@ -38,8 +38,8 @@ namespace WpfApp1
         public double RotationAngle { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public Rect SourceTextureBounds { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public Vector Velocity = new Vector(10, 0);
-        public Vector StartVelocity = new Vector(10, 0);
+        public Vector Velocity = new Vector(0, 0);
+        public Vector StartVelocity = new Vector(0, 0);
         public float MaxVelocity = 50;
         public ActionType lastActionType = ActionType.None;
         private float dt;
