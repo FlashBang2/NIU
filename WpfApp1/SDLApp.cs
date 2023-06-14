@@ -275,7 +275,6 @@ namespace WpfApp1
             SDLRendering.LoadTexture("fourth_platform.png", "fourth_platform");
             SDLRendering.LoadTexture("mario_big.png", "mario_big");
             SDLRendering.LoadTexture("mario_small.png", "mario_small");
-            SDLRendering.LoadTexture("brick.png", "brick");
             SDLRendering.LoadTexture("questionmark.png", "question_block");
             backgroundTexture = SDLRendering.LoadTexture("background_objects.png", "background_objects");
 

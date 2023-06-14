@@ -217,7 +217,7 @@ namespace WpfApp1
                 lastActionType = ActionType.None;
             }
 
-            Velocity.X = 0.9 * Velocity.X;
+            Velocity.X = 0.93 * Velocity.X;
         }
 
         private void MoveRight(Sprite sprite)
