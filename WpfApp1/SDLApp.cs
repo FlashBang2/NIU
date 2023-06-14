@@ -224,7 +224,7 @@ namespace WpfApp1
 
             brickBlocks(app);
 
- 
+            renderPipes(app);
 
             app.Run();
         }
@@ -239,6 +239,9 @@ namespace WpfApp1
             SDLRendering.LoadTexture("mario_small.png", "mario_small");
             SDLRendering.LoadTexture("questionmark.png", "question_block");
             SDLRendering.LoadTexture("brick.png", "brick");
+            SDLRendering.LoadTexture("pipe_small.png", "pipe_small");
+            SDLRendering.LoadTexture("pipe_medium.png", "pipe_medium");
+            SDLRendering.LoadTexture("pipe_large.png", "pipe_large");
             backgroundTexture = SDLRendering.LoadTexture("background_objects.png", "background_objects");
 
         }
@@ -430,6 +433,45 @@ namespace WpfApp1
             brick3.Height = 48;
             brick3.PosX = brick.PosX + 96;
             brick3.PosY = brick.PosY;
+
+        }
+        private static void renderPipes(SDLApp app)
+        {
+            Entity pipe = Entity.CreateEntity("Pipe");
+            pipe.AddComponent<CollisionComponent>();
+            pipe.AddComponent<Sprite>();
+            pipe.GetComponent<Sprite>().spriteId = "pipe_small";
+            pipe.Width = 96;
+            pipe.Height = 96;
+            pipe.PosX = 1440;
+            pipe.PosY = app.GetAppHeight() - 192;
+
+            Entity pipe2 = Entity.CreateEntity("Pipe2");
+            pipe2.AddComponent<CollisionComponent>();
+            pipe2.AddComponent<Sprite>();
+            pipe2.GetComponent<Sprite>().spriteId = "pipe_medium";
+            pipe2.Width = 96;
+            pipe2.Height = 144;
+            pipe2.PosX = pipe.PosX + 480;
+            pipe2.PosY = app.GetAppHeight() - 240;
+
+            Entity pipe3 = Entity.CreateEntity("Pipe3");
+            pipe3.AddComponent<CollisionComponent>();
+            pipe3.AddComponent<Sprite>();
+            pipe3.GetComponent<Sprite>().spriteId = "pipe_large";
+            pipe3.Width = 96;
+            pipe3.Height = 192;
+            pipe3.PosX = pipe2.PosX + 384;
+            pipe3.PosY = app.GetAppHeight() - 288;
+
+            Entity pipe4 = Entity.CreateEntity("Pipe4");
+            pipe4.AddComponent<CollisionComponent>();
+            pipe4.AddComponent<Sprite>();
+            pipe4.GetComponent<Sprite>().spriteId = "pipe_large";
+            pipe4.Width = 96;
+            pipe4.Height = 192;
+            pipe4.PosX = pipe3.PosX + 528;
+            pipe4.PosY = app.GetAppHeight() - 288;
 
         }
         private static void spawnEnemiesAtStartLocation()
