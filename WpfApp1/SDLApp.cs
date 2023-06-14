@@ -224,19 +224,42 @@ namespace WpfApp1
             skeleton.GetComponent<CharacterMovementComponent>().IsControlledByPlayer = true;
             skeleton.AddComponent<CollisionComponent>();
             skeleton.AddComponent<Sprite>();
-            skeleton.GetComponent<Sprite>().spriteId = "mario_big";
+            skeleton.GetComponent<Sprite>().spriteId = "mario_small";
             skeleton.GetComponent<CollisionComponent>().IsStatic = false;
             skeleton.Width = 48;
-            skeleton.Height = 96;
+            skeleton.Height = 48;
 
             AnimationData data = new AnimationData();
-            data.EndFrame = 7;
+            data.EndFrame = 0;
             data.StartFrame = 0;
-            data.FrameRatePerSecond = 8;
+            data.FrameRatePerSecond = 1;
             data.Width = 48;
-            data.Height = 96;
+            data.Height = 48;
+
+            AnimationData walkData = new AnimationData();
+            walkData.EndFrame = 3;
+            walkData.StartFrame = 0;
+            walkData.FrameRatePerSecond = 16;
+            walkData.Width = 48;
+            walkData.Height = 48;
+
+            AnimationData jumpData = new AnimationData();
+            jumpData.EndFrame = 3;
+            jumpData.StartFrame = 0;
+            jumpData.FrameRatePerSecond = 16;
+            jumpData.Width = 48;
+            jumpData.Height = 48;
+
+            AnimationData slowdownData = new AnimationData();
+            slowdownData.EndFrame = 5;
+            slowdownData.StartFrame = 5;
+            slowdownData.FrameRatePerSecond = 1;
+            slowdownData.Width = 48;
+            slowdownData.Height = 48;
 
             skeleton.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, data);
+            skeleton.GetComponent<Sprite>().AddAnimation(AnimationType.Walk, walkData);
+            skeleton.GetComponent<Sprite>().AddAnimation(AnimationType.SlowDown, slowdownData);
             skeleton.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
 
             app.Run();
@@ -250,6 +273,7 @@ namespace WpfApp1
             SDLRendering.LoadTexture("fourth_platform.png", "fourth_platform");
             backgroundTexture = SDLRendering.LoadTexture("background_objects.png", "background_objects");
             SDLRendering.LoadTexture("mario_big.png", "mario_big");
+            SDLRendering.LoadTexture("mario_small.png", "mario_small");
         }
 
         static IntPtr backgroundTexture = IntPtr.Zero;
@@ -264,6 +288,7 @@ namespace WpfApp1
             firstPlatform.PosX = 0;
             firstPlatform.PosY = app.GetAppHeight() - 96;
             firstPlatform.AddComponent<Sprite>();
+            firstPlatform.GetComponent<Sprite>().spriteId = "firstPlatform";
             firstPlatform.AddComponent<CollisionComponent>();
 
             Entity secondPlatform = Entity.CreateEntity("secondPlatform");

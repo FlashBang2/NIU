@@ -1,13 +1,11 @@
 ﻿namespace WpfApp1
 {
-    public partial class SDLApp
+    public enum AnimationType
     {
-        public enum AnimationType
-        {
-            Undefined,
-            Idle,
-            Jump,
-            Walk
-        }
+        Undefined,
+        Idle,
+        Jump,
+        Walk,
+        SlowDown
     }
 }
