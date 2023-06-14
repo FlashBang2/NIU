@@ -218,51 +218,13 @@ namespace WpfApp1
 
             AddPlatforms(app);
 
-            Entity mario = Entity.CreateEntity("mario");
-            mario.AddComponent<SkeletonComponent>();
-            mario.AddComponent<CharacterMovementComponent>();
-            mario.GetComponent<CharacterMovementComponent>().IsControlledByPlayer = true;
-            mario.AddComponent<CollisionComponent>();
-            mario.AddComponent<Sprite>();
-            mario.GetComponent<Sprite>().spriteId = "mario_small";
-            mario.GetComponent<CollisionComponent>().IsStatic = false;
-            mario.Width = 48;
-            mario.Height = 48;
+            playerCharacter();
 
-            AnimationData data = new AnimationData();
-            data.EndFrame = 7;
-            data.EndFrame = 0;
-            data.StartFrame = 0;
-            data.FrameRatePerSecond = 8;
-            data.FrameRatePerSecond = 1;
-            data.Width = 48;
-            data.Height = 48;
+            questionMarksBlocks(app);
 
-            AnimationData walkData = new AnimationData();
-            walkData.EndFrame = 3;
-            walkData.StartFrame = 0;
-            walkData.FrameRatePerSecond = 16;
-            walkData.Width = 48;
-            walkData.Height = 48;
+            brickBlocks(app);
 
-            AnimationData jumpData = new AnimationData();
-            jumpData.EndFrame = 3;
-            jumpData.StartFrame = 0;
-            jumpData.FrameRatePerSecond = 16;
-            jumpData.Width = 48;
-            jumpData.Height = 48;
-
-            AnimationData slowdownData = new AnimationData();
-            slowdownData.EndFrame = 5;
-            slowdownData.StartFrame = 5;
-            slowdownData.FrameRatePerSecond = 1;
-            slowdownData.Width = 48;
-            slowdownData.Height = 48;
-
-            mario.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, data);
-            mario.GetComponent<Sprite>().AddAnimation(AnimationType.Walk, walkData);
-            mario.GetComponent<Sprite>().AddAnimation(AnimationType.SlowDown, slowdownData);
-            mario.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+ 
 
             Entity goomba = Entity.CreateEntity("goomba");
             goomba.AddComponent<CharacterMovementComponent>();
@@ -296,6 +258,7 @@ namespace WpfApp1
             SDLRendering.LoadTexture("mario_small.png", "mario_small");
             SDLRendering.LoadTexture("questionmark.png", "question_block");
             SDLRendering.LoadTexture("goomba.png", "goomba");
+            SDLRendering.LoadTexture("brick.png", "brick");
             backgroundTexture = SDLRendering.LoadTexture("background_objects.png", "background_objects");
 
         }
@@ -358,12 +321,144 @@ namespace WpfApp1
             fourthPlatform.PosY = firstPlatform.PosY;
         }
 
-        private static void spawnEnemiesAtStartLocation()
+        private static void playerCharacter()
         {
+            Entity mario = Entity.CreateEntity("mario");
+            mario.AddComponent<SkeletonComponent>();
+            mario.AddComponent<CharacterMovementComponent>();
+            mario.GetComponent<CharacterMovementComponent>().IsControlledByPlayer = true;
+            mario.AddComponent<CollisionComponent>();
+            mario.AddComponent<Sprite>();
+            mario.GetComponent<Sprite>().spriteId = "mario_small";
+            mario.GetComponent<CollisionComponent>().IsStatic = false;
+            mario.Width = 48;
+            mario.Height = 48;
+
+            AnimationData idle = new AnimationData();
+            idle.EndFrame = 0;
+            idle.StartFrame = 0;
+            idle.FrameRatePerSecond = 16;
+            idle.Width = 48;
+            idle.Height = 48;
+
+            AnimationData walkData = new AnimationData();
+            walkData.EndFrame = 3;
+            walkData.StartFrame = 0;
+            walkData.FrameRatePerSecond = 16;
+            walkData.Width = 48;
+            walkData.Height = 48;
+
+            AnimationData jumpData = new AnimationData();
+            jumpData.EndFrame = 3;
+            jumpData.StartFrame = 0;
+            jumpData.FrameRatePerSecond = 16;
+            jumpData.Width = 48;
+            jumpData.Height = 48;
+
+            AnimationData slowdownData = new AnimationData();
+            slowdownData.EndFrame = 5;
+            slowdownData.StartFrame = 5;
+            slowdownData.FrameRatePerSecond = 16;
+            slowdownData.Width = 48;
+            slowdownData.Height = 48;
+
+            mario.GetComponent<Sprite>().AddAnimation(AnimationType.Walk, walkData);
+            mario.GetComponent<Sprite>().AddAnimation(AnimationType.SlowDown, slowdownData);
+            mario.GetComponent<Sprite>().AddAnimation(AnimationType.Jump, jumpData);
+            mario.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idle);
+            mario.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+        }
+        private static void questionMarksBlocks(SDLApp app)
+        {
+            Entity questionBlock = Entity.CreateEntity("questionBlock");
+            questionBlock.AddComponent<CollisionComponent>();
+            questionBlock.AddComponent<Sprite>();
+            questionBlock.GetComponent<Sprite>().spriteId = "question_block";
+            questionBlock.Width = 48;
+            questionBlock.Height = 48;
+            questionBlock.PosX = 768;
+            questionBlock.PosY = app.GetAppHeight() - 288;
+
+            Entity questionBlock2 = Entity.CreateEntity("questionBlock2");
+            questionBlock2.AddComponent<CollisionComponent>();
+            questionBlock2.AddComponent<Sprite>();
+            questionBlock2.GetComponent<Sprite>().spriteId = "question_block";
+            questionBlock2.Width = 48;
+            questionBlock2.Height = 48;
+            questionBlock2.PosX = questionBlock.PosX + 192;
+            questionBlock2.PosY = questionBlock.PosY;
+
+            Entity questionBlock3 = Entity.CreateEntity("questionBlock3");
+            questionBlock3.AddComponent<CollisionComponent>();
+            questionBlock3.AddComponent<Sprite>();
+            questionBlock3.GetComponent<Sprite>().spriteId = "question_block";
+            questionBlock3.Width = 48;
+            questionBlock3.Height = 48;
+            questionBlock3.PosX = questionBlock2.PosX + 96;
+            questionBlock3.PosY = questionBlock2.PosY;
+
+            Entity questionBlock4 = Entity.CreateEntity("questionBlock4");
+            questionBlock4.AddComponent<CollisionComponent>();
+            questionBlock4.AddComponent<Sprite>();
+            questionBlock4.GetComponent<Sprite>().spriteId = "question_block";
+            questionBlock4.Width = 48;
+            questionBlock4.Height = 48;
+            questionBlock4.PosX = questionBlock2.PosX + 48;
+            questionBlock4.PosY = questionBlock2.PosY - 192;
+
+            AnimationData idleQuestion = new AnimationData();
+            idleQuestion.EndFrame = 2;
+            idleQuestion.StartFrame = 0;
+            idleQuestion.FrameRatePerSecond = 4;
+            idleQuestion.Width = 48;
+            idleQuestion.Height = 48;
+
+            questionBlock.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
+            questionBlock2.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
+            questionBlock3.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
+            questionBlock4.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
+            questionBlock.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            questionBlock2.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            questionBlock3.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            questionBlock4.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+        }
+        private static void brickBlocks(SDLApp app)
+        {
+            Entity brick = Entity.CreateEntity("Brick");
+            brick.AddComponent<CollisionComponent>();
+            brick.AddComponent<Sprite>();
+            brick.GetComponent<Sprite>().spriteId = "brick";
+            brick.Width = 48;
+            brick.Height = 48;
+            brick.PosX = 1008;
+            brick.PosY = app.GetAppHeight() - 288;
+
+            Entity brick2 = Entity.CreateEntity("Brick2");
+            brick2.AddComponent<CollisionComponent>();
+            brick2.AddComponent<Sprite>();
+            brick2.GetComponent<Sprite>().spriteId = "brick";
+            brick2.Width = 48;
+            brick2.Height = 48;
+            brick2.PosX = brick.PosX - 96;
+            brick2.PosY = brick.PosY;
+
+            Entity brick3 = Entity.CreateEntity("Brick3");
+            brick3.AddComponent<CollisionComponent>();
+            brick3.AddComponent<Sprite>();
+            brick3.GetComponent<Sprite>().spriteId = "brick";
+            brick3.Width = 48;
+            brick3.Height = 48;
+            brick3.PosX = brick.PosX + 96;
+            brick3.PosY = brick.PosY;
 
         }
 
         private static void spawnBackground()
+        {
+
+        }
+        
+        private static void spawnEnemiesAtStartLocation()
         {
 
         }
