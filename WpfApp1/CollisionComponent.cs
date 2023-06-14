@@ -149,6 +149,12 @@ namespace WpfApp1
                             }
                         }
 
+                        OverlapEvent evt = new OverlapEvent();
+                        evt.Self = Owner;
+                        evt.LastContact = child;
+
+                        Overlaped?.Invoke(evt);
+                        _contacts.Add(child);
 
                         break;
                     }
