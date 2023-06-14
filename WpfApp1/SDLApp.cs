@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1;
+using Microsoft.Kinect;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -217,26 +218,51 @@ namespace WpfApp1
 
             AddPlatforms(app);
 
-            Entity skeleton = Entity.CreateEntity("Skeleton");
-            skeleton.AddComponent<SkeletonComponent>();
-            skeleton.AddComponent<CharacterMovementComponent>();
-            skeleton.GetComponent<CharacterMovementComponent>().IsControlledByPlayer = true;
-            skeleton.AddComponent<CollisionComponent>();
-            skeleton.AddComponent<Sprite>();
-            skeleton.GetComponent<Sprite>().spriteId = "mario_big";
-            skeleton.GetComponent<CollisionComponent>().IsStatic = false;
-            skeleton.Width = 48;
-            skeleton.Height = 96;
+            Entity mario = Entity.CreateEntity("mario");
+            mario.AddComponent<SkeletonComponent>();
+            mario.AddComponent<CharacterMovementComponent>();
+            mario.GetComponent<CharacterMovementComponent>().IsControlledByPlayer = true;
+            mario.AddComponent<CollisionComponent>();
+            mario.AddComponent<Sprite>();
+            mario.GetComponent<Sprite>().spriteId = "mario_small";
+            mario.GetComponent<CollisionComponent>().IsStatic = false;
+            mario.Width = 48;
+            mario.Height = 48;
 
             AnimationData data = new AnimationData();
             data.EndFrame = 7;
+            data.EndFrame = 0;
             data.StartFrame = 0;
             data.FrameRatePerSecond = 8;
+            data.FrameRatePerSecond = 1;
             data.Width = 48;
-            data.Height = 96;
+            data.Height = 48;
 
-            skeleton.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, data);
-            skeleton.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            AnimationData walkData = new AnimationData();
+            walkData.EndFrame = 3;
+            walkData.StartFrame = 0;
+            walkData.FrameRatePerSecond = 16;
+            walkData.Width = 48;
+            walkData.Height = 48;
+
+            AnimationData jumpData = new AnimationData();
+            jumpData.EndFrame = 3;
+            jumpData.StartFrame = 0;
+            jumpData.FrameRatePerSecond = 16;
+            jumpData.Width = 48;
+            jumpData.Height = 48;
+
+            AnimationData slowdownData = new AnimationData();
+            slowdownData.EndFrame = 5;
+            slowdownData.StartFrame = 5;
+            slowdownData.FrameRatePerSecond = 1;
+            slowdownData.Width = 48;
+            slowdownData.Height = 48;
+
+            mario.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, data);
+            mario.GetComponent<Sprite>().AddAnimation(AnimationType.Walk, walkData);
+            mario.GetComponent<Sprite>().AddAnimation(AnimationType.SlowDown, slowdownData);
+            mario.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
 
             app.Run();
         }
@@ -248,6 +274,7 @@ namespace WpfApp1
             SDLRendering.LoadTexture("third_platform.png", "third_platform");
             SDLRendering.LoadTexture("fourth_platform.png", "fourth_platform");
             SDLRendering.LoadTexture("mario_big.png", "mario_big");
+            SDLRendering.LoadTexture("mario_small.png", "mario_small");
             SDLRendering.LoadTexture("brick.png", "brick");
             SDLRendering.LoadTexture("questionmark.png", "question_block");
             backgroundTexture = SDLRendering.LoadTexture("background_objects.png", "background_objects");
