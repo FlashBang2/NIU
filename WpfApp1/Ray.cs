@@ -15,6 +15,8 @@ namespace WpfApp1
         public Vector Extend;
         public bool IsRay;
 
+        public Vector End { get => Start + Delta; }
+
         public void Init(Vector start, Vector end)
         {
             Delta = end - start;

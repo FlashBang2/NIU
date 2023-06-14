@@ -39,7 +39,7 @@ namespace WpfApp1
 
             while (t < 1)
             {
-                Vector current = (1 - t) * ray.Start + t * (ray.Start + ray.Delta);
+                Vector current = (1 - t) * ray.Start + t * ray.End;
 
                 foreach (var child in children)
                 {

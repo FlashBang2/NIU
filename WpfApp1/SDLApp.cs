@@ -213,7 +213,7 @@ namespace WpfApp1
         public static void Main(string[] args)
         {
             SDLApp app = new SDLApp(1920, 1080, "NIU");
-            
+
             LoadTextures();
 
             AddPlatforms(app);
@@ -264,6 +264,25 @@ namespace WpfApp1
             mario.GetComponent<Sprite>().AddAnimation(AnimationType.SlowDown, slowdownData);
             mario.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
 
+            Entity goomba = Entity.CreateEntity("goomba");
+            goomba.AddComponent<CharacterMovementComponent>();
+            goomba.AddComponent<Gumba>();
+            goomba.AddComponent<CollisionComponent>();
+            goomba.AddComponent<Sprite>();
+            goomba.GetComponent<Sprite>().spriteId = "goomba";
+            AnimationData gumbaaData = new AnimationData();
+            gumbaaData.StartFrame = 0;
+            gumbaaData.EndFrame = 1;
+            gumbaaData.FrameRatePerSecond = 1;
+            gumbaaData.Width = 48;
+            gumbaaData.Height = 48;
+            goomba.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+
+            goomba.PosX += 200;
+            goomba.Width = 96 / 2;
+            goomba.Height = 48;
             app.Run();
         }
 
@@ -276,6 +295,7 @@ namespace WpfApp1
             SDLRendering.LoadTexture("mario_big.png", "mario_big");
             SDLRendering.LoadTexture("mario_small.png", "mario_small");
             SDLRendering.LoadTexture("questionmark.png", "question_block");
+            SDLRendering.LoadTexture("goomba.png", "goomba");
             backgroundTexture = SDLRendering.LoadTexture("background_objects.png", "background_objects");
 
         }
@@ -299,7 +319,7 @@ namespace WpfApp1
             SDLRendering.SetWorldBounds(width, height);
         }
 
-        private static void createDownPlatform (SDLApp app)
+        private static void createDownPlatform(SDLApp app)
         {
             Entity firstPlatform = Entity.CreateEntity("firstPlatform");
             firstPlatform.AddComponent<CollisionComponent>();
@@ -343,7 +363,7 @@ namespace WpfApp1
 
         }
 
-        private static void spawnBackground() 
+        private static void spawnBackground()
         {
 
         }
