@@ -2,52 +2,56 @@
 
 namespace WpfApp1
 {
-    public partial class SDLApp
+    public struct AnimationDataCache
     {
-        public struct AnimationDataCache
+        public AnimationData Data;
+        public float DeltaFrameSeconds;
+        public List<Rect> SpriteBounds;
+
+        public AnimationDataCache(AnimationData data)
         {
-            public AnimationData Data;
-            public float DeltaFrameSeconds;
-            public List<Rect> SpriteBounds;
+            Data = data;
+            SpriteBounds = new List<Rect>();
 
-            public AnimationDataCache(AnimationData data)
+            // build cache
+            DeltaFrameSeconds = 1.0f / data.FrameRatePerSecond;
+
+            for (int i = 0; i <= data.StartFrame; i++)
             {
-                Data = data;
-                SpriteBounds = new List<Rect>();
-
-                // build cache
-                DeltaFrameSeconds = 1.0f / data.FrameRatePerSecond;
-                for (int i = data.StartFrame; i <= data.EndFrame; i++)
-                {
-                    Rect rect = new Rect(i * data.Width, 0, data.Width, data.Height);
-                    SpriteBounds.Insert(i, rect);
-                }
+                Rect rect = new Rect(i * data.Width, 0, data.Width, data.Height);
+                SpriteBounds.Insert(i, rect);
             }
 
-            public Rect GetRect(int frame)
+            for (int i = data.StartFrame; i <= data.EndFrame; i++)
             {
-                return SpriteBounds[frame];
+                Rect rect = new Rect(i * data.Width, 0, data.Width, data.Height);
+                SpriteBounds.Insert(i, rect);
+            }
+        }
+
+        public Rect GetRect(int frame)
+        {
+            return SpriteBounds[frame];
+        }
+
+        public int GetNextFrame(int frame)
+        {
+            if (frame > Data.EndFrame)
+            {
+                frame = Data.StartFrame;
             }
 
-            public int GetNextFrame(int frame)
-            {
-                if (frame > Data.EndFrame)
-                {
-                    frame = Data.StartFrame;
-                }
+            return frame;
+        }
 
-                return frame;
-            }
+        public bool CanAdvanceToNextFrame(float dt)
+        {
+            return dt > DeltaFrameSeconds;
+        }
 
-            public bool CanAdvanceToNextFrame(float dt)
-            {
-                return dt > DeltaFrameSeconds;
-            }
-
-            public bool HasNextFrameResetsAnimation(int frame)
-            {
-                return frame > Data.EndFrame;
-            }
+        public bool HasNextFrameResetsAnimation(int frame)
+        {
+            return frame > Data.EndFrame;
         }
     }
 }

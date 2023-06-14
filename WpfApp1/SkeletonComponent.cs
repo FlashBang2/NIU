@@ -19,6 +19,7 @@ namespace WpfApp1
 
     public class SkeletonComponent : Component, IRenderable
     {
+        private const int AccelerationRate = 20;
         private Skeleton user = null;
         private DebugSkeleton skeleton;
         private bool IsKinnectAvailable = false;
@@ -26,6 +27,23 @@ namespace WpfApp1
 
         public static bool IsPostCalibrationStage = false;
         public bool ShouldDrawDebugBounds = false;
+
+
+        private bool _once = false;
+
+        float totalOffset = 0;
+
+        public bool ShouldDraw => true;
+
+        public double RotationAngle { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Rect SourceTextureBounds { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public Vector Velocity = new Vector(0, 0);
+        public Vector StartVelocity = new Vector(0, 0);
+        public float MaxVelocity = 50;
+        public ActionType lastActionType = ActionType.None;
+        private float dt;
+
 
         public override void Spawned()
         {
@@ -114,15 +132,6 @@ namespace WpfApp1
             }
         }
 
-        private bool _once = false;
-
-        float totalOffset = 0;
-
-        public bool ShouldDraw => true;
-
-        public double RotationAngle { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Rect SourceTextureBounds { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
         public override void ReceiveRender()
         {
             base.ReceiveRender();
@@ -140,6 +149,8 @@ namespace WpfApp1
                     break;
             }
 
+            Sprite sprite = Owner.GetComponent<Sprite>();
+
             skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
 
             if (ShouldDrawDebugBounds && State == SkeletonComponentState.GameRunning)
@@ -149,20 +160,20 @@ namespace WpfApp1
 
             if (!IsKinnectAvailable && State == SkeletonComponentState.GameRunning)
             {
-
                 if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_d))
                 {
-                    Owner.AddWorldOffset(20, 0);
-                    totalOffset += 2;
-                    skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
+                    MoveRight(sprite);
+                }
+                else if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_a))
+                {
+                    MoveLeft(sprite);
+                }
+                else
+                {
+                    SlowDown(sprite);
                 }
 
-                if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_a))
-                {
-                    Owner.AddWorldOffset(-2, 0);
-                    totalOffset += -2;
-                    skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
-                }
+                Owner.AddWorldOffset(Velocity.X, 0);
 
                 if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_SPACE) && !Owner.GetComponent<CharacterMovementComponent>().IsFalling)
                 {
@@ -177,26 +188,96 @@ namespace WpfApp1
                 switch (actionType)
                 {
                     case ActionType.MoveLeft:
-                        Owner.AddWorldOffset(2, 0);
+                        MoveLeft(sprite);
                         break;
                     case ActionType.MoveRight:
-                        Owner.AddWorldOffset(-2, 0);
+                        MoveRight(sprite);
+                        break;
+                    default:
+                        SlowDown(sprite);
                         break;
                 }
 
-                if (isJumping && !Owner.GetComponent<CharacterMovementComponent>().IsFalling)
-                {
-                    Owner.GetComponent<CharacterMovementComponent>().Velocity = new Vector(Owner.GetComponent<CharacterMovementComponent>().Velocity.X, -20);
-                }
+                //
+
+                Owner.AddWorldOffset(Velocity.X, 0);
             }
 
             SDLRendering.SetCameraFollow(Owner);
+        }
+
+        private void SlowDown(Sprite sprite)
+        {
+            if (Math.Abs(Velocity.X) < 1)
+            {
+                sprite.PlayAnim(AnimationType.Idle);
+                lastActionType = ActionType.None;
+            }
+
+            Velocity.X = 0.9 * Velocity.X;
+        }
+
+        private void MoveRight(Sprite sprite)
+        {
+            if (Velocity.X < 0)
+            {
+                sprite.PlayAnim(AnimationType.SlowDown);
+            }
+            else
+            {
+                sprite.PlayAnim(AnimationType.Walk);
+            }
+
+            TryAccelerate(1);
+
+            sprite.FlipMode = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
+            skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
+            lastActionType = ActionType.MoveRight;
+        }
+
+        private void MoveLeft(Sprite sprite)
+        {
+            if (Velocity.X > 0)
+            {
+                sprite.PlayAnim(AnimationType.SlowDown);
+            }
+            else
+            {
+                sprite.PlayAnim(AnimationType.Walk);
+            }
+
+            TryAccelerate(-1);
+
+            totalOffset += (int)-Velocity.X;
+            sprite.FlipMode = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
+            skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
+            lastActionType = ActionType.MoveLeft;
+        }
+
+        private void TryAccelerate(int direction)
+        {
+            if (direction > 0)
+            {
+                Velocity.X = Velocity.X + dt * AccelerationRate > MaxVelocity ? MaxVelocity : Velocity.X + dt * AccelerationRate;
+            }
+            else
+            {
+                Velocity.X = Velocity.X - dt * AccelerationRate < -MaxVelocity ? -MaxVelocity : Velocity.X - dt * AccelerationRate;
+            }
+        }
+
+        public override void OnTick(float dt)
+        {
+            base.OnTick(dt);
+            this.dt = dt;
         }
 
         private ActionType FindActionType()
         {
             ActionType actionType = ActionType.None;
 
+            // ankle left nearly equal kneeRight -> accelerate
+            // ankle right nearly equal kneeLeft -> accelerate
             Vector ankleLeft = skeleton[JointType.AnkleLeft];
             Vector kneeRight = skeleton[JointType.KneeRight];
             Vector ankleRight = skeleton[JointType.AnkleRight];
