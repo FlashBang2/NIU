@@ -406,7 +406,6 @@ namespace WpfApp1
             if (_cameraCenter.Y > 2 * worldHeight - rect.h)
             {
                 _cameraCenter.Y = 2 * worldHeight - rect.h;
-                Entity.RootEntity.FindChild("Skeleton").SetActive(false);
             }
             _cameraCenter.Y = 0;
         }

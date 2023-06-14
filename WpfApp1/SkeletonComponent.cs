@@ -40,7 +40,7 @@ namespace WpfApp1
 
         public Vector Velocity = new Vector(0, 0);
         public Vector StartVelocity = new Vector(0, 0);
-        public float MaxVelocity = 50;
+        public float MaxVelocity = 10;
         public ActionType lastActionType = ActionType.None;
         private float dt;
 
@@ -198,12 +198,12 @@ namespace WpfApp1
                         break;
                 }
 
+                Owner.AddWorldOffset(Velocity.X, 0);
+
                 if (isJumping && !Owner.GetComponent<CharacterMovementComponent>().IsFalling)
                 {
                     Owner.GetComponent<CharacterMovementComponent>().Velocity = new Vector(Owner.GetComponent<CharacterMovementComponent>().Velocity.X, -20);
                 }
-
-                Owner.AddWorldOffset(Velocity.X, 0);
             }
 
             SDLRendering.SetCameraFollow(Owner);
