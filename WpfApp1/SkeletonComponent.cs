@@ -188,10 +188,10 @@ namespace WpfApp1
                 switch (actionType)
                 {
                     case ActionType.MoveLeft:
-                        MoveLeft(sprite);
+                        MoveRight(sprite);
                         break;
                     case ActionType.MoveRight:
-                        MoveRight(sprite);
+                        MoveLeft(sprite);
                         break;
                     default:
                         SlowDown(sprite);
