@@ -172,19 +172,21 @@ namespace WpfApp1
             else if (State == SkeletonComponentState.GameRunning)
             {
                 var actionType = FindActionType();
+                bool isJumping = CheckIfJumping();
 
                 switch (actionType)
                 {
                     case ActionType.MoveLeft:
                         Owner.AddWorldOffset(2, 0);
-                        totalOffset += 2;
-                        skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
                         break;
                     case ActionType.MoveRight:
                         Owner.AddWorldOffset(-2, 0);
-                        totalOffset += -2;
-                        skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
                         break;
+                }
+
+                if (isJumping && !Owner.GetComponent<CharacterMovementComponent>().IsFalling)
+                {
+                    Owner.GetComponent<CharacterMovementComponent>().Velocity = new Vector(Owner.GetComponent<CharacterMovementComponent>().Velocity.X, -20);
                 }
             }
 
@@ -227,5 +229,26 @@ namespace WpfApp1
 
             return actionType;
         }
+
+        private bool CheckIfJumping()
+        {
+            bool isJumping = false;
+
+            Vector head = skeleton[JointType.Head];
+            Vector leftHand = skeleton[JointType.HandLeft];
+            Vector rightHand = skeleton[JointType.HandRight];
+
+            if (head.Y > leftHand.Y || head.Y > rightHand.Y)
+            {
+                isJumping = true;
+            }
+            else
+            {
+                isJumping = false;
+            }
+
+            return isJumping;
+        }
+
     }
 }
