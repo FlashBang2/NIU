@@ -198,7 +198,10 @@ namespace WpfApp1
                         break;
                 }
 
-                //
+                if (isJumping && !Owner.GetComponent<CharacterMovementComponent>().IsFalling)
+                {
+                    Owner.GetComponent<CharacterMovementComponent>().Velocity = new Vector(Owner.GetComponent<CharacterMovementComponent>().Velocity.X, -20);
+                }
 
                 Owner.AddWorldOffset(Velocity.X, 0);
             }
