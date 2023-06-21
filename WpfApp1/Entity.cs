@@ -229,6 +229,7 @@ namespace WpfApp1
 
         public virtual void Destroyed()
         {
+            
         }
 
         public IEntity FindChild(string name)
@@ -303,7 +304,7 @@ namespace WpfApp1
             {
                 child.Tick(dt);
             }
-
+           
         }
 
         public IEntity[] GetChildren()

@@ -9,9 +9,10 @@ namespace WpfApp1
 {
     public class Gumba : Component
     {
-        private const int Speed = 5;
+        private const int Speed = 3;
         float directionScale = -1.0f;
 
+        private bool killed = false;
         public override void OnTick(float dt)
         {
             base.OnTick(dt);
@@ -19,7 +20,7 @@ namespace WpfApp1
             List<IEntity> e = new List<IEntity>();
             e.Add(Owner);
 
-            if (!Owner.GetComponent<CharacterMovementComponent>().IsFalling)
+            if (!Owner.GetComponent<CharacterMovementComponent>().IsFalling && Owner.GetComponent<Sprite>().shouldMove)
             {
                 Owner.AddWorldOffset(Speed * directionScale, 0);
 
@@ -29,13 +30,20 @@ namespace WpfApp1
                 OverlapEvent evt;
                 if (RayCast(ray, e, out evt))
                 {
-                    if (!evt.LastContact.Name.Equals("mario"))
+                    if (!evt.LastContact.Name.Equals("mario")) //reaction to other stuff
                     {
                         directionScale *= -1;
                     }
-                    else
+                    else // reaction to mario
                     {
-                        // reaction to mario
+                        Entity mario = Entity.GetEntity("mario", true);
+                        mario.PosX = 144;
+                        if (mario.PosY < Owner.PosY) {
+                            Owner.GetComponent<Sprite>().shouldMove = false;
+                            Owner.SetActive(false);
+                        }
+                        if (!killed)
+                            mario.PosY = SDLApp.GetInstance().GetAppHeight() - 144;
                     }
                 }
 

@@ -24,6 +24,8 @@ namespace WpfApp1
         private IntPtr _renderer = IntPtr.Zero;
         private bool _isOpen = true;
 
+        public bool canStartGoomba = false;
+
         private static SDLApp _instance;
 
         public static SDLApp GetInstance()
@@ -106,6 +108,40 @@ namespace WpfApp1
                 SDLRendering.ClearFrame();
                 Entity.RootEntity.ReceiveRender();
                 SDLRendering.RenderFrame();
+
+                if (Math.Abs(Entity.GetEntity("goomba", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba2", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba2", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba3", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba3", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba4", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba4", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba5", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba5", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba6", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba6", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba7", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba7", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba8", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba8", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba9", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba9", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba10", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba10", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba11", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba11", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba12", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba12", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba13", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba13", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba14", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba14", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba15", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba15", true).GetComponent<Sprite>().shouldMove = true;
+                if (Math.Abs(Entity.GetEntity("goomba16", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("goomba16", true).GetComponent<Sprite>().shouldMove = true;
+
             }
 
             FreeResources();
@@ -230,7 +266,7 @@ namespace WpfApp1
             renderPipes(app);
 
             spawnEnemiesAtStartLocation(app);
-            
+
             app.Run();
         }
 
@@ -810,7 +846,7 @@ namespace WpfApp1
             Entity pipe3 = Entity.CreateEntity("Pipe3");
             pipe3.AddComponent<CollisionComponent>();
             pipe3.AddComponent<Sprite>();
-            //pipe3.GetComponent<Sprite>().spriteId = "pipe_large";
+            pipe3.GetComponent<Sprite>().spriteId = "pipe_large";
             pipe3.Width = 96;
             pipe3.Height = 192;
             pipe3.PosX = pipe2.PosX + 384;
@@ -819,7 +855,7 @@ namespace WpfApp1
             Entity pipe4 = Entity.CreateEntity("Pipe4");
             pipe4.AddComponent<CollisionComponent>();
             pipe4.AddComponent<Sprite>();
-            //pipe4.GetComponent<Sprite>().spriteId = "pipe_large";
+            pipe4.GetComponent<Sprite>().spriteId = "pipe_large";
             pipe4.Width = 96;
             pipe4.Height = 192;
             pipe4.PosX = pipe3.PosX + 528;
@@ -1662,7 +1698,7 @@ namespace WpfApp1
 
             Entity goomba = Entity.CreateEntity("goomba");
             goomba.AddComponent<CharacterMovementComponent>();
-            //goomba.AddComponent<Gumba>();
+            goomba.AddComponent<Gumba>();
             goomba.AddComponent<CollisionComponent>();
             goomba.AddComponent<Sprite>();
             goomba.GetComponent<Sprite>().spriteId = "goomba";
@@ -1674,7 +1710,7 @@ namespace WpfApp1
 
             Entity goomba2 = Entity.CreateEntity("goomba2");
             goomba2.AddComponent<CharacterMovementComponent>();
-            //goomba2.AddComponent<Gumba>();
+            goomba2.AddComponent<Gumba>();
             goomba2.AddComponent<CollisionComponent>();
             goomba2.AddComponent<Sprite>();
             goomba2.GetComponent<Sprite>().spriteId = "goomba";
@@ -1686,7 +1722,7 @@ namespace WpfApp1
 
             Entity goomba3 = Entity.CreateEntity("goomba3");
             goomba3.AddComponent<CharacterMovementComponent>();
-            //goomba3.AddComponent<Gumba>();
+            goomba3.AddComponent<Gumba>();
             goomba3.AddComponent<CollisionComponent>();
             goomba3.AddComponent<Sprite>();
             goomba3.GetComponent<Sprite>().spriteId = "goomba";
@@ -1698,7 +1734,7 @@ namespace WpfApp1
 
             Entity goomba4 = Entity.CreateEntity("goomba4");
             goomba4.AddComponent<CharacterMovementComponent>();
-            //goomba4.AddComponent<Gumba>();
+            goomba4.AddComponent<Gumba>();
             goomba4.AddComponent<CollisionComponent>();
             goomba4.AddComponent<Sprite>();
             goomba4.GetComponent<Sprite>().spriteId = "goomba";
@@ -1710,7 +1746,7 @@ namespace WpfApp1
 
             Entity goomba5 = Entity.CreateEntity("goomba5");
             goomba5.AddComponent<CharacterMovementComponent>();
-            //goomba5.AddComponent<Gumba>();
+            goomba5.AddComponent<Gumba>();
             goomba5.AddComponent<CollisionComponent>();
             goomba5.AddComponent<Sprite>();
             goomba5.GetComponent<Sprite>().spriteId = "goomba";
@@ -1722,7 +1758,7 @@ namespace WpfApp1
 
             Entity goomba6 = Entity.CreateEntity("goomba6");
             goomba6.AddComponent<CharacterMovementComponent>();
-            //goomba6.AddComponent<Gumba>();
+            goomba6.AddComponent<Gumba>();
             goomba6.AddComponent<CollisionComponent>();
             goomba6.AddComponent<Sprite>();
             goomba6.GetComponent<Sprite>().spriteId = "goomba";
@@ -1734,7 +1770,7 @@ namespace WpfApp1
 
             Entity goomba7 = Entity.CreateEntity("goomba7");
             goomba7.AddComponent<CharacterMovementComponent>();
-            //goomba7.AddComponent<Gumba>();
+            goomba7.AddComponent<Gumba>();
             goomba7.AddComponent<CollisionComponent>();
             goomba7.AddComponent<Sprite>();
             goomba7.GetComponent<Sprite>().spriteId = "goomba";
@@ -1744,9 +1780,9 @@ namespace WpfApp1
             goomba7.PosX = goomba3.PosX + 2208;
             goomba7.PosY = goomba3.PosY;
 
-            Entity goomba8 = Entity.CreateEntity("goomba7");
+            Entity goomba8 = Entity.CreateEntity("goomba8");
             goomba8.AddComponent<CharacterMovementComponent>();
-            //goomba8.AddComponent<Gumba>();
+            goomba8.AddComponent<Gumba>();
             goomba8.AddComponent<CollisionComponent>();
             goomba8.AddComponent<Sprite>();
             goomba8.GetComponent<Sprite>().spriteId = "goomba";
@@ -1769,7 +1805,7 @@ namespace WpfApp1
 
             Entity goomba9 = Entity.CreateEntity("goomba9");
             goomba9.AddComponent<CharacterMovementComponent>();
-            //goomba9.AddComponent<Gumba>();
+            goomba9.AddComponent<Gumba>();
             goomba9.AddComponent<CollisionComponent>();
             goomba9.AddComponent<Sprite>();
             goomba9.GetComponent<Sprite>().spriteId = "goomba";
@@ -1781,7 +1817,7 @@ namespace WpfApp1
 
             Entity goomba10 = Entity.CreateEntity("goomba10");
             goomba10.AddComponent<CharacterMovementComponent>();
-            //goomba10.AddComponent<Gumba>();
+            goomba10.AddComponent<Gumba>();
             goomba10.AddComponent<CollisionComponent>();
             goomba10.AddComponent<Sprite>();
             goomba10.GetComponent<Sprite>().spriteId = "goomba";
@@ -1793,7 +1829,7 @@ namespace WpfApp1
 
             Entity goomba11 = Entity.CreateEntity("goomba11");
             goomba11.AddComponent<CharacterMovementComponent>();
-            //goomba11.AddComponent<Gumba>();
+            goomba11.AddComponent<Gumba>();
             goomba11.AddComponent<CollisionComponent>();
             goomba11.AddComponent<Sprite>();
             goomba11.GetComponent<Sprite>().spriteId = "goomba";
@@ -1805,7 +1841,7 @@ namespace WpfApp1
 
             Entity goomba12 = Entity.CreateEntity("goomba12");
             goomba12.AddComponent<CharacterMovementComponent>();
-            //goomba12.AddComponent<Gumba>();
+            goomba12.AddComponent<Gumba>();
             goomba12.AddComponent<CollisionComponent>();
             goomba12.AddComponent<Sprite>();
             goomba12.GetComponent<Sprite>().spriteId = "goomba";
@@ -1817,7 +1853,7 @@ namespace WpfApp1
 
             Entity goomba13 = Entity.CreateEntity("goomba13");
             goomba13.AddComponent<CharacterMovementComponent>();
-            //goomba13.AddComponent<Gumba>();
+            goomba13.AddComponent<Gumba>();
             goomba13.AddComponent<CollisionComponent>();
             goomba13.AddComponent<Sprite>();
             goomba13.GetComponent<Sprite>().spriteId = "goomba";
@@ -1829,7 +1865,7 @@ namespace WpfApp1
 
             Entity goomba14 = Entity.CreateEntity("goomba14");
             goomba14.AddComponent<CharacterMovementComponent>();
-            //goomba14.AddComponent<Gumba>();
+            goomba14.AddComponent<Gumba>();
             goomba14.AddComponent<CollisionComponent>();
             goomba14.AddComponent<Sprite>();
             goomba14.GetComponent<Sprite>().spriteId = "goomba";
@@ -1841,7 +1877,7 @@ namespace WpfApp1
 
             Entity goomba15 = Entity.CreateEntity("goomba15");
             goomba15.AddComponent<CharacterMovementComponent>();
-            //goomba15.AddComponent<Gumba>();
+            goomba15.AddComponent<Gumba>();
             goomba15.AddComponent<CollisionComponent>();
             goomba15.AddComponent<Sprite>();
             goomba15.GetComponent<Sprite>().spriteId = "goomba";
@@ -1853,7 +1889,7 @@ namespace WpfApp1
 
             Entity goomba16 = Entity.CreateEntity("goomba16");
             goomba16.AddComponent<CharacterMovementComponent>();
-            //goomba16.AddComponent<Gumba>();
+            goomba16.AddComponent<Gumba>();
             goomba16.AddComponent<CollisionComponent>();
             goomba16.AddComponent<Sprite>();
             goomba16.GetComponent<Sprite>().spriteId = "goomba";

@@ -420,7 +420,9 @@ namespace WpfApp1
             if (_cameraCenter.Y > 2 * worldHeight - rect.h)
             {
                 _cameraCenter.Y = 2 * worldHeight - rect.h;
-                System.Environment.Exit(0);
+                Entity mario = Entity.GetEntity("mario", true);
+                mario.PosX = 144;
+                mario.PosY = SDLApp.GetInstance().GetAppHeight() - 144;
             }
 
             _cameraCenter.Y = 0;

@@ -178,6 +178,24 @@ namespace WpfApp1
         {
             _maxY = -_jointLocations[JointType.HandRight].Y;
             Console.WriteLine("MaxY: " + _maxY);
+
+            SDLApp.GetInstance().canStartGoomba = true;
+
+            //Entity.GetEntity("goomba", true).GetComponent<Sprite>().shouldMove = true;
+            //Entity.GetEntity("goomba2", true).GetComponent<Sprite>().shouldMove = true;
+            //Entity.GetEntity("goomba3", true).GetComponent<Sprite>().shouldMove = true;
+            //Entity.GetEntity("goomba4", true).GetComponent<Sprite>().shouldMove = true;
+            //Entity.GetEntity("goomba5", true).GetComponent<Sprite>().shouldMove = true;
+            //Entity.GetEntity("goomba6", true).GetComponent<Sprite>().shouldMove = true;
+            //Entity.GetEntity("goomba7", true).GetComponent<Sprite>().shouldMove = true;
+            //Entity.GetEntity("goomba8", true).GetComponent<Sprite>().shouldMove = true;
+            //Entity.GetEntity("goomba9", true).GetComponent<Sprite>().shouldMove = true;
+            //Entity.GetEntity("goomba10", true).GetComponent<Sprite>().shouldMove = true;
+            //Entity.GetEntity("goomba11", true).GetComponent<Sprite>().shouldMove = true;
+            //Entity.GetEntity("goomba12", true).GetComponent<Sprite>().shouldMove = true;
+            //Entity.GetEntity("goomba13", true).GetComponent<Sprite>().shouldMove = true;
+            //Entity.GetEntity("goomba14", true).GetComponent<Sprite>().shouldMove = true;
+            //Entity.GetEntity("goomba15", true).GetComponent<Sprite>().shouldMove = true;
         }
 
         public void EndOfXCalibration()
@@ -187,6 +205,7 @@ namespace WpfApp1
 
             Console.WriteLine("MinX: " + _minX);
             Console.WriteLine("MaxX: " + _maxX);
+
         }
 
         static public double Map(double value, double istart, double istop, double ostart, double ostop)
