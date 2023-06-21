@@ -261,7 +261,7 @@ namespace WpfApp1
             SDLRendering.LoadTexture("brick.png", "brick");
             SDLRendering.LoadTexture("pipe_small.png", "pipe_small");
             SDLRendering.LoadTexture("pipe_medium.png", "pipe_medium");
-            SDLRendering.LoadTexture("pipe_large.png", "pipe_large");
+            //SDLRendering.LoadTexture("pipe_large.png", "pipe_large");
             backgroundTexture = SDLRendering.LoadTexture("background_objects.png", "background_objects");
 
         }
@@ -484,7 +484,7 @@ namespace WpfApp1
             Entity pipe3 = Entity.CreateEntity("Pipe3");
             pipe3.AddComponent<CollisionComponent>();
             pipe3.AddComponent<Sprite>();
-            pipe3.GetComponent<Sprite>().spriteId = "pipe_large";
+            //pipe3.GetComponent<Sprite>().spriteId = "pipe_large";
             pipe3.Width = 96;
             pipe3.Height = 192;
             pipe3.PosX = pipe2.PosX + 384;
@@ -493,7 +493,7 @@ namespace WpfApp1
             Entity pipe4 = Entity.CreateEntity("Pipe4");
             pipe4.AddComponent<CollisionComponent>();
             pipe4.AddComponent<Sprite>();
-            pipe4.GetComponent<Sprite>().spriteId = "pipe_large";
+            //pipe4.GetComponent<Sprite>().spriteId = "pipe_large";
             pipe4.Width = 96;
             pipe4.Height = 192;
             pipe4.PosX = pipe3.PosX + 528;

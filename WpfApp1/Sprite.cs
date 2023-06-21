@@ -31,6 +31,11 @@ namespace WpfApp1
         {
             base.ReceiveRender();
 
+            if (string.IsNullOrEmpty(spriteId))
+            {
+                return;
+            }
+
             if (_currentAnim == AnimationType.Undefined)
             {
                 // draw all sprite

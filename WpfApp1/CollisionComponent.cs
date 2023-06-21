@@ -130,7 +130,7 @@ namespace WpfApp1
                     {
                         Rect rect = childBounds.GetOverlap(ownerBounds);
 
-                        if (Math.Abs(rect.Width) < Math.Abs(rect.Height))
+                        if (Math.Abs(rect.Width) < Math.Abs(rect.Height) && Math.Abs(rect.Width - ownerBounds.Width) > 0.1f)
                         {
                             if (!IsStatic && rect.Width > 0.01)
                             {
@@ -141,11 +141,32 @@ namespace WpfApp1
                         }
                         else
                         {
-                            if (!IsStatic && rect.Height > 0.01)
+                            Entity o = (Entity)Owner;
+
+                            if (o.HasComponent<CharacterMovementComponent>())
                             {
-                                AccumulatedY = (float)-rect.Height - Math.Sign(rect.Height) * 0.01f;
-                                Owner.AddWorldOffset(0, AccumulatedY);
-                                IsOverlaping = true;
+                                CharacterMovementComponent movementComponent = o.GetComponent<CharacterMovementComponent>();
+                                if (movementComponent.Velocity.Y > 0)
+                                {
+                                    AccumulatedY = (float)rect.Height + 0.01f;
+                                    Owner.AddWorldOffset(0, -AccumulatedY);
+                                    IsOverlaping = true;
+                                }
+                                else if (movementComponent.Velocity.Y < 0)
+                                {
+                                    AccumulatedY = (float)rect.Height + 0.01f;
+                                    Owner.AddWorldOffset(0, AccumulatedY);
+                                    IsOverlaping = true;
+                                }
+                            }
+                            else
+                            {
+                                if (!IsStatic)
+                                {
+                                    AccumulatedY = (float)rect.Height + 0.01f;
+                                    Owner.AddWorldOffset(0, -AccumulatedY);
+                                    IsOverlaping = true;
+                                }
                             }
                         }
 
