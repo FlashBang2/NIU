@@ -130,12 +130,14 @@ namespace WpfApp1
                     {
                         Rect rect = childBounds.GetOverlap(ownerBounds);
 
-                        if (Math.Abs(rect.Width) < Math.Abs(rect.Height) && Math.Abs(rect.Width - ownerBounds.Width) > 0.1f)
+                        if (Math.Abs(rect.Width) < Math.Abs(rect.Height))
                         {
-                            if (!IsStatic && rect.Width > 0.01)
-                            {
-                                Owner.AddWorldOffset(-rect.Width - Math.Sign(rect.Width) * 0.01f, 0);
+                            var x = Owner.PosX - child.PosX;
 
+
+                            if (!IsStatic && rect.Width > 0)
+                            {
+                                Owner.AddWorldOffset(Math.Sign(x) * (rect.Width + Math.Sign(rect.Width)), 0);
                                 IsOverlaping = true;
                             }
                         }
