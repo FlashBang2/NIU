@@ -54,7 +54,7 @@ namespace WpfApp1
                 Owner
             };
 
-            ray.Init(new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height), new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height) + 10 * Owner.Down);
+            ray.Init(new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height), new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height) + 12 * Owner.Down);
             IsFalling = !CollisionComponent.RayCast(ray, ignore, out _);
         }
 

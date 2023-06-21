@@ -213,7 +213,7 @@ namespace WpfApp1
         public static void Main(string[] args)
         {
             SDLApp app = new SDLApp(1920, 1080, "NIU");
-            
+
             LoadTextures();
 
             AddPlatforms(app);
@@ -226,10 +226,25 @@ namespace WpfApp1
 
             renderPipes(app);
 
-            renderStairs(app);
+            Entity goomba = Entity.CreateEntity("goomba");
+            goomba.AddComponent<CharacterMovementComponent>();
+            goomba.AddComponent<Gumba>();
+            goomba.AddComponent<CollisionComponent>();
+            goomba.AddComponent<Sprite>();
+            goomba.GetComponent<Sprite>().spriteId = "goomba";
+            AnimationData gumbaaData = new AnimationData();
+            gumbaaData.StartFrame = 0;
+            gumbaaData.EndFrame = 1;
+            gumbaaData.FrameRatePerSecond = 1;
+            gumbaaData.Width = 48;
+            gumbaaData.Height = 48;
+            goomba.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
 
-            spawnEnemiesAtStartLocation(app);
-
+            goomba.PosX += 200;
+            goomba.Width = 96 / 2;
+            goomba.Height = 48;
             app.Run();
         }
 
@@ -242,6 +257,7 @@ namespace WpfApp1
             SDLRendering.LoadTexture("mario_big.png", "mario_big");
             SDLRendering.LoadTexture("mario_small.png", "mario_small");
             SDLRendering.LoadTexture("questionmark.png", "question_block");
+            SDLRendering.LoadTexture("goomba.png", "goomba");
             SDLRendering.LoadTexture("brick.png", "brick");
             SDLRendering.LoadTexture("block.png", "block");
             SDLRendering.LoadTexture("pipe_small.png", "pipe_small");
@@ -270,7 +286,7 @@ namespace WpfApp1
             SDLRendering.SetWorldBounds(width, height);
         }
 
-        private static void createDownPlatform (SDLApp app)
+        private static void createDownPlatform(SDLApp app)
         {
             Entity firstPlatform = Entity.CreateEntity("firstPlatform");
             firstPlatform.AddComponent<CollisionComponent>();
@@ -783,6 +799,12 @@ namespace WpfApp1
             brick30.PosX = brick29.PosX + 96;
             brick30.PosY = brick27.PosY;
         }
+
+        private static void spawnBackground()
+        {
+
+        }
+        
         private static void renderPipes(SDLApp app)
         {
             Entity pipe = Entity.CreateEntity("Pipe");
