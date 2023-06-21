@@ -235,7 +235,7 @@ namespace WpfApp1
             AnimationData gumbaaData = new AnimationData();
             gumbaaData.StartFrame = 0;
             gumbaaData.EndFrame = 1;
-            gumbaaData.FrameRatePerSecond = 1;
+            gumbaaData.FrameRatePerSecond = 3;
             gumbaaData.Width = 48;
             gumbaaData.Height = 48;
             goomba.GetComponent<CollisionComponent>().IsStatic = false;

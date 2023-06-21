@@ -31,6 +31,9 @@ namespace WpfApp1
         {
             _renderer = renderer;
             SDL_GetRendererOutputSize(renderer, out _screenWidth, out _screenHeight);
+
+            IntPtr surface = SDL_CreateRGBSurface(0, 1, 1, 32, 0, 0, 0, 0);
+            AddTexture(SDL_CreateTextureFromSurface(renderer, surface), "Empty");
         }
 
         public static void Quit()
@@ -248,9 +251,19 @@ namespace WpfApp1
 
         public static void DrawSprite(string textureId, Rect spriteBounds, Rect sourceRect, double angle, SDL_RendererFlip flipMode = SDL_RendererFlip.SDL_FLIP_NONE)
         {
-            IntPtr texture = _textures[textureId];
-            SDL_Rect spriteRect = spriteBounds.AsSDLRect;
             SDL_Rect src = sourceRect.AsSDLRect;
+            SDL_Rect spriteRect = spriteBounds.AsSDLRect;
+
+            if (!_textures.Any(v => v.Key.Equals(textureId)))
+            {
+                textureId = "Empty";
+                DrawRect(spriteRect.x, spriteRect.y, spriteRect.w, spriteRect.h, Color.FromRgb(255, 0, 0));
+                Object[] frames = new StackTrace().GetFrames();
+                Console.WriteLine("Drawing empty sprite " + string.Join(", ", frames));
+                return;
+            }
+
+            IntPtr texture = _textures[textureId];
             SDL_Point p = new SDL_Point();
             p.x = p.y = 0;
 
@@ -335,7 +348,8 @@ namespace WpfApp1
             IntPtr surface = IMG_Load(path);
             if (surface.Equals(IntPtr.Zero))
             {
-                throw new ApplicationException("Couldn't load texture from " + path);
+                Console.Error.WriteLine("Couldn't load texture from " + path);
+                return IntPtr.Zero;
             }
 
             IntPtr texture = SDL_CreateTextureFromSurface(_renderer, surface);
