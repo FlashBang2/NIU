@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -224,27 +225,12 @@ namespace WpfApp1
 
             brickBlocks(app);
 
+            renderStairs(app);
+
             renderPipes(app);
 
-            Entity goomba = Entity.CreateEntity("goomba");
-            goomba.AddComponent<CharacterMovementComponent>();
-            goomba.AddComponent<Gumba>();
-            goomba.AddComponent<CollisionComponent>();
-            goomba.AddComponent<Sprite>();
-            goomba.GetComponent<Sprite>().spriteId = "goomba";
-            AnimationData gumbaaData = new AnimationData();
-            gumbaaData.StartFrame = 0;
-            gumbaaData.EndFrame = 1;
-            gumbaaData.FrameRatePerSecond = 1;
-            gumbaaData.Width = 48;
-            gumbaaData.Height = 48;
-            goomba.GetComponent<CollisionComponent>().IsStatic = false;
-            goomba.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-
-            goomba.PosX += 200;
-            goomba.Width = 96 / 2;
-            goomba.Height = 48;
+            spawnEnemiesAtStartLocation(app);
+            
             app.Run();
         }
 
@@ -258,6 +244,7 @@ namespace WpfApp1
             SDLRendering.LoadTexture("mario_small.png", "mario_small");
             SDLRendering.LoadTexture("questionmark.png", "question_block");
             SDLRendering.LoadTexture("goomba.png", "goomba");
+            SDLRendering.LoadTexture("koopa.png", "koopa");
             SDLRendering.LoadTexture("brick.png", "brick");
             SDLRendering.LoadTexture("block.png", "block");
             SDLRendering.LoadTexture("pipe_small.png", "pipe_small");
@@ -799,11 +786,6 @@ namespace WpfApp1
             brick30.PosX = brick29.PosX + 96;
             brick30.PosY = brick27.PosY;
         }
-
-        private static void spawnBackground()
-        {
-
-        }
         
         private static void renderPipes(SDLApp app)
         {
@@ -849,7 +831,7 @@ namespace WpfApp1
             pipe5.GetComponent<Sprite>().spriteId = "pipe_small";
             pipe5.Width = 96;
             pipe5.Height = 96;
-            pipe5.PosX = pipe4.PosX + 5096;
+            pipe5.PosX = pipe4.PosX + 5090;
             pipe5.PosY = app.GetAppHeight() - 192;
 
             Entity pipe6 = Entity.CreateEntity("Pipe6");
@@ -858,7 +840,7 @@ namespace WpfApp1
             pipe6.GetComponent<Sprite>().spriteId = "pipe_small";
             pipe6.Width = 96;
             pipe6.Height = 96;
-            pipe6.PosX = pipe5.PosX + 672;
+            pipe6.PosX = pipe5.PosX + 768;
             pipe6.PosY = app.GetAppHeight() - 192;
 
         }
@@ -1268,7 +1250,7 @@ namespace WpfApp1
             block45.GetComponent<Sprite>().spriteId = "block";
             block45.Width = 48;
             block45.Height = 48;
-            block45.PosX = block44.PosX + 1056;
+            block45.PosX = block44.PosX + 1104;
             block45.PosY = block44.PosY;
 
             Entity block46 = Entity.CreateEntity("Block46");
@@ -1675,8 +1657,260 @@ namespace WpfApp1
             flag.GetComponent<Sprite>().spriteId = "full-flag";
             flag.Width = 96;
             flag.Height = 480;
-            flag.PosX = 9408;
+            flag.PosX = 9456;
             flag.PosY = app.GetAppHeight() - 624;
+
+            Entity goomba = Entity.CreateEntity("goomba");
+            goomba.AddComponent<CharacterMovementComponent>();
+            //goomba.AddComponent<Gumba>();
+            goomba.AddComponent<CollisionComponent>();
+            goomba.AddComponent<Sprite>();
+            goomba.GetComponent<Sprite>().spriteId = "goomba";
+            goomba.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba.Width = 48;
+            goomba.Height = 48;
+            goomba.PosX = 1056;
+            goomba.PosY = app.GetAppHeight() - 144;
+
+            Entity goomba2 = Entity.CreateEntity("goomba2");
+            goomba2.AddComponent<CharacterMovementComponent>();
+            //goomba2.AddComponent<Gumba>();
+            goomba2.AddComponent<CollisionComponent>();
+            goomba2.AddComponent<Sprite>();
+            goomba2.GetComponent<Sprite>().spriteId = "goomba";
+            goomba2.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba2.Width = 48;
+            goomba2.Height = 48;
+            goomba2.PosX = goomba.PosX + 864;
+            goomba2.PosY = app.GetAppHeight() - 144;
+
+            Entity goomba3 = Entity.CreateEntity("goomba3");
+            goomba3.AddComponent<CharacterMovementComponent>();
+            //goomba3.AddComponent<Gumba>();
+            goomba3.AddComponent<CollisionComponent>();
+            goomba3.AddComponent<Sprite>();
+            goomba3.GetComponent<Sprite>().spriteId = "goomba";
+            goomba3.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba3.Width = 48;
+            goomba3.Height = 48;
+            goomba3.PosX = goomba2.PosX + 528;
+            goomba3.PosY = app.GetAppHeight() - 144;
+
+            Entity goomba4 = Entity.CreateEntity("goomba4");
+            goomba4.AddComponent<CharacterMovementComponent>();
+            //goomba4.AddComponent<Gumba>();
+            goomba4.AddComponent<CollisionComponent>();
+            goomba4.AddComponent<Sprite>();
+            goomba4.GetComponent<Sprite>().spriteId = "goomba";
+            goomba4.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba4.Width = 48;
+            goomba4.Height = 48;
+            goomba4.PosX = goomba3.PosX + 72;
+            goomba4.PosY = app.GetAppHeight() - 144;
+
+            Entity goomba5 = Entity.CreateEntity("goomba5");
+            goomba5.AddComponent<CharacterMovementComponent>();
+            //goomba5.AddComponent<Gumba>();
+            goomba5.AddComponent<CollisionComponent>();
+            goomba5.AddComponent<Sprite>();
+            goomba5.GetComponent<Sprite>().spriteId = "goomba";
+            goomba5.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba5.Width = 48;
+            goomba5.Height = 48;
+            goomba5.PosX = goomba3.PosX + 1392;
+            goomba5.PosY = goomba3.PosY - 384;
+
+            Entity goomba6 = Entity.CreateEntity("goomba6");
+            goomba6.AddComponent<CharacterMovementComponent>();
+            //goomba6.AddComponent<Gumba>();
+            goomba6.AddComponent<CollisionComponent>();
+            goomba6.AddComponent<Sprite>();
+            goomba6.GetComponent<Sprite>().spriteId = "goomba";
+            goomba6.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba6.Width = 48;
+            goomba6.Height = 48;
+            goomba6.PosX = goomba5.PosX + 96;
+            goomba6.PosY = goomba5.PosY;
+
+            Entity goomba7 = Entity.CreateEntity("goomba7");
+            goomba7.AddComponent<CharacterMovementComponent>();
+            //goomba7.AddComponent<Gumba>();
+            goomba7.AddComponent<CollisionComponent>();
+            goomba7.AddComponent<Sprite>();
+            goomba7.GetComponent<Sprite>().spriteId = "goomba";
+            goomba7.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba7.Width = 48;
+            goomba7.Height = 48;
+            goomba7.PosX = goomba3.PosX + 2208;
+            goomba7.PosY = goomba3.PosY;
+
+            Entity goomba8 = Entity.CreateEntity("goomba7");
+            goomba8.AddComponent<CharacterMovementComponent>();
+            //goomba8.AddComponent<Gumba>();
+            goomba8.AddComponent<CollisionComponent>();
+            goomba8.AddComponent<Sprite>();
+            goomba8.GetComponent<Sprite>().spriteId = "goomba";
+            goomba8.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba8.Width = 48;
+            goomba8.Height = 48;
+            goomba8.PosX = goomba7.PosX + 72;
+            goomba8.PosY = goomba7.PosY;
+
+            Entity koopa = Entity.CreateEntity("Koopa");
+            koopa.AddComponent<CharacterMovementComponent>();
+            koopa.AddComponent<CollisionComponent>();
+            koopa.AddComponent<Sprite>();
+            koopa.GetComponent<Sprite>().spriteId = "koopa";
+            //koopa.GetComponent<CollisionComponent>().IsStatic = false;
+            koopa.Width = 48;
+            koopa.Height = 36;
+            koopa.PosX = goomba7.PosX + 480;
+            koopa.PosY = goomba7.PosY - 48;
+
+            Entity goomba9 = Entity.CreateEntity("goomba9");
+            goomba9.AddComponent<CharacterMovementComponent>();
+            //goomba9.AddComponent<Gumba>();
+            goomba9.AddComponent<CollisionComponent>();
+            goomba9.AddComponent<Sprite>();
+            goomba9.GetComponent<Sprite>().spriteId = "goomba";
+            goomba9.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba9.Width = 48;
+            goomba9.Height = 48;
+            goomba9.PosX = goomba7.PosX + 816;
+            goomba9.PosY = goomba7.PosY;
+
+            Entity goomba10 = Entity.CreateEntity("goomba10");
+            goomba10.AddComponent<CharacterMovementComponent>();
+            //goomba10.AddComponent<Gumba>();
+            goomba10.AddComponent<CollisionComponent>();
+            goomba10.AddComponent<Sprite>();
+            goomba10.GetComponent<Sprite>().spriteId = "goomba";
+            goomba10.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba10.Width = 48;
+            goomba10.Height = 48;
+            goomba10.PosX = goomba9.PosX + 72;
+            goomba10.PosY = goomba9.PosY;
+
+            Entity goomba11 = Entity.CreateEntity("goomba11");
+            goomba11.AddComponent<CharacterMovementComponent>();
+            //goomba11.AddComponent<Gumba>();
+            goomba11.AddComponent<CollisionComponent>();
+            goomba11.AddComponent<Sprite>();
+            goomba11.GetComponent<Sprite>().spriteId = "goomba";
+            goomba11.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba11.Width = 48;
+            goomba11.Height = 48;
+            goomba11.PosX = goomba9.PosX + 480;
+            goomba11.PosY = goomba9.PosY;
+
+            Entity goomba12 = Entity.CreateEntity("goomba12");
+            goomba12.AddComponent<CharacterMovementComponent>();
+            //goomba12.AddComponent<Gumba>();
+            goomba12.AddComponent<CollisionComponent>();
+            goomba12.AddComponent<Sprite>();
+            goomba12.GetComponent<Sprite>().spriteId = "goomba";
+            goomba12.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba12.Width = 48;
+            goomba12.Height = 48;
+            goomba12.PosX = goomba11.PosX + 72;
+            goomba12.PosY = goomba11.PosY;
+
+            Entity goomba13 = Entity.CreateEntity("goomba13");
+            goomba13.AddComponent<CharacterMovementComponent>();
+            //goomba13.AddComponent<Gumba>();
+            goomba13.AddComponent<CollisionComponent>();
+            goomba13.AddComponent<Sprite>();
+            goomba13.GetComponent<Sprite>().spriteId = "goomba";
+            goomba13.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba13.Width = 48;
+            goomba13.Height = 48;
+            goomba13.PosX = goomba11.PosX + 192;
+            goomba13.PosY = goomba11.PosY;
+
+            Entity goomba14 = Entity.CreateEntity("goomba14");
+            goomba14.AddComponent<CharacterMovementComponent>();
+            //goomba14.AddComponent<Gumba>();
+            goomba14.AddComponent<CollisionComponent>();
+            goomba14.AddComponent<Sprite>();
+            goomba14.GetComponent<Sprite>().spriteId = "goomba";
+            goomba14.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba14.Width = 48;
+            goomba14.Height = 48;
+            goomba14.PosX = goomba13.PosX + 72;
+            goomba14.PosY = goomba13.PosY;
+
+            Entity goomba15 = Entity.CreateEntity("goomba15");
+            goomba15.AddComponent<CharacterMovementComponent>();
+            //goomba15.AddComponent<Gumba>();
+            goomba15.AddComponent<CollisionComponent>();
+            goomba15.AddComponent<Sprite>();
+            goomba15.GetComponent<Sprite>().spriteId = "goomba";
+            goomba15.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba15.Width = 48;
+            goomba15.Height = 48;
+            goomba15.PosX = goomba13.PosX + 2208;
+            goomba15.PosY = goomba13.PosY;
+
+            Entity goomba16 = Entity.CreateEntity("goomba16");
+            goomba16.AddComponent<CharacterMovementComponent>();
+            //goomba16.AddComponent<Gumba>();
+            goomba16.AddComponent<CollisionComponent>();
+            goomba16.AddComponent<Sprite>();
+            goomba16.GetComponent<Sprite>().spriteId = "goomba";
+            goomba16.GetComponent<CollisionComponent>().IsStatic = false;
+            goomba16.Width = 48;
+            goomba16.Height = 48;
+            goomba16.PosX = goomba15.PosX + 72;
+            goomba16.PosY = goomba15.PosY;
+
+            AnimationData koopaData = new AnimationData();
+            koopaData.StartFrame = 0;
+            koopaData.EndFrame = 1;
+            koopaData.FrameRatePerSecond = 4;
+            koopaData.Width = 48;
+            koopaData.Height = 36;
+
+            AnimationData gumbaaData = new AnimationData();
+            gumbaaData.StartFrame = 0;
+            gumbaaData.EndFrame = 1;
+            gumbaaData.FrameRatePerSecond = 4;
+            gumbaaData.Width = 48;
+            gumbaaData.Height = 48;
+
+            koopa.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, koopaData);
+            goomba.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba2.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba3.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba4.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba5.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba6.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba7.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba8.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba9.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba10.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba11.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba12.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba13.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba14.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba15.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            goomba16.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
+            koopa.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba2.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba3.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba4.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba5.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba6.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba7.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba8.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba9.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba10.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba11.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba12.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba13.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba14.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba15.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            goomba16.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace WpfApp1
     public class Gumba : Component
     {
         private const int Speed = 5;
-        float directionScale = 1.0f;
+        float directionScale = -1.0f;
 
         public override void OnTick(float dt)
         {
