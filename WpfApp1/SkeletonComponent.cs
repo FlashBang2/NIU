@@ -177,7 +177,7 @@ namespace WpfApp1
 
                 if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_SPACE) && !Owner.GetComponent<CharacterMovementComponent>().IsFalling)
                 {
-                    Owner.GetComponent<CharacterMovementComponent>().Velocity = new Vector(Owner.GetComponent<CharacterMovementComponent>().Velocity.X, -20);
+                    Owner.GetComponent<CharacterMovementComponent>().Velocity = new Vector(Owner.GetComponent<CharacterMovementComponent>().Velocity.X, -30);
                 }
             }
             else if (State == SkeletonComponentState.GameRunning)
@@ -336,6 +336,8 @@ namespace WpfApp1
 
         public override bool Destroyed()
         {
+            Owner.PosX = 144;
+            Owner.PosY = SDLApp.GetInstance().GetAppHeight() - 144;
             return true;
         }
     }

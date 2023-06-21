@@ -1727,6 +1727,15 @@ namespace WpfApp1
             flag.Height = 480;
             flag.PosX = 9456;
             flag.PosY = app.GetAppHeight() - 624;
+            CollisionComponent flagCollision = flag.GetComponent<CollisionComponent>();
+            flagCollision.IsTrigger = true;
+            flagCollision.Overlaped += e =>
+            {
+                if (e.LastContact.Name.Equals("mario"))
+                {
+                    Entity.GetEntity("mario", true).Destroy();
+                }
+            };
 
             Entity goomba = Entity.CreateEntity("goomba");
             goomba.AddComponent<CharacterMovementComponent>();

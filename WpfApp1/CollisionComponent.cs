@@ -78,7 +78,6 @@ namespace WpfApp1
         {
             IEntity[] children = Entity.RootEntity.GetChildren();
 
-
             Rect ownerBounds = Owner.Bounds;
             IsOverlaping = false;
 
@@ -110,6 +109,10 @@ namespace WpfApp1
                         {
                             if (cb.IsOverlaping(ownerBounds) && ownerBounds.IsOverlaping(cb))
                             {
+                                if (child.Name.Equals("mario"))
+                                {
+                                    Console.WriteLine(Owner.Name);
+                                }
                                 OverlapEvent evt = new OverlapEvent();
                                 evt.Self = Owner;
                                 evt.LastContact = child;
