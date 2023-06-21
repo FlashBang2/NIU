@@ -211,15 +211,17 @@ namespace WpfApp1
 
         public void Destroy()
         {
-            Destroyed();
+            foreach (var component in _components)
+            {
+                if (component.Destroyed())
+                {
+                    return;
+                }
+            }
+
             foreach (var child in _children)
             {
                 child.Destroy();
-            }
-
-            foreach (var component in _components)
-            {
-                component.Destroyed();
             }
 
             _parent?.RemoveChild(this);
@@ -299,11 +301,15 @@ namespace WpfApp1
                 component.OnTick((float)dt);
             }
 
-            foreach (var child in _children)
+            for (var i = 0; i < _children.Count; i++)
             {
-                child.Tick(dt);
+                _children[i].Tick(dt);
             }
 
+            if (PosY > SDLApp.GetInstance().GetAppHeight() /*&& !HasComponent<SkeletonComponent>()*/)
+            {
+                Destroy();
+            }
         }
 
         public IEntity[] GetChildren()

@@ -20,8 +20,9 @@ namespace WpfApp1
         {
         }
 
-        public virtual void Destroyed()
+        public virtual bool Destroyed()
         {
+            return false;
         }
 
         public void OnComponentRegistered(IEntity owner)

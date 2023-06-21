@@ -334,5 +334,10 @@ namespace WpfApp1
             return isJumping;
         }
 
+        public override bool Destroyed()
+        {
+            return true;
+        }
     }
+
 }

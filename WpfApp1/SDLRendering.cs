@@ -420,7 +420,6 @@ namespace WpfApp1
             if (_cameraCenter.Y > 2 * worldHeight - rect.h)
             {
                 _cameraCenter.Y = 2 * worldHeight - rect.h;
-                System.Environment.Exit(0);
             }
 
             _cameraCenter.Y = 0;
