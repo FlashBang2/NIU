@@ -32,7 +32,7 @@ namespace WpfApp1
             _renderer = renderer;
             SDL_GetRendererOutputSize(renderer, out _screenWidth, out _screenHeight);
 
-            IntPtr surface = SDL_CreateRGBSurface(0, 1, 1, 32, 0, 0, 0, 0);
+            IntPtr surface = SDL_CreateRGBSurface(0, 1, 1, 32, 0, 0, 0, 0xff000000);
             AddTexture(SDL_CreateTextureFromSurface(renderer, surface), "Empty");
         }
 
