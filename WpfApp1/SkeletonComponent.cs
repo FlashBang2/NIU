@@ -202,7 +202,7 @@ namespace WpfApp1
 
                 if (isJumping && !Owner.GetComponent<CharacterMovementComponent>().IsFalling)
                 {
-                    Owner.GetComponent<CharacterMovementComponent>().Velocity = new Vector(Owner.GetComponent<CharacterMovementComponent>().Velocity.X, -20);
+                    Owner.GetComponent<CharacterMovementComponent>().Velocity = new Vector(Owner.GetComponent<CharacterMovementComponent>().Velocity.X, -22);
                 }
             }
 
