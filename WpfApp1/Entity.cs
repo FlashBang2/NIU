@@ -38,6 +38,7 @@ namespace WpfApp1
             {
                 if (!shouldOnlyTop)
                 {
+                    return null;
                     throw new ArgumentException("Couldn't find such entity");
                 }
 
@@ -211,15 +212,17 @@ namespace WpfApp1
 
         public void Destroy()
         {
-            Destroyed();
+            foreach (var component in _components)
+            {
+                if (component.Destroyed())
+                {
+                    return;
+                }
+            }
+
             foreach (var child in _children)
             {
                 child.Destroy();
-            }
-
-            foreach (var component in _components)
-            {
-                component.Destroyed();
             }
 
             _parent?.RemoveChild(this);
@@ -243,6 +246,11 @@ namespace WpfApp1
             return component;
         }
 
+        public bool IsInViewRect(Entity other)
+        {
+            return other.Bounds.IsOverlaping(new Rect(PosX - SDLApp.GetInstance().GetAppWidth(), PosY - SDLApp.GetInstance().GetAppHeight(), 4 * SDLApp.GetInstance().GetAppWidth(), 4 * SDLApp.GetInstance().GetAppHeight())); ;
+        }
+
         public void ReceiveRender()
         {
             if (!_active)
@@ -263,9 +271,15 @@ namespace WpfApp1
                 }
             }
 
+            Entity mario = Entity.GetEntity("mario", true);
+
             foreach (var child in _children)
             {
-                child.ReceiveRender();
+                Entity e = (Entity)child;
+                if (mario.IsInViewRect(e))
+                {
+                    child.ReceiveRender();
+                }
             }
         }
 
@@ -299,12 +313,20 @@ namespace WpfApp1
             {
                 component.OnTick((float)dt);
             }
+            Entity mario = Entity.GetEntity("mario", true);
 
-            foreach (var child in _children)
+            for (var i = 0; i < _children.Count; i++)
             {
-                child.Tick(dt);
+                if (mario.IsInViewRect((Entity)_children[i]))
+                {
+                    _children[i].Tick(dt);
+                }
             }
-           
+
+            if (PosY > SDLApp.GetInstance().GetAppHeight() /*&& !HasComponent<SkeletonComponent>()*/)
+            {
+                Destroy();
+            }
         }
 
         public IEntity[] GetChildren()

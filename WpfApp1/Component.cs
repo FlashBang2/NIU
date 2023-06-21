@@ -20,8 +20,10 @@ namespace WpfApp1
         {
         }
 
-        public virtual void Destroyed()
+        // should return true, if object will handle respawn
+        public virtual bool Destroyed()
         {
+            return false;
         }
 
         public void OnComponentRegistered(IEntity owner)
