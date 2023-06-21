@@ -20,6 +20,7 @@ namespace WpfApp1
         {
         }
 
+        // should return true, if object will handle respawn
         public virtual bool Destroyed()
         {
             return false;
