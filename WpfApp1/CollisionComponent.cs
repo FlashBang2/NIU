@@ -132,20 +132,43 @@ namespace WpfApp1
 
                         if (Math.Abs(rect.Width) < Math.Abs(rect.Height))
                         {
-                            if (!IsStatic && rect.Width > 0.01)
-                            {
-                                Owner.AddWorldOffset(-rect.Width - Math.Sign(rect.Width) * 0.01f, 0);
+                            var x = Owner.PosX - child.PosX;
 
+
+                            if (!IsStatic && rect.Width > 0)
+                            {
+                                Owner.AddWorldOffset(Math.Sign(x) * (rect.Width + Math.Sign(rect.Width)), 0);
                                 IsOverlaping = true;
                             }
                         }
                         else
                         {
-                            if (!IsStatic && rect.Height > 0.01)
+                            Entity o = (Entity)Owner;
+
+                            if (o.HasComponent<CharacterMovementComponent>())
                             {
-                                AccumulatedY = (float)-rect.Height - Math.Sign(rect.Height) * 0.01f;
-                                Owner.AddWorldOffset(0, AccumulatedY);
-                                IsOverlaping = true;
+                                CharacterMovementComponent movementComponent = o.GetComponent<CharacterMovementComponent>();
+                                if (movementComponent.Velocity.Y > 0)
+                                {
+                                    AccumulatedY = (float)rect.Height + 0.01f;
+                                    Owner.AddWorldOffset(0, -AccumulatedY);
+                                    IsOverlaping = true;
+                                }
+                                else if (movementComponent.Velocity.Y < 0)
+                                {
+                                    AccumulatedY = (float)rect.Height + 0.01f;
+                                    Owner.AddWorldOffset(0, AccumulatedY);
+                                    IsOverlaping = true;
+                                }
+                            }
+                            else
+                            {
+                                if (!IsStatic)
+                                {
+                                    AccumulatedY = (float)rect.Height + 0.01f;
+                                    Owner.AddWorldOffset(0, -AccumulatedY);
+                                    IsOverlaping = true;
+                                }
                             }
                         }
 

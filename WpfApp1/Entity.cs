@@ -178,6 +178,7 @@ namespace WpfApp1
 
         public void AddWorldOffset(double x, double y)
         {
+            _lastPos = new Vector(PosX, PosY);
             Ray ray = new Ray();
             ray.Init(new Vector(PosX, PosY), new Vector(PosX + x, PosY + y));
             PosX += x;
