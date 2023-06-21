@@ -258,8 +258,6 @@ namespace WpfApp1
             {
                 textureId = "Empty";
                 DrawRect(spriteRect.x, spriteRect.y, spriteRect.w, spriteRect.h, Color.FromRgb(255, 0, 0));
-                Object[] frames = new StackTrace().GetFrames();
-                Console.WriteLine("Drawing empty sprite " + string.Join(", ", frames));
                 return;
             }
 
@@ -349,6 +347,8 @@ namespace WpfApp1
             if (surface.Equals(IntPtr.Zero))
             {
                 Console.Error.WriteLine("Couldn't load texture from " + path);
+                Object[] frames = new StackTrace(true).GetFrames();
+                Console.WriteLine("Drawing empty sprite \n" + string.Join("\n", frames));
                 return IntPtr.Zero;
             }
 
