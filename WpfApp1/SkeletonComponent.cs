@@ -336,6 +336,8 @@ namespace WpfApp1
 
         public override bool Destroyed()
         {
+            Owner.PosX = 144;
+            Owner.PosY = SDLApp.GetInstance().GetAppHeight() - 144;
             return true;
         }
     }
