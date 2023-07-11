@@ -34,6 +34,12 @@ namespace WpfApp1
 
         private IDictionary<string, SharedAnimation> animations = new Dictionary<string, SharedAnimation>();
 
+        public override void Spawned()
+        {
+            base.Spawned();
+            isActive = true;
+        }
+
         public override void OnTick(float dt)
         {
             base.OnTick(dt);

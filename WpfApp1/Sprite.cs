@@ -10,9 +10,6 @@ namespace WpfApp1
 
         public bool shouldMove = false;
         bool IRenderable.ShouldDraw => SkeletonComponent.IsPostCalibrationStage;
-
-        Rect IRenderable.SourceTextureBounds { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
         public string spriteId;
 
         private readonly Dictionary<AnimationType, AnimationDataCache> _animData = new Dictionary<AnimationType, AnimationDataCache>();

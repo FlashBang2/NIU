@@ -24,8 +24,10 @@ namespace WpfApp1
         private readonly IDictionary<Type, Component> _newComponents = new Dictionary<Type, Component>();
 
         public static Entity RootEntity = new Entity("Root");
-        public static bool HasCalculatedTickyComponents = false;
+        public static bool ShowedCountOfTickyComponents = false;
         public static int NumTickyComponents = 0;
+        private static int FramesToSkip = 4;
+
         public float lastX = 0;
         public float lastY = 0;
 
@@ -302,7 +304,7 @@ namespace WpfApp1
             {
                 component.OnTick(dt);
             }
-            if (!HasCalculatedTickyComponents)
+            if (!ShowedCountOfTickyComponents)
             {
                 NumTickyComponents += _tickyComponents.Count;
             }
@@ -311,10 +313,17 @@ namespace WpfApp1
 
             for (var i = 0; i < _children.Count; i++)
             {
-                if (mario.IsInViewRect((Entity)_children[i]))
+                if (FramesToSkip == 0 || mario.IsInViewRect((Entity)_children[i]))
                 {
                     _children[i].Tick(dt);
                 }
+            }
+
+            FramesToSkip--;
+
+            if (FramesToSkip < 0)
+            {
+                FramesToSkip = 4;
             }
 
             if (PosY > SDLApp.GetInstance().GetAppHeight() /*&& !HasComponent<SkeletonComponent>()*/)
@@ -322,9 +331,13 @@ namespace WpfApp1
                 Destroy();
             }
 
-            if (Name.Equals("Root"))
+            if (!ShowedCountOfTickyComponents)
             {
-                HasCalculatedTickyComponents = true;
+                if (Name.Equals("Root"))
+                {
+                    Console.WriteLine("Num ticky components: " + NumTickyComponents);
+                    ShowedCountOfTickyComponents = true;
+                }
             }
         }
 

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using static SDL2.SDL;
 
 namespace WpfApp1
 {
@@ -19,9 +17,6 @@ namespace WpfApp1
         public bool IsFalling { get; private set; }
 
         public bool ShouldDraw => true;
-
-        public double RotationAngle { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public Rect SourceTextureBounds { get => new Rect(); set => throw new NotImplementedException(); }
 
         public override void Spawned()
         {

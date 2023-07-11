@@ -13,6 +13,13 @@ namespace WpfApp1
         float directionScale = -1.0f;
 
         private bool killed = false;
+
+        public override void Spawned()
+        {
+            base.Spawned();
+            isActive = true;
+        }
+
         public override void OnTick(float dt)
         {
             base.OnTick(dt);
