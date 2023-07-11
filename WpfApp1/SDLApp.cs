@@ -109,8 +109,8 @@ namespace WpfApp1
                 Entity.RootEntity.ReceiveRender();
                 SDLRendering.RenderFrame();
 
-                if (Math.Abs(Entity.GetEntity("goomba", true).PosX 
-                    - 
+                if (Math.Abs(Entity.GetEntity("goomba", true).PosX
+                    -
                     Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
 
                     Entity.GetEntity("goomba", true).GetComponent<Sprite>().shouldMove = true;
@@ -433,6 +433,7 @@ namespace WpfApp1
             slowdownData.Width = 48;
             slowdownData.Height = 48;
 
+            mario.GetComponent<Sprite>().ShouldUseSharedAnimationManager = false;
             mario.GetComponent<Sprite>().AddAnimation(AnimationType.Walk, walkData);
             mario.GetComponent<Sprite>().AddAnimation(AnimationType.SlowDown, slowdownData);
             mario.GetComponent<Sprite>().AddAnimation(AnimationType.Jump, jumpData);
@@ -565,32 +566,37 @@ namespace WpfApp1
             idleQuestion.Width = 48;
             idleQuestion.Height = 48;
 
-            questionBlock.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
-            questionBlock2.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
-            questionBlock3.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
-            questionBlock4.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
-            questionBlock5.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
-            questionBlock6.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
-            questionBlock7.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
-            questionBlock8.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
-            questionBlock9.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
-            questionBlock10.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
-            questionBlock11.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
-            questionBlock12.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
-            questionBlock13.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, idleQuestion);
-            questionBlock.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            questionBlock2.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            questionBlock3.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            questionBlock4.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            questionBlock5.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            questionBlock6.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            questionBlock7.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            questionBlock8.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            questionBlock9.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            questionBlock10.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            questionBlock11.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            questionBlock12.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            questionBlock13.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            SharedAnimationManager manager = Entity.RootEntity.GetComponent<SharedAnimationManager>();
+
+            manager.AddAnimation("question_block", AnimationType.Idle, idleQuestion);
+            manager.PlayAnim("question_block", AnimationType.Idle);
+
+            questionBlock.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock2.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock3.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock4.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock5.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock6.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock7.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock8.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock9.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock10.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock11.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock12.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock13.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock2.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock3.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock4.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock5.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock6.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock7.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock8.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock9.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock10.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock11.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock12.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock13.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
         }
         private static void brickBlocks(SDLApp app)
         {
@@ -864,7 +870,7 @@ namespace WpfApp1
             brick30.PosX = brick29.PosX + 96;
             brick30.PosY = brick27.PosY;
         }
-        
+
         private static void renderPipes(SDLApp app)
         {
             Entity pipe = Entity.CreateEntity("Pipe");
@@ -1122,7 +1128,7 @@ namespace WpfApp1
             block22.PosX = block21.PosX + 48;
             block22.PosY = block21.PosY;
 
-            
+
             Entity block23 = Entity.CreateEntity("Block23");
             block23.AddComponent<CollisionComponent>();
             block23.AddComponent<Sprite>();
@@ -1132,7 +1138,7 @@ namespace WpfApp1
             block23.PosX = block22.PosX;
             block23.PosY = block22.PosY - 48;
 
-            
+
             Entity block24 = Entity.CreateEntity("Block24");
             block24.AddComponent<CollisionComponent>();
             block24.AddComponent<Sprite>();
@@ -1726,7 +1732,7 @@ namespace WpfApp1
             block89.Height = 48;
             block89.PosX = block81.PosX + 432;
             block89.PosY = block81.PosY;
-        } 
+        }
         private static void spawnEnemiesAtStartLocation(SDLApp app)
         {
             Entity flag = Entity.CreateEntity("flag");
@@ -1964,40 +1970,31 @@ namespace WpfApp1
             gumbaaData.Width = 48;
             gumbaaData.Height = 48;
 
-            koopa.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, koopaData);
-            goomba.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba2.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba3.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba4.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba5.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba6.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba7.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba8.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba9.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba10.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba11.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba12.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba13.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba14.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba15.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            goomba16.GetComponent<Sprite>().AddAnimation(AnimationType.Idle, gumbaaData);
-            koopa.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba2.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba3.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba4.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba5.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba6.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba7.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba8.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba9.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba10.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba11.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba12.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba13.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba14.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba15.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
-            goomba16.GetComponent<Sprite>().PlayAnim(AnimationType.Idle);
+            SharedAnimationManager manager = Entity.RootEntity.GetComponent<SharedAnimationManager>();
+
+            manager.AddAnimation("goomba", AnimationType.Idle, gumbaaData);
+            manager.PlayAnim("goomba", AnimationType.Idle);
+
+            manager.AddAnimation("koopa", AnimationType.Idle, koopaData);
+            manager.PlayAnim("koopa", AnimationType.Idle);
+
+            koopa.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba2.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba3.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba4.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba5.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba6.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba7.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba8.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba9.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba10.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba11.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba12.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba13.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba14.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba15.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba16.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
         }
     }
 }

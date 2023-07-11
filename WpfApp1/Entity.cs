@@ -27,6 +27,11 @@ namespace WpfApp1
         public float lastX = 0;
         public float lastY = 0;
 
+        static Entity()
+        {
+            RootEntity.AddComponent<SharedAnimationManager>();
+        }
+
         public static Entity CreateEntity(string name)
         {
             Entity e = new Entity(name);

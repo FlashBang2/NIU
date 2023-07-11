@@ -63,6 +63,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Gumba.cs" />
+    <Compile Include="SharedAnimationManager.cs" />
     <Compile Include="SpriteAnim\AnimationData.cs" />
     <Compile Include="SpriteAnim\AnimationDataCache.cs" />
     <Compile Include="SpriteAnim\AnimationType.cs" />
@@ -84,7 +85,6 @@
     <Compile Include="SkeletonComponent.cs" />
     <Compile Include="Sprite.cs" />
     <Compile Include="Timer.cs" />
-    <Compile Include="WpfPhysicsBody.cs" />
     <Compile Include="Rect.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>

@@ -22,6 +22,15 @@ namespace WpfApp1
 
         public SDL_RendererFlip FlipMode = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_NONE;
 
+        public bool ShouldUseSharedAnimationManager = false;
+        SharedAnimationManager animationManager;
+
+        public override void Spawned()
+        {
+            base.Spawned();
+            animationManager = Entity.RootEntity.GetComponent<SharedAnimationManager>();
+        }
+
         public override void OnTick(float dt)
         {
             base.OnTick(dt);
@@ -38,14 +47,22 @@ namespace WpfApp1
                 return;
             }
 
-            if (_currentAnim == AnimationType.Undefined)
+            if (!ShouldUseSharedAnimationManager)
             {
-                // draw all sprite
-                SDLRendering.DrawSprite(spriteId, Owner.Bounds, SdlRectMath.UnlimitedRect, RotationAngle, FlipMode);
+                if (_currentAnim == AnimationType.Undefined)
+                {
+                    // draw all sprite
+                    SDLRendering.DrawSprite(spriteId, Owner.Bounds, SdlRectMath.UnlimitedRect, RotationAngle, FlipMode);
+                }
+                else
+                {
+                    UpdateAnimation();
+                }
             }
             else
             {
-                UpdateAnimation();
+                animationManager.GetRenderRect(spriteId, out SdlRectMath.DummyEndResult);
+                SDLRendering.DrawSprite(spriteId, Owner.Bounds, SdlRectMath.DummyEndResult, RotationAngle, FlipMode);
             }
         }
 
