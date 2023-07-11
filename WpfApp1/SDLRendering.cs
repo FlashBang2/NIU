@@ -25,8 +25,8 @@ namespace WpfApp1
         private static readonly List<IRenderable> _renderables = new List<IRenderable>();
 
         private static Vector _cameraCenter = new Vector();
-        private static int _screenWidth = 0;
-        private static int _screenHeight = 0;
+        public static int _screenWidth = 0;
+        public static int _screenHeight = 0;
         private static bool isMovingRight = false;
 
         public static void Init(IntPtr renderer)
@@ -316,7 +316,7 @@ namespace WpfApp1
 
             TTF_SizeText(_fonts[fontId], text, out int w, out int h);
 
-            DrawSprite(texture, new Rect(posX - _cameraCenter.X, posY - _cameraCenter.Y, w, h), Rect.Unlimited, 0);
+            DrawSprite(texture, new Rect(posX + _cameraCenter.X, posY + _cameraCenter.Y, w, h), Rect.Unlimited, 0);
         }
 
         public static void DrawTextOnCenterPivot(string text, string fontId, double posX, double posY, Color color)

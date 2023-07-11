@@ -35,6 +35,10 @@ namespace WpfApp1
         static Entity()
         {
             RootEntity.AddComponent<SharedAnimationManager>();
+            if (SDLApp.ShouldShowFps)
+            {
+                RootEntity.AddComponent<FrameRateRendererComponent>();
+            }
         }
 
         public static Entity CreateEntity(string name)

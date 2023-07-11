@@ -25,6 +25,7 @@ namespace WpfApp1
         private bool _isOpen = true;
 
         public bool canStartGoomba = false;
+        public static bool ShouldShowFps = false;
 
         private static SDLApp _instance;
 
@@ -84,13 +85,13 @@ namespace WpfApp1
             return h;
         }
 
+        public static float DeltaTime = 0.0f;
 
         public void Run()
         {
             Debug.Assert(!_window.Equals(IntPtr.Zero));
 
             uint lastTick = SDL_GetTicks();
-            float delta = 0.0f;
 
             while (_isOpen)
             {
@@ -100,17 +101,17 @@ namespace WpfApp1
                 }
 
                 uint tick_time = SDL_GetTicks();
-                delta = tick_time - lastTick;
+                DeltaTime = tick_time - lastTick;
                 lastTick = tick_time;
 
-                Entity.RootEntity.Tick(delta / 1000.0f);
+                Entity.RootEntity.Tick(DeltaTime / 1000.0f);
 
                 SDLRendering.ClearFrame();
                 Entity.RootEntity.ReceiveRender();
                 SDLRendering.RenderFrame();
 
-                if (Math.Abs(Entity.GetEntity("goomba", true).PosX 
-                    - 
+                if (Math.Abs(Entity.GetEntity("goomba", true).PosX
+                    -
                     Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
 
                     Entity.GetEntity("goomba", true).GetComponent<Sprite>().shouldMove = true;
@@ -284,6 +285,8 @@ namespace WpfApp1
 
         public static void Main(string[] args)
         {
+            ShouldShowFps = true;
+
 #if true
             SDLApp app = new SDLApp(1920, 1080, "NIU");
 
@@ -573,27 +576,27 @@ namespace WpfApp1
             manager.PlayAnim("question_block", AnimationType.Idle);
 
             questionBlock.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
-            questionBlock2.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            questionBlock3.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            questionBlock4.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            questionBlock5.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            questionBlock6.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            questionBlock7.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            questionBlock8.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            questionBlock9.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
+            questionBlock2.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock3.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock4.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock5.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock6.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock7.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock8.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock9.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
             questionBlock10.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
             questionBlock11.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
             questionBlock12.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
             questionBlock13.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
-            questionBlock.GetComponent<Sprite>()  .ShouldUseSharedAnimationManager = true;
-            questionBlock2.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            questionBlock3.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            questionBlock4.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            questionBlock5.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            questionBlock6.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            questionBlock7.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            questionBlock8.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            questionBlock9.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
+            questionBlock.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock2.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock3.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock4.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock5.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock6.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock7.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock8.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            questionBlock9.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
             questionBlock10.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
             questionBlock11.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
             questionBlock12.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
@@ -871,7 +874,7 @@ namespace WpfApp1
             brick30.PosX = brick29.PosX + 96;
             brick30.PosY = brick27.PosY;
         }
-        
+
         private static void renderPipes(SDLApp app)
         {
             Entity pipe = Entity.CreateEntity("Pipe");
@@ -1129,7 +1132,7 @@ namespace WpfApp1
             block22.PosX = block21.PosX + 48;
             block22.PosY = block21.PosY;
 
-            
+
             Entity block23 = Entity.CreateEntity("Block23");
             block23.AddComponent<CollisionComponent>();
             block23.AddComponent<Sprite>();
@@ -1139,7 +1142,7 @@ namespace WpfApp1
             block23.PosX = block22.PosX;
             block23.PosY = block22.PosY - 48;
 
-            
+
             Entity block24 = Entity.CreateEntity("Block24");
             block24.AddComponent<CollisionComponent>();
             block24.AddComponent<Sprite>();
@@ -1733,7 +1736,7 @@ namespace WpfApp1
             block89.Height = 48;
             block89.PosX = block81.PosX + 432;
             block89.PosY = block81.PosY;
-        } 
+        }
         private static void spawnEnemiesAtStartLocation(SDLApp app)
         {
             Entity flag = Entity.CreateEntity("flag");
@@ -1981,14 +1984,14 @@ namespace WpfApp1
 
             koopa.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
             goomba.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
-            goomba2.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            goomba3.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            goomba4.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            goomba5.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            goomba6.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            goomba7.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            goomba8.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
-            goomba9.GetComponent<Sprite>() .ShouldUseSharedAnimationManager = true;
+            goomba2.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba3.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba4.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba5.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba6.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba7.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba8.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
+            goomba9.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
             goomba10.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
             goomba11.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;
             goomba12.GetComponent<Sprite>().ShouldUseSharedAnimationManager = true;

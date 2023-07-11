@@ -13,14 +13,17 @@ namespace WpfApp1
         public bool IsControlledByPlayer = false;
 
         public float AccumulatedY = 0;
+        public CollisionComponent collision = null;
 
         public bool IsFalling { get; private set; }
         Ray ray = new Ray();
+        List<IEntity> ignore = new List<IEntity>();
 
         public override void Spawned()
         {
             base.Spawned();
             isActive = true;
+            ignore.Add(Owner);
         }
 
         public override void OnTick(float dt)
@@ -41,7 +44,12 @@ namespace WpfApp1
 
             Owner.AddWorldOffset((float)Velocity.X, (float)Velocity.Y);
             Velocity.Y += 9.81 * GravityScale * dt;
-            CollisionComponent collision = Owner.GetComponent<CollisionComponent>();
+
+            if (collision == null)
+            {
+                collision = Owner.GetComponent<CollisionComponent>();
+            }
+
             collision.TestCollision();
 
             AccumulatedY += (float)Velocity.Y * dt;
@@ -52,14 +60,7 @@ namespace WpfApp1
                 Velocity.Y = 0;
             }
 
-            
-            List<IEntity> ignore = new List<IEntity>
-            {
-                Owner
-            };
-
             ray.Init(new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height), new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height + 30));
-
             IsFalling = !CollisionComponent.RayCast(ray, ignore, out _);
         }
 
