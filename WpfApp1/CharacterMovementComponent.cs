@@ -6,7 +6,7 @@ using static SDL2.SDL;
 
 namespace WpfApp1
 {
-    public class CharacterMovementComponent : Component, IRenderable
+    public class CharacterMovementComponent : Component
     {
         public Vector Velocity = new Vector();
         public float GravityScale = 6.0f;
@@ -15,8 +15,7 @@ namespace WpfApp1
         public float AccumulatedY = 0;
 
         public bool IsFalling { get; private set; }
-
-        public bool ShouldDraw => true;
+        Ray ray = new Ray();
 
         public override void Spawned()
         {
@@ -30,7 +29,6 @@ namespace WpfApp1
 
             ApplyMovement(dt);
         }
-        Ray ray = new Ray();
         private void ApplyMovement(float dt)
         {
             if (Owner.HasComponent<SkeletonComponent>())
@@ -62,14 +60,7 @@ namespace WpfApp1
 
             ray.Init(new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height), new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height + 30));
 
-            
             IsFalling = !CollisionComponent.RayCast(ray, ignore, out _);
-        }
-
-        public override void ReceiveRender()
-        {
-            base.ReceiveRender();
-            SDLRendering.DrawLine(ray.Start, ray.End, Color.FromRgb(255, 255, 255));
         }
 
         public override void Deactivated()

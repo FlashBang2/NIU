@@ -24,6 +24,7 @@ namespace WpfApp1
         private readonly IDictionary<Type, Component> _newComponents = new Dictionary<Type, Component>();
 
         public static Entity RootEntity = new Entity("Root");
+        public static Entity Mario = null;
         public static bool ShowedCountOfTickyComponents = false;
         public static int NumTickyComponents = 0;
         private static int FramesToSkip = 4;
@@ -262,12 +263,15 @@ namespace WpfApp1
                 }
             }
 
-            Entity mario = GetEntity("mario", true);
+            if (Mario == null)
+            {
+                Mario = GetEntity("mario", true);
+            }
 
             foreach (var child in _children)
             {
                 Entity e = (Entity)child;
-                if (mario.IsInViewRect(e))
+                if (Mario.IsInViewRect(e))
                 {
                     child.ReceiveRender();
                 }
@@ -309,11 +313,14 @@ namespace WpfApp1
                 NumTickyComponents += _tickyComponents.Count;
             }
 
-            Entity mario = GetEntity("mario", true);
+            if (Mario == null)
+            {
+                Mario = GetEntity("mario", true);
+            }
 
             for (var i = 0; i < _children.Count; i++)
             {
-                if (FramesToSkip == 0 || mario.IsInViewRect((Entity)_children[i]))
+                if (FramesToSkip == 0 || Mario.IsInViewRect((Entity)_children[i]))
                 {
                     _children[i].Tick(dt);
                 }
