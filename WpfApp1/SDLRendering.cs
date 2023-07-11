@@ -249,15 +249,12 @@ namespace WpfApp1
             SDL_RenderFillRect(_renderer, ref r);
         }
 
-        public static void DrawSprite(string textureId, Rect spriteBounds, Rect sourceRect, double angle, SDL_RendererFlip flipMode = SDL_RendererFlip.SDL_FLIP_NONE)
+        public static void DrawSprite(string textureId, SDL_Rect spriteBounds, SDL_Rect sourceRect, double angle, SDL_RendererFlip flipMode = SDL_RendererFlip.SDL_FLIP_NONE)
         {
-            SDL_Rect src = sourceRect.AsSDLRect;
-            SDL_Rect spriteRect = spriteBounds.AsSDLRect;
-
             if (!_textures.Any(v => v.Key.Equals(textureId)))
             {
                 textureId = "Empty";
-                DrawRect(spriteRect.x, spriteRect.y, spriteRect.w, spriteRect.h, Color.FromRgb(255, 0, 0));
+                DrawRect(spriteBounds.x, spriteBounds.y, spriteBounds.w, spriteBounds.h, Color.FromRgb(255, 0, 0));
                 return;
             }
 
@@ -265,10 +262,10 @@ namespace WpfApp1
             SDL_Point p = new SDL_Point();
             p.x = p.y = 0;
 
-            spriteRect.x -= (int)_cameraCenter.X;
-            spriteRect.y -= (int)_cameraCenter.Y;
+            spriteBounds.x -= (int)_cameraCenter.X;
+            spriteBounds.y -= (int)_cameraCenter.Y;
 
-            SDL_RenderCopyEx(_renderer, texture, ref src, ref spriteRect, angle, ref p, flipMode);
+            SDL_RenderCopyEx(_renderer, texture, ref sourceRect, ref spriteBounds, angle, ref p, flipMode);
         }
 
         public static void DrawSprite(IntPtr texture, Rect spriteBounds, Rect sourceRect, double angle)
@@ -400,8 +397,8 @@ namespace WpfApp1
         {
             SDL_Rect rect = new SDL_Rect();
             SDL_RenderGetViewport(_renderer, out rect);
-            _cameraCenter.X = entity.PosX + entity.Bounds.Width / 2 - _screenWidth / 2;
-            _cameraCenter.Y = entity.PosY + entity.Bounds.Height / 2 - 100 - _screenHeight / 2;
+            _cameraCenter.X = entity.PosX + entity.Width / 2 - _screenWidth / 2;
+            _cameraCenter.Y = entity.PosY + entity.Height / 2 - 100 - _screenHeight / 2;
             
             if (_cameraCenter.X  < 0)
             {

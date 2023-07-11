@@ -35,8 +35,8 @@ namespace WpfApp1
                 }
             }
 
-            Owner.AddWorldOffset(Velocity.X, Velocity.Y);
-            Velocity.Y += 9.81 * GravityScale * dt;
+            //Owner.AddWorldOffset((float)Velocity.X, (float)Velocity.Y);
+            //Velocity.Y += 9.81 * GravityScale * dt;
             CollisionComponent collision = Owner.GetComponent<CollisionComponent>();
             collision.TestCollision();
 
@@ -54,7 +54,7 @@ namespace WpfApp1
                 Owner
             };
 
-            ray.Init(new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height), new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height) + 12 * Owner.Down);
+            ray.Init(new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height), new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height) + new Vector(0, -12));
             IsFalling = !CollisionComponent.RayCast(ray, ignore, out _);
         }
 

@@ -6,6 +6,81 @@ using static SDL2.SDL;
 
 namespace WpfApp1
 {
+    public static class SdlRectMath
+    {
+        public static readonly SDL_Rect UnlimitedRect = new SDL_Rect();
+        public static SDL_Rect DummyEndResult = new SDL_Rect();
+
+        static SdlRectMath()
+        {
+            UnlimitedRect.w = int.MaxValue;
+            UnlimitedRect.h = int.MaxValue;
+        }
+
+        static public void FromMinAndMax(Vector Min, Vector Max, out SDL_Rect OutRect)
+        {
+            FromMinAndMax((float)Min.X, (float)Min.Y, (float)Max.X, (float)Max.Y, out OutRect);
+        }
+
+        static public void FromMinAndMax(float MinX, float MinY, float MaxX, float MaxY, out SDL_Rect OutRect)
+        {
+            bool bHasUserMistakenMinAndMax = MinX > MaxX && MinY > MaxY;
+
+            if (bHasUserMistakenMinAndMax)
+            {
+                (MaxX, MinX) = (MinX, MaxX);
+                (MaxY, MinY) = (MinY, MaxY);
+            }
+
+            OutRect.x = (int)MinX;
+            OutRect.y = (int)MinY;
+            OutRect.w = (int)(MaxX - MinX);
+            OutRect.h = (int)(MaxY - MinY);
+        }
+
+        static public void FromMinAndMaxByRef(float MinX, float MinY, float MaxX, float MaxY, ref SDL_Rect OutRect)
+        {
+            bool bHasUserMistakenMinAndMax = MinX > MaxX && MinY > MaxY;
+
+            if (bHasUserMistakenMinAndMax)
+            {
+                (MaxX, MinX) = (MinX, MaxX);
+                (MaxY, MinY) = (MinY, MaxY);
+            }
+
+            OutRect.x = (int)MinX;
+            OutRect.y = (int)MinY;
+            OutRect.w = (int)(MaxX - MinX);
+            OutRect.h = (int)(MaxY - MinY);
+        }
+
+        static public void FromOriginAndExtend(float OriginX, float OriginY, float ExtendX, float ExtendY, out SDL_Rect OutRect)
+        {
+            OutRect.x = (int)(OriginX - ExtendX);
+            OutRect.y = (int)(OriginY - ExtendY);
+            OutRect.w = (int)(OriginX);
+            OutRect.h = (int)(OriginY);
+        }
+
+        static public void FromXywh(float X, float Y, float W, float H, out SDL_Rect OutRect)
+        {
+            OutRect.x = (int)(X);
+            OutRect.y = (int)(Y);
+            OutRect.w = (int)(W);
+            OutRect.h = (int)(H);
+        }
+
+        public static Vector PendicularVector(Vector v)
+        {
+            return new Vector(-v.Y, v.X);
+        }
+
+        public static bool IsPointInRect(ref SDL_Rect RectToTest, float X, float Y)
+        {
+            return X >= RectToTest.x && Y >= RectToTest.y && X <= RectToTest.x + RectToTest.w && Y <= RectToTest.y + RectToTest.h;
+        }
+    }
+
     public struct Rect
     {
         private readonly Vector[] _vertices;
@@ -68,7 +143,7 @@ namespace WpfApp1
             _vertices[BottomLeftIndex] = new Vector(x, y + h);
             _vertices[BottomRightIndex] = new Vector(x + w, y + h);
 
-            _center = new Vector(x + w/2, y + h/2);
+            _center = new Vector(x + w / 2, y + h / 2);
             _angle = 0;
         }
 

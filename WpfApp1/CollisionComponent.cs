@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.ExceptionServices;
+using System.Security.Cryptography;
 using System.Windows;
+using static SDL2.SDL;
 
 namespace WpfApp1
 {
@@ -31,35 +35,56 @@ namespace WpfApp1
 
         public static bool RayCast(Ray ray, List<IEntity> ignored, out OverlapEvent evt)
         {
-            evt = new OverlapEvent();
-
             double t = 0.00;
             IEntity[] children = Entity.RootEntity.GetChildren();
 
+
+            if (TestPointInAnyComponent(children, ignored, ray.Start, out evt))
+            {
+                return true;
+            }
+
+            if (TestPointInAnyComponent(children, ignored, ray.End, out evt))
+            {
+                return true;
+            }
 
             while (t < 1)
             {
                 Vector current = (1 - t) * ray.Start + t * ray.End;
 
-                foreach (var child in children)
+                if (TestPointInAnyComponent(children, ignored, current, out evt))
                 {
-                    if (child.HasComponent<CollisionComponent>() && child.IsActive && ignored.Find(e => e == child) == null)
-                    {
-                        var bounds = child.Bounds;
-
-                        if (bounds.IsOverlaping(current))
-                        {
-                            evt.Self = null;
-                            evt.LastContact = child;
-                            evt.ContactPoint = current;
-                            return true;
-                        }
-                    }
-
+                    return true;
                 }
-                t += 0.01f;
+
+                t += 0.1f;
             }
 
+            evt = new OverlapEvent();
+            return false;
+        }
+
+        static bool TestPointInAnyComponent(IEntity[] children, IList<IEntity> ignored, Vector point, out OverlapEvent evt)
+        {
+            foreach (var child in children)
+            {
+                if (child.HasComponent<CollisionComponent>() && child.IsActive && ignored.FirstOrDefault(e => e == child) == null)
+                {
+                    var bounds = child.Bounds;
+
+                    if (SdlRectMath.IsPointInRect(ref bounds, (float)point.X, (float)point.Y))
+                    {
+                        evt.Self = null;
+                        evt.LastContact = child;
+                        evt.ContactPoint = point;
+                        return true;
+                    }
+                }
+
+            }
+
+            evt = new OverlapEvent();
             return false;
         }
 
@@ -76,9 +101,10 @@ namespace WpfApp1
 
         public void TestCollision()
         {
+            return;
             IEntity[] children = Entity.RootEntity.GetChildren();
 
-            Rect ownerBounds = Owner.Bounds;
+            SDL_Rect ownerBounds = Owner.Bounds;
             IsOverlaping = false;
 
             foreach (var child in children)
@@ -87,14 +113,11 @@ namespace WpfApp1
                 {
                     if (IsTrigger)
                     {
-                        Rect cb = child.Bounds;
+                        SDL_Rect cb = child.Bounds;
 
                         if (_contacts.Find(e => e == child) != null)
                         {
-                            if (cb.IsOverlaping(ownerBounds) && ownerBounds.IsOverlaping(cb))
-                            {
-                            }
-                            else
+                            if (SDL_IntersectRect(ref cb, ref ownerBounds, out SdlRectMath.DummyEndResult) != SDL_bool.SDL_TRUE)
                             {
                                 OverlapEvent evt = new OverlapEvent();
                                 evt.Self = Owner;
@@ -107,7 +130,7 @@ namespace WpfApp1
                         }
                         else
                         {
-                            if (cb.IsOverlaping(ownerBounds) && ownerBounds.IsOverlaping(cb))
+                            if (SDL_IntersectRect(ref cb, ref ownerBounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE)
                             {
                                 if (child.Name.Equals("mario"))
                                 {
@@ -127,20 +150,20 @@ namespace WpfApp1
 
                     CollisionComponent c = child.GetComponent<CollisionComponent>();
 
-                    Rect childBounds = child.Bounds;
+                    SDL_Rect childBounds = child.Bounds;
 
-                    if (childBounds.IsOverlaping(ownerBounds) && ownerBounds.IsOverlaping(childBounds) && !c.IsTrigger)
+                    if (SDL_IntersectRect(ref childBounds, ref ownerBounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE && !c.IsTrigger)
                     {
-                        Rect rect = childBounds.GetOverlap(ownerBounds);
+                        SDL_Rect rect = SdlRectMath.DummyEndResult;
 
-                        if (Math.Abs(rect.Width) < Math.Abs(rect.Height))
+                        if (Math.Abs(rect.w) < Math.Abs(rect.h))
                         {
                             var x = Owner.PosX - child.PosX;
 
 
-                            if (!IsStatic && rect.Width > 0)
+                            if (!IsStatic && rect.w > 0)
                             {
-                                Owner.AddWorldOffset(Math.Sign(x) * (rect.Width + Math.Sign(rect.Width)), 0);
+                                Owner.AddWorldOffset(Math.Sign(x) * (rect.w + Math.Sign(rect.w)), 0);
                                 IsOverlaping = true;
                             }
                         }
@@ -153,13 +176,13 @@ namespace WpfApp1
                                 CharacterMovementComponent movementComponent = o.GetComponent<CharacterMovementComponent>();
                                 if (movementComponent.Velocity.Y > 0)
                                 {
-                                    AccumulatedY = (float)rect.Height + 0.01f;
+                                    AccumulatedY = (float)rect.h + 0.01f;
                                     Owner.AddWorldOffset(0, -AccumulatedY);
                                     IsOverlaping = true;
                                 }
                                 else if (movementComponent.Velocity.Y < 0)
                                 {
-                                    AccumulatedY = (float)rect.Height + 0.01f;
+                                    AccumulatedY = (float)rect.h + 0.01f;
                                     Owner.AddWorldOffset(0, AccumulatedY);
                                     IsOverlaping = true;
                                 }
@@ -168,7 +191,7 @@ namespace WpfApp1
                             {
                                 if (!IsStatic)
                                 {
-                                    AccumulatedY = (float)rect.Height + 0.01f;
+                                    AccumulatedY = (float)rect.h + 0.01f;
                                     Owner.AddWorldOffset(0, -AccumulatedY);
                                     IsOverlaping = true;
                                 }

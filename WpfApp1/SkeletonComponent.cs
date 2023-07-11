@@ -85,8 +85,10 @@ namespace WpfApp1
 
             SDLRendering.LoadFont("arial.ttf", 96, "arial-32");
             SDLRendering.GetTextTexture("Podnieś ręce", "arial-32", Color.FromRgb(0, 0, 0));
-            Owner.Width = SDLRendering.GetTextSize("Podnieś ręce", "arial-32").X;
-            Owner.Height = SDLRendering.GetTextSize("Podnieś ręce", "arial-32").Y;
+            var TextSize = SDLRendering.GetTextSize("Podnieś ręce", "arial-32");
+
+            Owner.Width = (float)TextSize.X;
+            Owner.Height = (float)TextSize.Y;
         }
 
         private void StartupCalibration()
@@ -173,7 +175,7 @@ namespace WpfApp1
                     SlowDown(sprite);
                 }
 
-                Owner.AddWorldOffset(Velocity.X, 0);
+                Owner.AddWorldOffset((float)Velocity.X, 0);
 
                 if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_SPACE) && !Owner.GetComponent<CharacterMovementComponent>().IsFalling)
                 {
@@ -198,7 +200,7 @@ namespace WpfApp1
                         break;
                 }
 
-                Owner.AddWorldOffset(Velocity.X, 0);
+                Owner.AddWorldOffset((float)Velocity.X, 0);
 
                 if (isJumping && !Owner.GetComponent<CharacterMovementComponent>().IsFalling)
                 {

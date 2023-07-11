@@ -281,6 +281,7 @@ namespace WpfApp1
 
         public static void Main(string[] args)
         {
+#if true
             SDLApp app = new SDLApp(1920, 1080, "NIU");
 
             LoadTextures();
@@ -300,6 +301,12 @@ namespace WpfApp1
             spawnEnemiesAtStartLocation(app);
 
             app.Run();
+#else
+            SDL_Rect r = new SDL_Rect();
+
+            SdlRectMath.FromXywh(0, 0, 120, 120, out r);
+            int i = 0;
+#endif
         }
 
         private static void LoadTextures()

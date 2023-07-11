@@ -3,26 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
+using static SDL2.SDL;
 
 namespace WpfApp1
 {
     public class Entity : IEntity
     {
         private IEntity _parent;
-        private double _posX;
-        private double _posY;
-        private Rect _bounds;
+        private float _posX;
+        private float _posY;
+        private SDL_Rect _bounds;
         private string _name;
         private bool _active = true;
 
-        private double _angle = 0;
+        private float _angle = 0;
 
         private readonly IList<IEntity> _children = new List<IEntity>();
         private readonly IList<IRenderable> _renderablesComponents = new List<IRenderable>();
         private readonly List<Component> _components = new List<Component>();
+        private readonly IDictionary<Type, Component> _newComponents = new Dictionary<Type, Component>();
 
         public static Entity RootEntity = new Entity("Root");
-        public Vector _lastPos = new Vector();
+        public float lastX = 0;
+        public float lastY = 0;
 
         public static Entity CreateEntity(string name)
         {
@@ -73,16 +76,16 @@ namespace WpfApp1
         {
             _parent = null;
             _name = name;
-            _bounds = new Rect(new Vector(), new Vector());
+            _bounds = new SDL_Rect();
             _posX = 0;
             _posY = 0;
         }
 
-        public double PosX
+        public float PosX
         {
             get => _posX; set
             {
-                double offset = _posX - value;
+                float offset = _posX - value;
                 _posX = value;
 
                 foreach (IEntity entity in _children)
@@ -90,15 +93,16 @@ namespace WpfApp1
                     entity.AddWorldOffset(offset, 0);
                 }
 
-                _lastPos = new Vector(offset + value, _lastPos.Y);
+
+                lastX = offset + value;
             }
         }
 
-        public double PosY
+        public float PosY
         {
             get => _posY; set
             {
-                double offset = _posY - value;
+                float offset = _posY - value;
                 _posY = value;
 
                 foreach (IEntity entity in _children)
@@ -106,14 +110,14 @@ namespace WpfApp1
                     entity.AddWorldOffset(0, offset);
                 }
 
-
-                _lastPos = new Vector(_lastPos.X, offset + value);
+                lastY = offset + value;
             }
         }
 
-        public double Width { get => _bounds.Width; set => _bounds = Rect.FromOriginAndExtend(_bounds.Center, new Vector(value, _bounds.Height)); }
+        public float Width { get => _bounds.w; set { SdlRectMath.FromXywh(PosX, PosY, value, Height, out _bounds); } }
+
         public string Name { get => _name; set => _name = value; }
-        public double Height { get => _bounds.Height; set => _bounds = Rect.FromOriginAndExtend(_bounds.Center, new Vector(_bounds.Width, value)); }
+        public float Height { get => _bounds.h; set { SdlRectMath.FromXywh(PosX, PosY, Width, value, out _bounds); } }
 
         public Vector Right => new Vector(Math.Cos(_angle / 180.0 * Math.PI), Math.Sin(_angle / 180.0f * Math.PI));
 
@@ -124,7 +128,7 @@ namespace WpfApp1
 
         public bool IsActive { get => _active; set => SetActive(value); }
 
-        public Rect Bounds { get => new Rect(_posX, _posY, Width, Height); }
+        public SDL_Rect Bounds { get => _bounds; }
 
         public void SetActive(bool active)
         {
@@ -167,35 +171,17 @@ namespace WpfApp1
             }
 
             component.Spawned();
-            _components.Add(component);
+            _newComponents.Add(typeof(T), component);
         }
 
-        public void AddLocalOffset(double x, double y)
+        public void AddWorldOffset(float x, float y)
         {
-            var totalDirVector = Up + Right;
-
-            AddWorldOffset(totalDirVector.X * x, totalDirVector.Y * y);
-        }
-
-        public void AddWorldOffset(double x, double y)
-        {
-            _lastPos = new Vector(PosX, PosY);
-            Ray ray = new Ray();
-            ray.Init(new Vector(PosX, PosY), new Vector(PosX + x, PosY + y));
+            lastX = _posX;
+            lastY = _posY;
             PosX += x;
             PosY += y;
-#if false
-            if (!Physics.TestRay(ray, _collideable))
-            {
-                PosX += x;
-                PosY += y;
-                
-                foreach (var child in _children)
-                {
-                    child.AddWorldOffset(x, y);
-                }
-            }
-#endif
+
+            SdlRectMath.FromXywh(_posX, _posY, _bounds.w, _bounds.h, out _bounds);
         }
 
         public void AttachChild(IEntity entity)
@@ -212,9 +198,9 @@ namespace WpfApp1
 
         public void Destroy()
         {
-            foreach (var component in _components)
+            foreach (var component in _newComponents)
             {
-                if (component.Destroyed())
+                if (component.Value.Destroyed())
                 {
                     return;
                 }
@@ -242,13 +228,13 @@ namespace WpfApp1
 
         public T GetComponent<T>()
         {
-            T component = (T)(object)_components.FindAll(v => typeof(T).IsInstanceOfType(v)).First();
+            T component = (T)((object)_newComponents[typeof(T)]);
             return component;
         }
 
         public bool IsInViewRect(Entity other)
         {
-            return other.Bounds.IsOverlaping(new Rect(PosX - SDLApp.GetInstance().GetAppWidth(), PosY - SDLApp.GetInstance().GetAppHeight(), 4 * SDLApp.GetInstance().GetAppWidth(), 4 * SDLApp.GetInstance().GetAppHeight())); ;
+            return SDL_IntersectRect(ref _bounds, ref other._bounds, out _) == SDL_bool.SDL_TRUE;
         }
 
         public void ReceiveRender()
@@ -258,20 +244,20 @@ namespace WpfApp1
                 return;
             }
 
-            foreach (var component in _components)
+            foreach (var component in _newComponents)
             {
-                if (component is IRenderable)
+                if (component.Value is IRenderable)
                 {
-                    IRenderable renderable = (IRenderable)component;
+                    IRenderable renderable = (IRenderable)component.Value;
 
                     if (renderable.ShouldDraw)
                     {
-                        component.ReceiveRender();
+                        component.Value.ReceiveRender();
                     }
                 }
             }
 
-            Entity mario = Entity.GetEntity("mario", true);
+            Entity mario = GetEntity("mario", true);
 
             foreach (var child in _children)
             {
@@ -288,7 +274,7 @@ namespace WpfApp1
             return _children.Remove(entity);
         }
 
-        public void Rotate(double angle)
+        public void Rotate(float angle)
         {
             _angle += angle;
 
@@ -302,16 +288,16 @@ namespace WpfApp1
         {
         }
 
-        public virtual void Tick(double dt)
+        public virtual void Tick(float dt)
         {
             if (!_active)
             {
                 return;
             }
 
-            foreach (var component in _components)
+            foreach (var component in _newComponents)
             {
-                component.OnTick((float)dt);
+                component.Value.OnTick(dt);
             }
             Entity mario = Entity.GetEntity("mario", true);
 
@@ -336,14 +322,14 @@ namespace WpfApp1
 
         public bool HasComponent<T>()
         {
-            var x = (T)(object)_components.FindAll(v => typeof(T).IsInstanceOfType(v)).FirstOrDefault();
-            return x != null;
+            var x = _newComponents.ContainsKey(typeof(T));
+            return x;
         }
 
         public void UndoLastTranslation()
         {
-            PosX = _lastPos.X;
-            PosY = _lastPos.Y;
+            PosX = lastX;
+            PosY = lastY;
         }
     }
 }

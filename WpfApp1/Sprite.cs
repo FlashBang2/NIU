@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static SDL2.SDL;
 
 namespace WpfApp1
 {
@@ -40,7 +41,7 @@ namespace WpfApp1
             if (_currentAnim == AnimationType.Undefined)
             {
                 // draw all sprite
-                SDLRendering.DrawSprite(spriteId, Owner.Bounds, Rect.Unlimited, RotationAngle, FlipMode);
+                SDLRendering.DrawSprite(spriteId, Owner.Bounds, SdlRectMath.UnlimitedRect, RotationAngle, FlipMode);
             }
             else
             {
@@ -52,7 +53,7 @@ namespace WpfApp1
         {
             AnimationDataCache data = _animData[_currentAnim];
 
-            Rect rect = data.GetRect(_currentFrame);
+            SDL_Rect rect = data.GetRect(_currentFrame);
             SDLRendering.DrawSprite(spriteId, Owner.Bounds, rect, 0, FlipMode);
 
             if (data.CanAdvanceToNextFrame(_lastFrameTime))

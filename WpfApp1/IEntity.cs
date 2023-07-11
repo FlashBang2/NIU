@@ -4,38 +4,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using static SDL2.SDL;
 
 namespace WpfApp1
 {
     public interface IEntity
     {
-        double PosX { get; set; }
-        double PosY { get; set; }
+        float PosX { get; set; }
+        float PosY { get; set; }
 
         /// <summary>
         /// Approximate bounds width
         /// </summary>
-        double Width { get; set; }
+        float Width { get; set; }
+        float Height { get; set; }
 
         string Name { get; set; }
+        SDL_Rect Bounds { get; }
 
-        /// <summary>
-        /// Approximate bounds height
-        /// </summary>
-        double Height { get; set; }
+        void AddWorldOffset(float x, float y);
 
-        Vector Right { get; }
-        Vector Left { get; }
-
-        Vector Up { get; }
-        Vector Down { get; }
-
-        Rect Bounds { get; }
-
-        void AddLocalOffset(double x, double y);
-        void AddWorldOffset(double x, double y);
-
-        void Rotate(double angle);
+        void Rotate(float angle);
 
         void AttachChild(IEntity entity);
         bool RemoveChild(IEntity entity);
@@ -47,7 +36,7 @@ namespace WpfApp1
         void Destroy();
         IEntity FindChild(string name);
 
-        void Tick(double dt);
+        void Tick(float dt);
 
         T GetComponent<T>();
         bool HasComponent<T>();
