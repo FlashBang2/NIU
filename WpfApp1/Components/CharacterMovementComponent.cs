@@ -13,12 +13,13 @@ namespace WpfApp1
         public bool IsControlledByPlayer = false;
 
         public float AccumulatedY = 0;
-        public CollisionComponent collision = null;
-        public SkeletonComponent skeleton = null;
-
         public bool IsFalling { get; private set; }
-        Ray ray = new Ray();
-        List<IEntity> ignore = new List<IEntity>();
+
+        private CollisionComponent collision = null;
+        private SkeletonComponent skeleton = null;
+        private Ray ray = new Ray();
+        
+        private List<IEntity> ignore = new List<IEntity>();
 
         public override void Spawned()
         {
@@ -42,7 +43,7 @@ namespace WpfApp1
                     skeleton = Owner.GetComponent<SkeletonComponent>();
                 }
 
-                if (skeleton.State != SkeletonComponentState.GameRunning)
+                if (skeleton.state != SkeletonComponentState.GameRunning)
                 {
                     return;
                 }

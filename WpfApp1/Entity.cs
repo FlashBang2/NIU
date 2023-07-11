@@ -260,7 +260,7 @@ namespace WpfApp1
                 {
                     IRenderable renderable = (IRenderable)component.Value;
 
-                    if (renderable.ShouldDraw)
+                    if (renderable.shouldDraw)
                     {
                         component.Value.ReceiveRender();
                     }

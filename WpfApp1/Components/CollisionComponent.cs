@@ -10,13 +10,6 @@ namespace WpfApp1
 {
     public class CollisionComponent : Component
     {
-        public bool IsStatic = true;
-        public bool IsOverlaping = false;
-        public bool IsTrigger = false;
-        private List<IEntity> _contacts = new List<IEntity>();
-
-        private static List<CollisionComponent> collisionComponents = new List<CollisionComponent>();
-
         public struct OverlapEvent
         {
             public IEntity LastContact;
@@ -24,15 +17,22 @@ namespace WpfApp1
             public Vector ContactPoint;
         }
 
-        public event Action<OverlapEvent> Overlaped;
-        public event Action<OverlapEvent> StopOverlaping;
+        public bool IsStatic = true;
+        public bool IsOverlaping = false;
+        public bool IsTrigger = false;
 
         public float AccumulatedY = 0;
 
+        public event Action<OverlapEvent> Overlaped;
+        public event Action<OverlapEvent> StopOverlaping;
+
+        private List<IEntity> _contacts = new List<IEntity>();
+        private static List<CollisionComponent> collisionComponents = new List<CollisionComponent>();
+        private static IList<IEntity> EmptyList = new List<IEntity>();
+
         public static bool RayCast(Ray ray, out OverlapEvent evt)
         {
-            List<IEntity> ignored = new List<IEntity>();
-            return RayCast(ray, ignored, out evt);
+            return RayCast(ray, EmptyList, out evt);
         }
 
         public override void Activated()
@@ -54,7 +54,7 @@ namespace WpfApp1
             return false;
         }
 
-        public static bool RayCast(Ray ray, List<IEntity> ignored, out OverlapEvent evt)
+        public static bool RayCast(Ray ray, IList<IEntity> ignored, out OverlapEvent evt)
         {
             double t = 0.00;
 
@@ -131,98 +131,115 @@ namespace WpfApp1
                 {
                     if (IsTrigger)
                     {
-                        SDL_Rect cb = child.Owner.Bounds;
-
-                        if (_contacts.Find(e => e == child) != null)
-                        {
-                            if (SDL_IntersectRect(ref cb, ref ownerBounds, out SdlRectMath.DummyEndResult) != SDL_bool.SDL_TRUE)
-                            {
-                                OverlapEvent evt = new OverlapEvent();
-                                evt.Self = Owner;
-                                evt.LastContact = child.Owner;
-
-                                StopOverlaping?.Invoke(evt);
-
-                                _contacts.Remove(child.Owner);
-                            }
-                        }
-                        else
-                        {
-                            if (SDL_IntersectRect(ref cb, ref ownerBounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE)
-                            {
-                                if (child.Owner.Name.Equals("mario"))
-                                {
-                                    Console.WriteLine(Owner.Name);
-                                }
-                                OverlapEvent evt = new OverlapEvent();
-                                evt.Self = Owner;
-                                evt.LastContact = child.Owner;
-
-                                Overlaped?.Invoke(evt);
-                                _contacts.Add(child.Owner);
-                            }
-                        }
-
+                        TestForTrigger(ownerBounds, child);
                         continue;
                     }
+                 
+                    TestForCollision(ownerBounds, child);
+                }
+            }
+        }
 
-                    SDL_Rect childBounds = child.Owner.Bounds;
+        private void TestForCollision(SDL_Rect ownerBounds, CollisionComponent child)
+        {
+            SDL_Rect childBounds = child.Owner.Bounds;
 
-                    if (SDL_IntersectRect(ref childBounds, ref ownerBounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE && !child.IsTrigger)
+            if (SDL_IntersectRect(ref childBounds, ref ownerBounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE && !child.IsTrigger)
+            {
+                SDL_Rect rect = SdlRectMath.DummyEndResult;
+
+                if (Math.Abs(rect.w) < Math.Abs(rect.h))
+                {
+                    CorrectHorizontalLocation(child, rect);
+                }
+                else
+                {
+                    CorrectVerticalLocation(rect);
+                }
+
+                OverlapEvent evt = new OverlapEvent();
+                evt.Self = Owner;
+                evt.LastContact = child.Owner;
+
+                Overlaped?.Invoke(evt);
+                _contacts.Add(child.Owner);
+            }
+        }
+
+        private void CorrectVerticalLocation(SDL_Rect rect)
+        {
+            Entity o = (Entity)Owner;
+
+            if (o.HasComponent<CharacterMovementComponent>())
+            {
+                CharacterMovementComponent movementComponent = o.GetComponent<CharacterMovementComponent>();
+                if (movementComponent.Velocity.Y > 0)
+                {
+                    AccumulatedY = (float)rect.h + 0.01f;
+                    Owner.AddWorldOffset(0, -AccumulatedY);
+                    IsOverlaping = true;
+                }
+                else if (movementComponent.Velocity.Y < 0)
+                {
+                    AccumulatedY = (float)rect.h + 0.01f;
+                    Owner.AddWorldOffset(0, AccumulatedY);
+                    IsOverlaping = true;
+                }
+            }
+            else
+            {
+                if (!IsStatic)
+                {
+                    AccumulatedY = (float)rect.h + 0.01f;
+                    Owner.AddWorldOffset(0, -AccumulatedY);
+                    IsOverlaping = true;
+                }
+            }
+        }
+
+        private void CorrectHorizontalLocation(CollisionComponent child, SDL_Rect rect)
+        {
+            var x = Owner.PosX - child.Owner.PosX;
+
+
+            if (!IsStatic && rect.w > 0)
+            {
+                Owner.AddWorldOffset(Math.Sign(x) * (rect.w + Math.Sign(rect.w)), 0);
+                IsOverlaping = true;
+            }
+        }
+
+        private void TestForTrigger(SDL_Rect ownerBounds, CollisionComponent child)
+        {
+            SDL_Rect cb = child.Owner.Bounds;
+
+            if (_contacts.Find(e => e == child) != null)
+            {
+                if (SDL_IntersectRect(ref cb, ref ownerBounds, out SdlRectMath.DummyEndResult) != SDL_bool.SDL_TRUE)
+                {
+                    OverlapEvent evt = new OverlapEvent();
+                    evt.Self = Owner;
+                    evt.LastContact = child.Owner;
+
+                    StopOverlaping?.Invoke(evt);
+
+                    _contacts.Remove(child.Owner);
+                }
+            }
+            else
+            {
+                if (SDL_IntersectRect(ref cb, ref ownerBounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE)
+                {
+                    if (child.Owner.Name.Equals("mario"))
                     {
-                        SDL_Rect rect = SdlRectMath.DummyEndResult;
-
-                        if (Math.Abs(rect.w) < Math.Abs(rect.h))
-                        {
-                            var x = Owner.PosX - child.Owner.PosX;
-
-
-                            if (!IsStatic && rect.w > 0)
-                            {
-                                Owner.AddWorldOffset(Math.Sign(x) * (rect.w + Math.Sign(rect.w)), 0);
-                                IsOverlaping = true;
-                            }
-                        }
-                        else
-                        {
-                            Entity o = (Entity)Owner;
-
-                            if (o.HasComponent<CharacterMovementComponent>())
-                            {
-                                CharacterMovementComponent movementComponent = o.GetComponent<CharacterMovementComponent>();
-                                if (movementComponent.Velocity.Y > 0)
-                                {
-                                    AccumulatedY = (float)rect.h + 0.01f;
-                                    Owner.AddWorldOffset(0, -AccumulatedY);
-                                    IsOverlaping = true;
-                                }
-                                else if (movementComponent.Velocity.Y < 0)
-                                {
-                                    AccumulatedY = (float)rect.h + 0.01f;
-                                    Owner.AddWorldOffset(0, AccumulatedY);
-                                    IsOverlaping = true;
-                                }
-                            }
-                            else
-                            {
-                                if (!IsStatic)
-                                {
-                                    AccumulatedY = (float)rect.h + 0.01f;
-                                    Owner.AddWorldOffset(0, -AccumulatedY);
-                                    IsOverlaping = true;
-                                }
-                            }
-                        }
-
-                        OverlapEvent evt = new OverlapEvent();
-                        evt.Self = Owner;
-                        evt.LastContact = child.Owner;
-
-                        Overlaped?.Invoke(evt);
-                        _contacts.Add(child.Owner);
-
-                        break;
+                        Console.WriteLine(Owner.Name);
                     }
+                    OverlapEvent evt = new OverlapEvent();
+                    evt.Self = Owner;
+                    evt.LastContact = child.Owner;
+
+                    Overlaped?.Invoke(evt);
+                    _contacts.Add(child.Owner);
                 }
             }
         }

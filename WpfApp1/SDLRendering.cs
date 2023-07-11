@@ -382,7 +382,7 @@ namespace WpfApp1
 
         public static void RenderRenderable(IRenderable renderable)
         {
-            if (renderable.ShouldDraw)
+            if (renderable.shouldDraw)
             {
                 ChooseRenderMethod(renderable);
             }
