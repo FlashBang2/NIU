@@ -113,6 +113,7 @@ namespace WpfApp1
         {
             base.Spawned();
             collisionComponents.Add(this);
+            isActive = true;
         }
 
         public override void OnTick(float dt)

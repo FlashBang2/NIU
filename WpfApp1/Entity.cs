@@ -20,10 +20,12 @@ namespace WpfApp1
 
         private readonly IList<IEntity> _children = new List<IEntity>();
         private readonly IList<IRenderable> _renderablesComponents = new List<IRenderable>();
-        private readonly List<Component> _components = new List<Component>();
+        private readonly List<Component> _tickyComponents = new List<Component>();
         private readonly IDictionary<Type, Component> _newComponents = new Dictionary<Type, Component>();
 
         public static Entity RootEntity = new Entity("Root");
+        public static bool HasCalculatedTickyComponents = false;
+        public static int NumTickyComponents = 0;
         public float lastX = 0;
         public float lastY = 0;
 
@@ -136,7 +138,7 @@ namespace WpfApp1
             {
                 if (_active != active)
                 {
-                    foreach (var component in _components)
+                    foreach (var component in _newComponents.Values)
                     {
                         component.Deactivated();
                     }
@@ -146,7 +148,7 @@ namespace WpfApp1
             {
                 if (_active != active)
                 {
-                    foreach (var component in _components)
+                    foreach (var component in _newComponents.Values)
                     {
                         component.Activated();
                     }
@@ -171,6 +173,7 @@ namespace WpfApp1
             }
 
             component.Spawned();
+
             _newComponents.Add(typeof(T), component);
         }
 
@@ -218,7 +221,7 @@ namespace WpfApp1
 
         public virtual void Destroyed()
         {
-            
+
         }
 
         public IEntity FindChild(string name)
@@ -295,10 +298,15 @@ namespace WpfApp1
                 return;
             }
 
-            foreach (var component in _newComponents)
+            foreach (var component in _tickyComponents)
             {
-                component.Value.OnTick(dt);
+                component.OnTick(dt);
             }
+            if (!HasCalculatedTickyComponents)
+            {
+                NumTickyComponents += _tickyComponents.Count;
+            }
+
             Entity mario = GetEntity("mario", true);
 
             for (var i = 0; i < _children.Count; i++)
@@ -312,6 +320,11 @@ namespace WpfApp1
             if (PosY > SDLApp.GetInstance().GetAppHeight() /*&& !HasComponent<SkeletonComponent>()*/)
             {
                 Destroy();
+            }
+
+            if (Name.Equals("Root"))
+            {
+                HasCalculatedTickyComponents = true;
             }
         }
 
@@ -330,6 +343,16 @@ namespace WpfApp1
         {
             PosX = lastX;
             PosY = lastY;
+        }
+
+        public void AddToTickList(Component component)
+        {
+            _tickyComponents.Add(component);
+        }
+
+        public void RemoveFromTickList(Component component)
+        {
+            _tickyComponents.Remove(component);
         }
     }
 }

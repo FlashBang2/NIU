@@ -434,6 +434,7 @@ namespace WpfApp1
             slowdownData.Height = 48;
 
             mario.GetComponent<Sprite>().ShouldUseSharedAnimationManager = false;
+            mario.GetComponent<Sprite>().isActive = true;
             mario.GetComponent<Sprite>().AddAnimation(AnimationType.Walk, walkData);
             mario.GetComponent<Sprite>().AddAnimation(AnimationType.SlowDown, slowdownData);
             mario.GetComponent<Sprite>().AddAnimation(AnimationType.Jump, jumpData);

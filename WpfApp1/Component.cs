@@ -9,9 +9,10 @@ namespace WpfApp1
     public class Component
     {
         public IEntity Owner { get; private set; }
+        private bool _isActive = false;
 
-        private bool _isActive = true;
-
+        public bool isActive { get => _isActive; set { SetActive(value); } }
+        
         public Component()
         {
         }
@@ -47,11 +48,30 @@ namespace WpfApp1
         {
         }
 
+        public void SetActive(bool b)
+        {
+            if (b)
+            {
+                if (b != _isActive)
+                {
+                    Activate();   
+                }
+            }
+            else
+            {
+                if (b != _isActive)
+                {
+                    Deactivate();
+                }
+            }
+        }
+
         public void Activate()
         {
             if (!_isActive)
             {
                 Activated();
+                Owner.AddToTickList(this);
             }
 
             _isActive = true;
@@ -62,6 +82,7 @@ namespace WpfApp1
             if (_isActive)
             {
                 Deactivated();
+                Owner.RemoveFromTickList(this);
             }
 
             _isActive = false;

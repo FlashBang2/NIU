@@ -47,5 +47,8 @@ namespace WpfApp1
 
         IEntity[] GetChildren();
         void UndoLastTranslation();
+
+        void AddToTickList(Component component);
+        void RemoveFromTickList(Component component);
     }
 }

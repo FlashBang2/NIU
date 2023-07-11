@@ -23,6 +23,12 @@ namespace WpfApp1
         public double RotationAngle { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public Rect SourceTextureBounds { get => new Rect(); set => throw new NotImplementedException(); }
 
+        public override void Spawned()
+        {
+            base.Spawned();
+            isActive = true;
+        }
+
         public override void OnTick(float dt)
         {
             base.OnTick(dt);

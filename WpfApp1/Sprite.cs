@@ -34,8 +34,12 @@ namespace WpfApp1
         public override void OnTick(float dt)
         {
             base.OnTick(dt);
-
             _lastFrameTime += dt;
+
+            if (_currentAnim != AnimationType.Undefined)
+            {
+                UpdateAnimation();
+            }
         }
 
         public override void ReceiveRender()
@@ -56,7 +60,10 @@ namespace WpfApp1
                 }
                 else
                 {
-                    UpdateAnimation();
+                    AnimationDataCache data = _animData[_currentAnim];
+
+                    SDL_Rect rect = data.GetRect(_currentFrame);
+                    SDLRendering.DrawSprite(spriteId, Owner.Bounds, rect, 0, FlipMode);
                 }
             }
             else
@@ -69,10 +76,6 @@ namespace WpfApp1
         private void UpdateAnimation()
         {
             AnimationDataCache data = _animData[_currentAnim];
-
-            SDL_Rect rect = data.GetRect(_currentFrame);
-            SDLRendering.DrawSprite(spriteId, Owner.Bounds, rect, 0, FlipMode);
-
             if (data.CanAdvanceToNextFrame(_lastFrameTime))
             {
                 _currentFrame++;

@@ -89,6 +89,7 @@ namespace WpfApp1
 
             Owner.Width = (float)TextSize.X;
             Owner.Height = (float)TextSize.Y;
+            isActive = true;
         }
 
         private void StartupCalibration()
