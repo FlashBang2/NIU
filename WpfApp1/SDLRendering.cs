@@ -27,6 +27,8 @@ namespace WpfApp1
         private static Vector _cameraCenter = new Vector();
         private static int _screenWidth = 0;
         private static int _screenHeight = 0;
+        private static bool isMovingRight = false;
+
         public static void Init(IntPtr renderer)
         {
             _renderer = renderer;
@@ -409,7 +411,7 @@ namespace WpfApp1
         {
             SDL_Rect rect = new SDL_Rect();
             SDL_RenderGetViewport(_renderer, out rect);
-            _cameraCenter.X = entity.PosX + entity.Width / 2 - _screenWidth / 2;
+            _cameraCenter.X = entity.PosX + entity.Width / 2 - _screenWidth / 2 - 30;
             _cameraCenter.Y = entity.PosY + entity.Height / 2 - 100 - _screenHeight / 2;
 
             if (_cameraCenter.X < 0)
@@ -429,7 +431,6 @@ namespace WpfApp1
             if (_cameraCenter.Y > 2 * worldHeight - rect.h)
             {
                 _cameraCenter.Y = 2 * worldHeight - rect.h;
-
             }
 
             _cameraCenter.Y = 0;

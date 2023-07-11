@@ -22,7 +22,7 @@ namespace WpfApp1
 
         public SDL_RendererFlip FlipMode = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_NONE;
 
-        public bool ShouldUseSharedAnimationManager = false;
+        public bool ShouldUseSharedAnimationManager = true;
         SharedAnimationManager animationManager;
 
         public override void Spawned()
