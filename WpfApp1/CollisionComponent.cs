@@ -101,7 +101,6 @@ namespace WpfApp1
 
         public void TestCollision()
         {
-            return;
             IEntity[] children = Entity.RootEntity.GetChildren();
 
             SDL_Rect ownerBounds = Owner.Bounds;

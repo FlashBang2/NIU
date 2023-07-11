@@ -259,12 +259,24 @@ namespace WpfApp1
             }
 
             IntPtr texture = _textures[textureId];
+
+            if (sourceRect.x == SdlRectMath.UnlimitedRect.x &&
+                sourceRect.y == SdlRectMath.UnlimitedRect.y &&
+                sourceRect.w == SdlRectMath.UnlimitedRect.w &&
+                sourceRect.h == SdlRectMath.UnlimitedRect.h)
+            {
+
+                SDL_QueryTexture(texture, out uint Format, out int Access, out int Width, out int Height);
+                sourceRect.w = Width;
+                sourceRect.h = Height;
+                sourceRect.x = sourceRect.y = 0;
+            }
+
             SDL_Point p = new SDL_Point();
             p.x = p.y = 0;
 
             spriteBounds.x -= (int)_cameraCenter.X;
             spriteBounds.y -= (int)_cameraCenter.Y;
-
             SDL_RenderCopyEx(_renderer, texture, ref sourceRect, ref spriteBounds, angle, ref p, flipMode);
         }
 
@@ -399,8 +411,8 @@ namespace WpfApp1
             SDL_RenderGetViewport(_renderer, out rect);
             _cameraCenter.X = entity.PosX + entity.Width / 2 - _screenWidth / 2;
             _cameraCenter.Y = entity.PosY + entity.Height / 2 - 100 - _screenHeight / 2;
-            
-            if (_cameraCenter.X  < 0)
+
+            if (_cameraCenter.X < 0)
             {
                 _cameraCenter.X = 0;
             }
@@ -417,7 +429,7 @@ namespace WpfApp1
             if (_cameraCenter.Y > 2 * worldHeight - rect.h)
             {
                 _cameraCenter.Y = 2 * worldHeight - rect.h;
-             
+
             }
 
             _cameraCenter.Y = 0;

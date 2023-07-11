@@ -95,6 +95,7 @@ namespace WpfApp1
 
 
                 lastX = offset + value;
+                SdlRectMath.FromXywh(_posX, _posY, Width, Height, out _bounds);
             }
         }
 
@@ -111,6 +112,7 @@ namespace WpfApp1
                 }
 
                 lastY = offset + value;
+                SdlRectMath.FromXywh(_posX, _posY, Width, Height, out _bounds);
             }
         }
 
@@ -118,13 +120,6 @@ namespace WpfApp1
 
         public string Name { get => _name; set => _name = value; }
         public float Height { get => _bounds.h; set { SdlRectMath.FromXywh(PosX, PosY, Width, value, out _bounds); } }
-
-        public Vector Right => new Vector(Math.Cos(_angle / 180.0 * Math.PI), Math.Sin(_angle / 180.0f * Math.PI));
-
-        public Vector Left => -Right;
-
-        public Vector Up => new Vector(-Math.Sin(_angle / 180.0 * Math.PI), -Math.Cos(_angle / 180.0 * Math.PI));
-        public Vector Down => -Up;
 
         public bool IsActive { get => _active; set => SetActive(value); }
 
@@ -234,7 +229,7 @@ namespace WpfApp1
 
         public bool IsInViewRect(Entity other)
         {
-            return SDL_IntersectRect(ref _bounds, ref other._bounds, out _) == SDL_bool.SDL_TRUE;
+            return true;//  SDL_IntersectRect(ref _bounds, ref other._bounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE;
         }
 
         public void ReceiveRender()
@@ -299,7 +294,7 @@ namespace WpfApp1
             {
                 component.Value.OnTick(dt);
             }
-            Entity mario = Entity.GetEntity("mario", true);
+            Entity mario = GetEntity("mario", true);
 
             for (var i = 0; i < _children.Count; i++)
             {

@@ -109,7 +109,10 @@ namespace WpfApp1
                 Entity.RootEntity.ReceiveRender();
                 SDLRendering.RenderFrame();
 
-                if (Math.Abs(Entity.GetEntity("goomba", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba", true).PosX 
+                    - 
+                    Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+
                     Entity.GetEntity("goomba", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba", true).GetComponent<Sprite>().shouldMove = false;

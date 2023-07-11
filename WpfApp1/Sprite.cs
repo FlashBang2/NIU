@@ -20,7 +20,7 @@ namespace WpfApp1
         private float _lastFrameTime = 0;
         private AnimationType _currentAnim = AnimationType.Undefined;
 
-        public SDL2.SDL.SDL_RendererFlip FlipMode = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_NONE;
+        public SDL_RendererFlip FlipMode = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_NONE;
 
         public override void OnTick(float dt)
         {

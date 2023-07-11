@@ -8,7 +8,7 @@ using System.Windows.Media;
 
 namespace WpfApp1
 {
-    public class CharacterMovementComponent : Component
+    public class CharacterMovementComponent : Component, IRenderable
     {
         public Vector Velocity = new Vector();
         public float GravityScale = 6.0f;
@@ -18,13 +18,18 @@ namespace WpfApp1
 
         public bool IsFalling { get; private set; }
 
+        public bool ShouldDraw => true;
+
+        public double RotationAngle { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Rect SourceTextureBounds { get => new Rect(); set => throw new NotImplementedException(); }
+
         public override void OnTick(float dt)
         {
             base.OnTick(dt);
 
             ApplyMovement(dt);
         }
-
+        Ray ray = new Ray();
         private void ApplyMovement(float dt)
         {
             if (Owner.HasComponent<SkeletonComponent>())
@@ -35,8 +40,8 @@ namespace WpfApp1
                 }
             }
 
-            //Owner.AddWorldOffset((float)Velocity.X, (float)Velocity.Y);
-            //Velocity.Y += 9.81 * GravityScale * dt;
+            Owner.AddWorldOffset((float)Velocity.X, (float)Velocity.Y);
+            Velocity.Y += 9.81 * GravityScale * dt;
             CollisionComponent collision = Owner.GetComponent<CollisionComponent>();
             collision.TestCollision();
 
@@ -48,14 +53,22 @@ namespace WpfApp1
                 Velocity.Y = 0;
             }
 
-            Ray ray = new Ray();
+            
             List<IEntity> ignore = new List<IEntity>
             {
                 Owner
             };
 
-            ray.Init(new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height), new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height) + new Vector(0, -12));
+            ray.Init(new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height), new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height + 30));
+
+            
             IsFalling = !CollisionComponent.RayCast(ray, ignore, out _);
+        }
+
+        public override void ReceiveRender()
+        {
+            base.ReceiveRender();
+            SDLRendering.DrawLine(ray.Start, ray.End, Color.FromRgb(255, 255, 255));
         }
 
         public override void Deactivated()

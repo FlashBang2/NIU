@@ -17,8 +17,10 @@ namespace WpfApp1
         {
             base.OnTick(dt);
 
-            List<IEntity> e = new List<IEntity>();
-            e.Add(Owner);
+            List<IEntity> e = new List<IEntity>
+            {
+                Owner
+            };
 
             if (!Owner.GetComponent<CharacterMovementComponent>().IsFalling && Owner.GetComponent<Sprite>().shouldMove)
             {
