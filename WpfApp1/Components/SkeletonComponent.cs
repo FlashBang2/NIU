@@ -20,7 +20,6 @@ namespace WpfApp1
     public class SkeletonComponent : Component, IRenderable
     {
         private const int AccelerationRate = 20;
-        private Skeleton user = null;
         private DebugSkeleton skeleton;
         private bool IsKinnectAvailable = false;
         public SkeletonComponentState State = SkeletonComponentState.CalibrateX;
@@ -28,8 +27,6 @@ namespace WpfApp1
         public static bool IsPostCalibrationStage = false;
         public bool ShouldDrawDebugBounds = false;
 
-
-        private bool _once = false;
 
         float totalOffset = 0;
 
@@ -43,7 +40,18 @@ namespace WpfApp1
         public float MaxVelocity = 10;
         public ActionType lastActionType = ActionType.None;
         private float dt;
+        CharacterMovementComponent MovementComponent;
+        Sprite sprite;
 
+        private void TryGetMovementComponent()
+        {
+            if (MovementComponent == null)
+            {
+                MovementComponent = Owner.GetComponent<CharacterMovementComponent>();
+                sprite = Owner.GetComponent<Sprite>();
+            }
+
+        }
 
         public override void Spawned()
         {
@@ -95,8 +103,6 @@ namespace WpfApp1
 
         private void StartupCalibration()
         {
-            string text = "Podnieś ręce";
-
             skeleton.EndOfYCalibration();
             skeleton.EndOfXCalibration();
         }
@@ -152,8 +158,7 @@ namespace WpfApp1
                     skeleton.RenderEachJoint();
                     break;
             }
-
-            Sprite sprite = Owner.GetComponent<Sprite>();
+            TryGetMovementComponent();
 
             skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
 
@@ -277,6 +282,7 @@ namespace WpfApp1
         {
             base.OnTick(dt);
             this.dt = dt;
+            TryGetMovementComponent();
         }
 
         private ActionType FindActionType()

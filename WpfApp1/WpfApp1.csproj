@@ -62,15 +62,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="FrameRateRendererComponent.cs" />
-    <Compile Include="Gumba.cs" />
-    <Compile Include="SharedAnimationManager.cs" />
+    <Compile Include="Components\CharacterMovementComponent.cs" />
+    <Compile Include="Components\CollisionComponent.cs" />
+    <Compile Include="Components\Component.cs" />
+    <Compile Include="Components\FrameRateRendererComponent.cs" />
+    <Compile Include="Components\Gumba.cs" />
+    <Compile Include="Components\SharedAnimationManager.cs" />
+    <Compile Include="Components\SkeletonComponent.cs" />
+    <Compile Include="Components\Sprite.cs" />
     <Compile Include="SpriteAnim\AnimationData.cs" />
     <Compile Include="SpriteAnim\AnimationDataCache.cs" />
     <Compile Include="SpriteAnim\AnimationType.cs" />
-    <Compile Include="CharacterMovementComponent.cs" />
-    <Compile Include="CollisionComponent.cs" />
-    <Compile Include="Component.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="IEntity.cs" />
     <Compile Include="IRenderable.cs" />
@@ -83,8 +85,6 @@
     <Compile Include="SDL2-CS\SDL2_mixer.cs" />
     <Compile Include="SDL2-CS\SDL2_ttf.cs" />
     <Compile Include="SDLRendering.cs" />
-    <Compile Include="SkeletonComponent.cs" />
-    <Compile Include="Sprite.cs" />
     <Compile Include="Timer.cs" />
     <Compile Include="Rect.cs" />
     <Compile Include="App.xaml.cs">
@@ -125,6 +125,7 @@
   <ItemGroup>
     <Resource Include="skeleton.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(ProjectDir)skeleton.txt" "$(ProjectDir)$(OutDir)\skeleton.txt"

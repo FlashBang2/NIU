@@ -25,10 +25,6 @@ namespace ConsoleApp1
         public event Action Tick;
 
         public bool ShouldLoop;
-
-        private int _id;
-        private float _totalTime;
-
         private Timer _Handle;
 
         public SDLTimer(float seconds, bool shouldLoop)
@@ -38,8 +34,6 @@ namespace ConsoleApp1
             _Handle.Elapsed += OnState;
             _Handle.Start();
 
-            ShouldLoop = false;
-            _totalTime = 0;
             ShouldLoop = shouldLoop; 
         }
 

@@ -27,7 +27,6 @@ namespace WpfApp1
         private static Vector _cameraCenter = new Vector();
         public static int _screenWidth = 0;
         public static int _screenHeight = 0;
-        private static bool isMovingRight = false;
 
         public static void Init(IntPtr renderer)
         {

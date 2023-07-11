@@ -57,15 +57,13 @@ namespace WpfApp1
         public static bool RayCast(Ray ray, List<IEntity> ignored, out OverlapEvent evt)
         {
             double t = 0.00;
-            IEntity[] children = Entity.RootEntity.GetChildren();
 
-
-            if (TestPointInAnyComponent(children, ignored, ray.Start, out evt))
+            if (TestPointInAnyComponent(ignored, ray.Start, out evt))
             {
                 return true;
             }
 
-            if (TestPointInAnyComponent(children, ignored, ray.End, out evt))
+            if (TestPointInAnyComponent(ignored, ray.End, out evt))
             {
                 return true;
             }
@@ -74,7 +72,7 @@ namespace WpfApp1
             {
                 Vector current = (1 - t) * ray.Start + t * ray.End;
 
-                if (TestPointInAnyComponent(children, ignored, current, out evt))
+                if (TestPointInAnyComponent(ignored, current, out evt))
                 {
                     return true;
                 }
@@ -86,18 +84,18 @@ namespace WpfApp1
             return false;
         }
 
-        static bool TestPointInAnyComponent(IEntity[] children, IList<IEntity> ignored, Vector point, out OverlapEvent evt)
+        static bool TestPointInAnyComponent(IList<IEntity> ignored, Vector point, out OverlapEvent evt)
         {
-            foreach (var child in children)
+            foreach (var child in collisionComponents)
             {
-                if (child.HasComponent<CollisionComponent>() && child.IsActive && ignored.FirstOrDefault(e => e == child) == null)
+                if (child.Owner.IsActive && ignored.FirstOrDefault(e => e == child.Owner) == null)
                 {
-                    var bounds = child.Bounds;
+                    var bounds = child.Owner.Bounds;
 
                     if (SdlRectMath.IsPointInRect(ref bounds, (float)point.X, (float)point.Y))
                     {
                         evt.Self = null;
-                        evt.LastContact = child;
+                        evt.LastContact = child.Owner;
                         evt.ContactPoint = point;
                         return true;
                     }

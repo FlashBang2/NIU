@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using static SDL2.SDL;
 
 namespace WpfApp1
 {
@@ -23,10 +24,10 @@ namespace WpfApp1
         public double NormalizedMaxY { get => _maxY; }
         public double NormalizedMaxX { get => _maxX; }
         public double NormalizedMinX { get => _minX; }
-        public Rect Bounds { get => _bounds; }
+        public SDL_Rect Bounds { get => _bounds; }
         public double PosX
         {
-            get => _bounds.Center.X;
+            get => _bounds.x;
             set
             {
             }
@@ -34,7 +35,7 @@ namespace WpfApp1
 
         public double PosY
         {
-            get => _bounds.Center.Y;
+            get => _bounds.y;
             set
             {
             }
@@ -66,11 +67,10 @@ namespace WpfApp1
         private double _minX = 0;
         private double _maxX = 0;
 
-        private Rect _bounds;
+        private SDL_Rect _bounds;
 
 
         private bool _isTrigger;
-        private bool _isStatic;
 
         private Vector _velocity = new Vector();
 
@@ -85,7 +85,7 @@ namespace WpfApp1
         {
             _connections = Connection.Connections;
             AddJoints();
-            _bounds = new Rect(new Vector(), new Vector());
+            _bounds = new SDL_Rect();
 
             foreach (var x in Enum.GetValues(typeof(JointType)).Cast<JointType>())
             {
@@ -235,22 +235,22 @@ namespace WpfApp1
 
         private void FindSkeletonBounds()
         {
-            double minX = double.PositiveInfinity;
-            double minY = double.PositiveInfinity;
-            double maxX = double.NegativeInfinity;
-            double maxY = double.NegativeInfinity;
+            float minX = float.PositiveInfinity;
+            float minY = float.PositiveInfinity;
+            float maxX = float.NegativeInfinity;
+            float maxY = float.NegativeInfinity;
 
             foreach (var i in _joints)
             {
-                Rect bounds = i.Value.Bounds;
-                minX = Math.Min(minX, bounds.Left);
-                minY = Math.Min(minY, bounds.Top);
+                SDL_Rect bounds = i.Value.Bounds;
+                minX = Math.Min(minX, bounds.x);
+                minY = Math.Min(minY, bounds.y);
 
-                maxX = Math.Max(maxX, bounds.Right);
-                maxY = Math.Max(maxY, bounds.Down);
+                maxX = Math.Max(maxX, bounds.x + bounds.w);
+                maxY = Math.Max(maxY, bounds.y + bounds.h);
             }
 
-            _bounds = new Rect(new Vector(minX, minY), new Vector(maxX, maxY));
+            SdlRectMath.FromMinAndMax(minX, minY, maxX, maxY, out _bounds);
         }
 
         private void CalculateScaledBounds(double scale, KeyValuePair<JointType, DebugJoint> joint)
@@ -273,8 +273,6 @@ namespace WpfApp1
                 connection.ClearConnectionLine();
             }
         }
-
-        private bool isInFloor = false;
 
         public void PhysicsUpdate()
         {

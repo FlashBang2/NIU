@@ -13,6 +13,9 @@ namespace WpfApp1
         float directionScale = -1.0f;
 
         private bool killed = false;
+        private CharacterMovementComponent MovementComponent;
+
+        Ray ray = new Ray();
 
         public override void Spawned()
         {
@@ -29,11 +32,15 @@ namespace WpfApp1
                 Owner
             };
 
-            if (!Owner.GetComponent<CharacterMovementComponent>().IsFalling && Owner.GetComponent<Sprite>().shouldMove)
+            if (MovementComponent == null)
+            {
+                MovementComponent = Owner.GetComponent<CharacterMovementComponent>();
+            }
+
+            if (!MovementComponent.IsFalling && Owner.GetComponent<Sprite>().shouldMove)
             {
                 Owner.AddWorldOffset(Speed * directionScale, 0);
 
-                Ray ray = new Ray();
                 ray.Init(new System.Windows.Vector(Owner.PosX, Owner.PosY), new System.Windows.Vector(Owner.PosX + Owner.Width * directionScale + Speed * directionScale, Owner.PosY));
 
                 OverlapEvent evt;
@@ -47,7 +54,8 @@ namespace WpfApp1
                     {
                         Entity mario = Entity.GetEntity("mario", true);
                         mario.PosX = 144;
-                        if (mario.PosY < Owner.PosY) {
+                        if (mario.PosY < Owner.PosY)
+                        {
                             Owner.GetComponent<Sprite>().shouldMove = false;
                             Owner.SetActive(false);
                         }

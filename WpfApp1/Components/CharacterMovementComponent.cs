@@ -14,6 +14,7 @@ namespace WpfApp1
 
         public float AccumulatedY = 0;
         public CollisionComponent collision = null;
+        public SkeletonComponent skeleton = null;
 
         public bool IsFalling { get; private set; }
         Ray ray = new Ray();
@@ -36,7 +37,12 @@ namespace WpfApp1
         {
             if (Owner.HasComponent<SkeletonComponent>())
             {
-                if (Owner.GetComponent<SkeletonComponent>().State != SkeletonComponentState.GameRunning)
+                if (skeleton == null)
+                {
+                    skeleton = Owner.GetComponent<SkeletonComponent>();
+                }
+
+                if (skeleton.State != SkeletonComponentState.GameRunning)
                 {
                     return;
                 }

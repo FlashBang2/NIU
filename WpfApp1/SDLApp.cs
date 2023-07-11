@@ -29,6 +29,7 @@ namespace WpfApp1
 
         private static SDLApp _instance;
 
+
         public static SDLApp GetInstance()
         {
             return _instance;
@@ -201,73 +202,6 @@ namespace WpfApp1
             if (evt.type == SDL_EventType.SDL_QUIT)
             {
                 _isOpen = false;
-            }
-        }
-
-
-        class RectRenderable : Component
-        {
-            public override void Spawned()
-            {
-                base.Spawned();
-                Owner.Width = GetInstance().GetAppWidth();
-                Owner.Height = 40;
-                Owner.PosX = 0;
-                Owner.PosY = GetInstance().GetAppHeight() - Owner.Height;
-            }
-
-
-            public Color blockColor = Color.FromRgb(120, 40, 30);
-
-            public override void ReceiveRender()
-            {
-                base.ReceiveRender();
-
-
-                var e = Entity.RootEntity.FindChild("Skeleton");
-
-                if (e.GetComponent<SkeletonComponent>().State != SkeletonComponentState.GameRunning)
-                {
-                    return;
-                }
-
-                SDLRendering.FillRect((int)Owner.PosX, (int)Owner.PosY, (int)Owner.Width, (int)Owner.Height, blockColor);
-            }
-        }
-
-        class Temp : Component
-        {
-
-            public override void Spawned()
-            {
-                base.Spawned();
-                Owner.Width = 40;
-                Owner.Height = 40;
-            }
-
-            public override void OnTick(float dt)
-            {
-                int x, y;
-
-                SDL_GetMouseState(out x, out y);
-
-                Owner.PosX = x;
-                Owner.PosY = y;
-            }
-
-            public Color blockColor = Color.FromRgb(120, 40, 40);
-
-            public override void ReceiveRender()
-            {
-                base.ReceiveRender();
-
-                var e = Entity.RootEntity.FindChild("Skeleton");
-
-                if (e.GetComponent<SkeletonComponent>().State != SkeletonComponentState.GameRunning)
-                {
-                    return;
-                }
-                SDLRendering.FillCircle((int)Owner.PosX, (int)Owner.PosY, (int)(Owner.Width / 2), blockColor);
             }
         }
 
