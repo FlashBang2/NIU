@@ -29,12 +29,12 @@ namespace WpfApp1
         public float maxVelocity = 10;
         public ActionType lastActionType = ActionType.None;
 
-        private bool isKinnectAvailable = false;
-        private const int accelerationRate = 20;
-        private DebugSkeleton skeleton;
+        private bool _isKinnectAvailable = false;
+        private const int AccelerationRate = 20;
+        private DebugSkeleton _skeleton;
 
-        private float totalOffset = 0;
-        private float lastDeltaTime;
+        private float _totalOffset = 0;
+        private float _lastDeltaTime;
 
 
         private CharacterMovementComponent movementComponent;
@@ -45,14 +45,15 @@ namespace WpfApp1
         {
             base.Spawned();
 
-            skeleton = new DebugSkeleton();
-            skeleton.Scale = 1;
+            _skeleton = new DebugSkeleton();
+            _skeleton.scale = 1;
 
             StartKinect();
 
-            if (!isKinnectAvailable)
+            if (!_isKinnectAvailable)
             {
                 StartupGameWithoutKinnect();
+                _skeleton.LoadTestSkeleton();
             }
             else
             {
@@ -69,8 +70,8 @@ namespace WpfApp1
             SDLRendering.GetTextTexture("Podnieś ręce", "arial-32", Color.FromRgb(0, 0, 0));
             var TextSize = SDLRendering.GetTextSize("Podnieś ręce", "arial-32");
 
-            Owner.Width = (float)TextSize.X;
-            Owner.Height = (float)TextSize.Y;
+            owner.width = (float)TextSize.X;
+            owner.height = (float)TextSize.Y;
             isActive = true;
         }
 
@@ -81,40 +82,40 @@ namespace WpfApp1
             Console.WriteLine("Starting calibrating X");
 
             SDLTimer timer = new SDLTimer(5, false);
-            timer.TimeElapsed += () =>
+            timer.onTimeElapsed += () =>
             {
-                skeleton.EndOfXCalibration();
+                _skeleton.EndOfXCalibration();
                 Console.WriteLine("Starting calibrating Y");
 
                 state = SkeletonComponentState.CalibrateY;
                 SDLTimer t = new SDLTimer(5, false);
-                t.TimeElapsed += () => { skeleton.EndOfYCalibration(); Console.WriteLine("Starting game..."); isPostCalibrationStage = true; state = SkeletonComponentState.GameRunning; };
+                t.onTimeElapsed += () => { _skeleton.EndOfYCalibration(); Console.WriteLine("Starting game..."); isPostCalibrationStage = true; state = SkeletonComponentState.GameRunning; };
             };
         }
 
         private void StartupGameWithoutKinnect()
         {
             state = SkeletonComponentState.GameRunning;
-            skeleton.LoadTestSkeleton();
+            _skeleton.LoadTestSkeleton();
             StartupCalibration();
 
-            skeleton.EndOfXCalibration();
-            skeleton.EndOfYCalibration();
+            _skeleton.EndOfXCalibration();
+            _skeleton.EndOfYCalibration();
 
             isPostCalibrationStage = true;
         }
 
         private void StartupCalibration()
         {
-            skeleton.EndOfYCalibration();
-            skeleton.EndOfXCalibration();
+            _skeleton.EndOfYCalibration();
+            _skeleton.EndOfXCalibration();
         }
 
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Space)
             {
-                skeleton.Jump();
+                _skeleton.Jump();
             }
         }
 
@@ -122,9 +123,9 @@ namespace WpfApp1
         {
             KinectSensor kinect = KinectSensor.KinectSensors.FirstOrDefault(s => s.Status == KinectStatus.Connected);
 
-            isKinnectAvailable = kinect != null;
+            _isKinnectAvailable = kinect != null;
 
-            if (isKinnectAvailable)
+            if (_isKinnectAvailable)
             {
                 kinect.SkeletonStream.Enable();
                 kinect.SkeletonFrameReady += OnSkeletonFrameReady;
@@ -140,7 +141,7 @@ namespace WpfApp1
 
                 if (isSkeletonDataAvailable)
                 {
-                    skeleton.UpdateSkeleton(frame);
+                    _skeleton.UpdateSkeleton(frame);
                 }
             }
         }
@@ -158,25 +159,25 @@ namespace WpfApp1
                     SDLRendering.DrawTextOnCenterPivot("Rozloz Rece", "arial-32", SDLApp.GetInstance().GetAppWidth() / 2, SDLApp.GetInstance().GetAppHeight() / 2, Color.FromRgb(0, 0, 0));
                     break;
                 case SkeletonComponentState.GameRunning:
-                    skeleton.RenderEachJoint();
+                    _skeleton.RenderEachJoint();
                     break;
             }
 
             TryGetMovementComponent();
 
-            skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
+            _skeleton.offset = new Vector(_totalOffset, owner.posY - owner.height / 6);
 
             if (shouldDrawDebugBounds && state == SkeletonComponentState.GameRunning)
             {
-                SDLRendering.DrawRect((int)Owner.PosX, (int)Owner.PosY, (int)Owner.Width, (int)Owner.Height, Color.FromRgb(255, 0, 0));
+                SDLRendering.DrawRect((int)owner.posX, (int)owner.posY, (int)owner.width, (int)owner.height, Color.FromRgb(255, 0, 0));
             }
         }
         private void TryGetMovementComponent()
         {
             if (movementComponent == null)
             {
-                movementComponent = Owner.GetComponent<CharacterMovementComponent>();
-                sprite = Owner.GetComponent<Sprite>();
+                movementComponent = owner.GetComponent<CharacterMovementComponent>();
+                sprite = owner.GetComponent<Sprite>();
             }
         }
 
@@ -205,7 +206,7 @@ namespace WpfApp1
             TryAccelerate(1);
 
             sprite.FlipMode = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
-            skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
+            _skeleton.offset = new Vector(_totalOffset, owner.posY - owner.height / 6);
             lastActionType = ActionType.MoveRight;
         }
 
@@ -222,9 +223,9 @@ namespace WpfApp1
 
             TryAccelerate(-1);
 
-            totalOffset += (int)-velocity.X;
+            _totalOffset += (int)-velocity.X;
             sprite.FlipMode = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
-            skeleton.offset = new Vector(totalOffset, Owner.PosY - Owner.Height / 6);
+            _skeleton.offset = new Vector(_totalOffset, owner.posY - owner.height / 6);
             lastActionType = ActionType.MoveLeft;
         }
 
@@ -232,21 +233,21 @@ namespace WpfApp1
         {
             if (direction > 0)
             {
-                velocity.X = velocity.X + lastDeltaTime * accelerationRate > maxVelocity ? maxVelocity : velocity.X + lastDeltaTime * accelerationRate;
+                velocity.X = velocity.X + _lastDeltaTime * AccelerationRate > maxVelocity ? maxVelocity : velocity.X + _lastDeltaTime * AccelerationRate;
             }
             else
             {
-                velocity.X = velocity.X - lastDeltaTime * accelerationRate < -maxVelocity ? -maxVelocity : velocity.X - lastDeltaTime * accelerationRate;
+                velocity.X = velocity.X - _lastDeltaTime * AccelerationRate < -maxVelocity ? -maxVelocity : velocity.X - _lastDeltaTime * AccelerationRate;
             }
         }
 
         public override void OnTick(float dt)
         {
             base.OnTick(dt);
-            lastDeltaTime = dt;
+            _lastDeltaTime = dt;
             TryGetMovementComponent();
 
-            if (!isKinnectAvailable && state == SkeletonComponentState.GameRunning)
+            if (!_isKinnectAvailable && state == SkeletonComponentState.GameRunning)
             {
                 HandleKeyboardMovement();
             }
@@ -255,7 +256,7 @@ namespace WpfApp1
                 HandleKinnectMovement();
             }
 
-            SDLRendering.SetCameraFollow(Owner);
+            SDLRendering.SetCameraFollow(owner);
         }
 
         private void HandleKinnectMovement()
@@ -276,11 +277,11 @@ namespace WpfApp1
                     break;
             }
 
-            Owner.AddWorldOffset((float)velocity.X, 0);
+            owner.AddWorldOffset((float)velocity.X, 0);
 
-            if (isJumping && !movementComponent.IsFalling)
+            if (isJumping && !movementComponent.isFalling)
             {
-                movementComponent.Velocity = new Vector(movementComponent.Velocity.X, -22);
+                movementComponent.velocity = new Vector(movementComponent.velocity.X, -22);
             }
         }
 
@@ -299,11 +300,11 @@ namespace WpfApp1
                 SlowDown(sprite);
             }
 
-            Owner.AddWorldOffset((float)velocity.X, 0);
+            owner.AddWorldOffset((float)velocity.X, 0);
 
-            if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_SPACE) && !movementComponent.IsFalling)
+            if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_SPACE) && !movementComponent.isFalling)
             {
-                movementComponent.Velocity = new Vector(movementComponent.Velocity.X, -30);
+                movementComponent.velocity = new Vector(movementComponent.velocity.X, -30);
             }
         }
 
@@ -313,10 +314,10 @@ namespace WpfApp1
 
             // ankle left nearly equal kneeRight -> accelerate
             // ankle right nearly equal kneeLeft -> accelerate
-            Vector ankleLeft = skeleton[JointType.AnkleLeft];
-            Vector kneeRight = skeleton[JointType.KneeRight];
-            Vector ankleRight = skeleton[JointType.AnkleRight];
-            Vector kneeLeft = skeleton[JointType.KneeLeft];
+            Vector ankleLeft = _skeleton[JointType.AnkleLeft];
+            Vector kneeRight = _skeleton[JointType.KneeRight];
+            Vector ankleRight = _skeleton[JointType.AnkleRight];
+            Vector kneeLeft = _skeleton[JointType.KneeLeft];
 
             if (-ankleLeft.Y > -kneeRight.Y)
             {
@@ -327,7 +328,7 @@ namespace WpfApp1
                 actionType = ActionType.MoveLeft;
             }
 
-            if (!isKinnectAvailable)
+            if (!_isKinnectAvailable)
             {
                 if (Keyboard.IsKeyDown(Key.D))
                 {
@@ -350,9 +351,9 @@ namespace WpfApp1
         {
             bool isJumping = false;
 
-            Vector head = skeleton[JointType.Head];
-            Vector leftHand = skeleton[JointType.HandLeft];
-            Vector rightHand = skeleton[JointType.HandRight];
+            Vector head = _skeleton[JointType.Head];
+            Vector leftHand = _skeleton[JointType.HandLeft];
+            Vector rightHand = _skeleton[JointType.HandRight];
 
             if (head.Y > leftHand.Y || head.Y > rightHand.Y)
             {
@@ -369,8 +370,8 @@ namespace WpfApp1
         public override bool Destroyed()
         {
             // just resets to start location
-            Owner.PosX = 144;
-            Owner.PosY = SDLApp.GetInstance().GetAppHeight() - 144;
+            owner.posX = 144;
+            owner.posY = SDLApp.GetInstance().GetAppHeight() - 144;
             return true;
         }
     }

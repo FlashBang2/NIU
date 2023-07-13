@@ -8,24 +8,24 @@ namespace WpfApp1
 {
     public class CharacterMovementComponent : Component
     {
-        public Vector Velocity = new Vector();
-        public float GravityScale = 6.0f;
-        public bool IsControlledByPlayer = false;
+        public Vector velocity = new Vector();
+        public float gravityScale = 6.0f;
+        public bool isControlledByPlayer = false;
 
-        public float AccumulatedY = 0;
-        public bool IsFalling { get; private set; }
+        public float accumulatedY = 0;
+        public bool isFalling { get; private set; }
 
-        private CollisionComponent collision = null;
-        private SkeletonComponent skeleton = null;
-        private Ray ray = new Ray();
+        private CollisionComponent _collision = null;
+        private SkeletonComponent _skeleton = null;
+        private Ray _ray = new Ray();
         
-        private List<IEntity> ignore = new List<IEntity>();
+        private List<IEntity> _ignoreList = new List<IEntity>();
 
         public override void Spawned()
         {
             base.Spawned();
             isActive = true;
-            ignore.Add(Owner);
+            _ignoreList.Add(owner);
         }
 
         public override void OnTick(float dt)
@@ -36,39 +36,40 @@ namespace WpfApp1
         }
         private void ApplyMovement(float dt)
         {
-            if (Owner.HasComponent<SkeletonComponent>())
+            if (owner.HasComponent<SkeletonComponent>())
             {
-                if (skeleton == null)
+                if (_skeleton == null)
                 {
-                    skeleton = Owner.GetComponent<SkeletonComponent>();
+                    _skeleton = owner.GetComponent<SkeletonComponent>();
                 }
 
-                if (skeleton.state != SkeletonComponentState.GameRunning)
+                if (_skeleton.state != SkeletonComponentState.GameRunning)
                 {
                     return;
                 }
             }
 
-            Owner.AddWorldOffset((float)Velocity.X, (float)Velocity.Y);
-            Velocity.Y += 9.81 * GravityScale * dt;
+            
+            owner.AddWorldOffset((float)velocity.X, (float)velocity.Y);
+            velocity.Y += 9.81 * gravityScale * dt;
 
-            if (collision == null)
+            if (_collision == null)
             {
-                collision = Owner.GetComponent<CollisionComponent>();
+                _collision = owner.GetComponent<CollisionComponent>();
             }
 
-            collision.TestCollision();
+            _collision.TestCollision();
 
-            AccumulatedY += (float)Velocity.Y * dt;
+            accumulatedY += (float)velocity.Y * dt;
 
-            if (collision.IsOverlaping)
+            if (_collision.isOverlaping)
             {
-                AccumulatedY -= (float)Velocity.Y * dt;
-                Velocity.Y = 0;
+                accumulatedY -= (float)velocity.Y * dt;
+                velocity.Y = 0;
             }
 
-            ray.Init(new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height), new Vector(Owner.PosX + Owner.Width / 2, Owner.PosY + Owner.Height + 30));
-            IsFalling = !CollisionComponent.RayCast(ray, ignore, out _);
+            _ray.Init(new Vector(owner.posX + owner.width / 2, owner.posY + owner.height), new Vector(owner.posX + owner.width / 2, owner.posY + owner.height + 30));
+            isFalling = !CollisionComponent.RayCast(_ray, _ignoreList, out _);
         }
 
         public override void Deactivated()

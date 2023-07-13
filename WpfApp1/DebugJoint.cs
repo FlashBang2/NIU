@@ -10,18 +10,18 @@ namespace WpfApp1
 {
     public class DebugJoint
     {
-        public double PosX { get => _posX; }
-        public double PosY { get => _posY; }
+        public double posX { get => _posX; }
+        public double posY { get => _posY; }
 
         private double _posX = 0;
         private double _posY = 0;
 
-        public SDL_Rect Bounds { get { SDL_Rect r = new SDL_Rect(); SdlRectMath.FromXywh((float)_posX, (float)_posY, 0, 0, out r); return r; } }
+        public SDL_Rect bounds { get { SDL_Rect r = new SDL_Rect(); SdlRectMath.FromXywh((float)_posX, (float)_posY, 0, 0, out r); return r; } }
 
         private float _offsetX = 0;
         private float _offsetY = 0;
 
-        public bool IsVisible
+        public bool isVisible
         {
             get => _visible; set
             {
@@ -38,7 +38,7 @@ namespace WpfApp1
 
         public void DrawDebugJoint(Vector normalizedPosition, Vector size, Vector offset, Color color)
         {
-            if (!IsVisible)
+            if (!isVisible)
             {
                 return;
             }

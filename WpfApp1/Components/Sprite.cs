@@ -7,32 +7,32 @@ namespace WpfApp1
     public class Sprite : Component, IRenderable
     {
         public bool shouldMove = false;
-        public bool ShouldUseSharedAnimationManager = true;
+        public bool shouldUseSharedAnimationManager = true;
         public string spriteId;
 
-        public float RotationAngle = 0.0f;
+        public float rotationAngle = 0.0f;
         public SDL_RendererFlip FlipMode = SDL_RendererFlip.SDL_FLIP_NONE;
 
         bool IRenderable.shouldDraw => SkeletonComponent.isPostCalibrationStage;
 
-        private readonly Dictionary<AnimationType, AnimationDataCache> animData = new Dictionary<AnimationType, AnimationDataCache>();
-        private int currentFrame = 0;
-        private float lastFrameTime = 0;
-        private AnimationType currentAnim = AnimationType.Undefined;
-        private SharedAnimationManager animationManager;
+        private readonly Dictionary<AnimationType, AnimationDataCache> _animData = new Dictionary<AnimationType, AnimationDataCache>();
+        private int _currentFrame = 0;
+        private float _lastFrameTime = 0;
+        private AnimationType _currentAnim = AnimationType.Undefined;
+        private SharedAnimationManager _animationManager;
 
         public override void Spawned()
         {
             base.Spawned();
-            animationManager = Entity.RootEntity.GetComponent<SharedAnimationManager>();
+            _animationManager = Entity.rootEntity.GetComponent<SharedAnimationManager>();
         }
 
         public override void OnTick(float dt)
         {
             base.OnTick(dt);
-            lastFrameTime += dt;
+            _lastFrameTime += dt;
 
-            if (currentAnim != AnimationType.Undefined)
+            if (_currentAnim != AnimationType.Undefined)
             {
                 UpdateAnimation();
             }
@@ -47,62 +47,62 @@ namespace WpfApp1
                 return;
             }
 
-            if (!ShouldUseSharedAnimationManager)
+            if (!shouldUseSharedAnimationManager)
             {
                 RenderSelfAnimation();
             }
             else
             {
-                animationManager.GetRenderRect(spriteId, out SdlRectMath.DummyEndResult);
-                SDLRendering.DrawSprite(spriteId, Owner.Bounds, SdlRectMath.DummyEndResult, RotationAngle, FlipMode);
+                _animationManager.GetRenderRect(spriteId, out SdlRectMath.DummyEndResult);
+                SDLRendering.DrawSprite(spriteId, owner.bounds, SdlRectMath.DummyEndResult, rotationAngle, FlipMode);
             }
         }
 
         private void RenderSelfAnimation()
         {
-            if (currentAnim == AnimationType.Undefined)
+            if (_currentAnim == AnimationType.Undefined)
             {
                 // draw all sprite
-                SDLRendering.DrawSprite(spriteId, Owner.Bounds, SdlRectMath.UnlimitedRect, RotationAngle, FlipMode);
+                SDLRendering.DrawSprite(spriteId, owner.bounds, SdlRectMath.UnlimitedRect, rotationAngle, FlipMode);
             }
             else
             {
-                AnimationDataCache data = animData[currentAnim];
+                AnimationDataCache data = _animData[_currentAnim];
 
-                SDL_Rect rect = data.GetRect(currentFrame);
-                SDLRendering.DrawSprite(spriteId, Owner.Bounds, rect, 0, FlipMode);
+                SDL_Rect rect = data.GetRect(_currentFrame);
+                SDLRendering.DrawSprite(spriteId, owner.bounds, rect, 0, FlipMode);
             }
         }
 
         private void UpdateAnimation()
         {
-            AnimationDataCache data = animData[currentAnim];
-            if (data.CanAdvanceToNextFrame(lastFrameTime))
+            AnimationDataCache data = _animData[_currentAnim];
+            if (data.CanAdvanceToNextFrame(_lastFrameTime))
             {
-                currentFrame++;
-                lastFrameTime = 0;
+                _currentFrame++;
+                _lastFrameTime = 0;
             }
 
-            if (data.HasNextFrameResetsAnimation(currentFrame))
+            if (data.HasNextFrameResetsAnimation(_currentFrame))
             {
-                currentFrame = data.GetNextFrame(currentFrame);
-                lastFrameTime = 0;
+                _currentFrame = data.GetNextFrame(_currentFrame);
+                _lastFrameTime = 0;
             }
         }
 
         public void AddAnimation(AnimationType animationType, AnimationData data)
         {
             AnimationDataCache cache = new AnimationDataCache(data);
-            animData.Add(animationType, cache);
+            _animData.Add(animationType, cache);
         }
 
         public void PlayAnim(AnimationType animationType)
         {
-            if (currentAnim != animationType)
+            if (_currentAnim != animationType)
             {
-                currentAnim = animationType;
-                currentFrame = animData[animationType].Data.StartFrame;
-                lastFrameTime = 0;
+                _currentAnim = animationType;
+                _currentFrame = _animData[animationType].data.startFrame;
+                _lastFrameTime = 0;
             }
         }
     }

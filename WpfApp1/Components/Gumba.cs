@@ -10,78 +10,78 @@ namespace WpfApp1
 {
     public class Gumba : Component
     {
-        private float directionScale = -1.0f;
-        private bool killed = false;
-        private CharacterMovementComponent movementComponent;
+        private float _directionScale = -1.0f;
+        private bool _isKilled = false;
+        private CharacterMovementComponent _movementComponent;
         
         private const int Speed = 3;
-        private Ray ray = new Ray();
-        private List<IEntity> ignoredEntities = new List<IEntity>();
+        private Ray _ray = new Ray();
+        private List<IEntity> _ignoredEntities = new List<IEntity>();
 
-        private Sprite sprite;
+        private Sprite _sprite;
 
         public override void Spawned()
         {
             base.Spawned();
             isActive = true;
-            ignoredEntities.Add(Owner);
+            _ignoredEntities.Add(owner);
         }
 
         public override void OnTick(float dt)
         {
             base.OnTick(dt);
 
-            if (movementComponent == null)
+            if (_movementComponent == null)
             {
-                movementComponent = Owner.GetComponent<CharacterMovementComponent>();
-                sprite = Owner.GetComponent<Sprite>();
+                _movementComponent = owner.GetComponent<CharacterMovementComponent>();
+                _sprite = owner.GetComponent<Sprite>();
             }
 
-            if (!movementComponent.IsFalling && sprite.shouldMove)
+            if (!_movementComponent.isFalling && _sprite.shouldMove)
             {
-                Owner.AddWorldOffset(Speed * directionScale, 0);
+                owner.AddWorldOffset(Speed * _directionScale, 0);
 
-                ray.Init(new Vector(Owner.PosX, Owner.PosY), new Vector(Owner.PosX + Owner.Width * directionScale + Speed * directionScale, Owner.PosY));
+                _ray.Init(new Vector(owner.posX, owner.posY), new Vector(owner.posX + owner.width * _directionScale + Speed * _directionScale, owner.posY));
 
                 OverlapEvent evt;
-                if (RayCast(ray, ignoredEntities, out evt))
+                if (RayCast(_ray, _ignoredEntities, out evt))
                 {
                     ReactToEntity(evt);
                 }
 
-                ray.Init(new Vector(Owner.PosX + Owner.Width * directionScale + Speed * directionScale, Owner.PosY + Owner.Height), 
-                    new Vector(Owner.PosX + Owner.Width * directionScale + Speed * directionScale, Owner.PosY + Owner.Height + 40));
+                _ray.Init(new Vector(owner.posX + owner.width * _directionScale + Speed * _directionScale, owner.posY + owner.height), 
+                    new Vector(owner.posX + owner.width * _directionScale + Speed * _directionScale, owner.posY + owner.height + 40));
 
-                bool isObstacleInFront = !RayCast(ray, ignoredEntities, out evt);
+                bool isObstacleInFront = !RayCast(_ray, _ignoredEntities, out evt);
                 if (isObstacleInFront)
                 {
-                    directionScale *= -1;
+                    _directionScale *= -1;
                 }
             }
         }
 
         private void ReactToEntity(OverlapEvent evt)
         {
-            bool isReactedWithMario = evt.LastContact.Name.Equals("mario");
+            bool isReactedWithMario = evt.lastContact.name.Equals("mario");
             if (isReactedWithMario) //reaction to other stuff
             {
                 Entity mario = Entity.GetEntity("mario", true);
-                mario.PosX = 144;
+                mario.posX = 144;
 
-                if (mario.PosY < Owner.PosY)
+                if (mario.posY < owner.posY)
                 {
-                    Owner.GetComponent<Sprite>().shouldMove = false;
-                    Owner.SetActive(false);
+                    owner.GetComponent<Sprite>().shouldMove = false;
+                    owner.SetActive(false);
                 }
 
-                if (!killed)
+                if (!_isKilled)
                 {
-                    mario.PosY = SDLApp.GetInstance().GetAppHeight() - 144;
+                    mario.posY = SDLApp.GetInstance().GetAppHeight() - 144;
                 }
             }
             else // reaction to mario
             {
-                directionScale *= -1;
+                _directionScale *= -1;
             }
         }
     }

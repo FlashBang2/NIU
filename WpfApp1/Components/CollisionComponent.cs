@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Security.Cryptography;
 using System.Windows;
+using System.Windows.Media;
 using static SDL2.SDL;
 
 namespace WpfApp1
@@ -12,45 +13,45 @@ namespace WpfApp1
     {
         public struct OverlapEvent
         {
-            public IEntity LastContact;
-            public IEntity Self;
-            public Vector ContactPoint;
+            public IEntity lastContact;
+            public IEntity self;
+            public Vector contactPoint;
         }
 
-        public bool IsStatic = true;
-        public bool IsOverlaping = false;
-        public bool IsTrigger = false;
+        public bool isStatic = true;
+        public bool isOverlaping = false;
+        public bool isTrigger = false;
 
-        public float AccumulatedY = 0;
+        public float accumulatedY = 0;
 
-        public event Action<OverlapEvent> Overlaped;
-        public event Action<OverlapEvent> StopOverlaping;
+        public event Action<OverlapEvent> overlaped;
+        public event Action<OverlapEvent> stopsOverlaping;
 
         private List<IEntity> _contacts = new List<IEntity>();
-        private static List<CollisionComponent> collisionComponents = new List<CollisionComponent>();
-        private static IList<IEntity> EmptyList = new List<IEntity>();
+        private static List<CollisionComponent> _collisionComponents = new List<CollisionComponent>();
+        private static IList<IEntity> _emptyList = new List<IEntity>();
 
         public static bool RayCast(Ray ray, out OverlapEvent evt)
         {
-            return RayCast(ray, EmptyList, out evt);
+            return RayCast(ray, _emptyList, out evt);
         }
 
         public override void Activated()
         {
             base.Activated();
-            collisionComponents.Add(this);
+            _collisionComponents.Add(this);
         }
 
         public override void Deactivated()
         {
             base.Deactivated();
-            collisionComponents.Remove(this);
+            _collisionComponents.Remove(this);
         }
 
         public override bool Destroyed()
         {
             base.Deactivated();
-            collisionComponents.Remove(this);
+            _collisionComponents.Remove(this);
             return false;
         }
 
@@ -58,19 +59,19 @@ namespace WpfApp1
         {
             double t = 0.00;
 
-            if (TestPointInAnyComponent(ignored, ray.Start, out evt))
+            if (TestPointInAnyComponent(ignored, ray.start, out evt))
             {
                 return true;
             }
 
-            if (TestPointInAnyComponent(ignored, ray.End, out evt))
+            if (TestPointInAnyComponent(ignored, ray.end, out evt))
             {
                 return true;
             }
 
             while (t < 1)
             {
-                Vector current = (1 - t) * ray.Start + t * ray.End;
+                Vector current = (1 - t) * ray.start + t * ray.end;
 
                 if (TestPointInAnyComponent(ignored, current, out evt))
                 {
@@ -86,17 +87,17 @@ namespace WpfApp1
 
         static bool TestPointInAnyComponent(IList<IEntity> ignored, Vector point, out OverlapEvent evt)
         {
-            foreach (var child in collisionComponents)
+            foreach (var child in _collisionComponents)
             {
-                if (child.Owner.IsActive && ignored.FirstOrDefault(e => e == child.Owner) == null)
+                if (child.owner.isActive && ignored.FirstOrDefault(e => e == child.owner) == null)
                 {
-                    var bounds = child.Owner.Bounds;
+                    var bounds = child.owner.bounds;
 
                     if (SdlRectMath.IsPointInRect(ref bounds, (float)point.X, (float)point.Y))
                     {
-                        evt.Self = null;
-                        evt.LastContact = child.Owner;
-                        evt.ContactPoint = point;
+                        evt.self = null;
+                        evt.lastContact = child.owner;
+                        evt.contactPoint = point;
                         return true;
                     }
                 }
@@ -110,41 +111,94 @@ namespace WpfApp1
         public override void Spawned()
         {
             base.Spawned();
-            collisionComponents.Add(this);
+            _collisionComponents.Add(this);
             isActive = true;
         }
+
+        bool firstFrame = true;
+
+        public bool shouldDraw => true;
 
         public override void OnTick(float dt)
         {
             base.OnTick(dt);
+            if (firstFrame)
+            {
+                firstFrame = false;
+                return;
+            }
+
             TestCollision();
         }
 
         public void TestCollision()
         {
-            SDL_Rect ownerBounds = Owner.Bounds;
-            IsOverlaping = false;
-
-            foreach (var child in collisionComponents)
+            if (isStatic)
             {
-                if (child != this && child.Owner.IsActive)
+                return;
+            }
+
+            SDL_Rect ownerBounds = owner.bounds;
+            isOverlaping = false;
+
+            foreach (var child in _collisionComponents)
+            {
+                if (child != this && child.owner.isActive)
                 {
-                    if (IsTrigger)
+                    if (isTrigger)
                     {
                         TestForTrigger(ownerBounds, child);
                         continue;
                     }
-                 
-                    TestForCollision(ownerBounds, child);
+
+                    TestForCollision(ref ownerBounds, child);
                 }
             }
         }
 
-        private void TestForCollision(SDL_Rect ownerBounds, CollisionComponent child)
+        private void TestForCollision(ref SDL_Rect ownerBounds, CollisionComponent child)
         {
-            SDL_Rect childBounds = child.Owner.Bounds;
+            SDL_Rect childBounds = child.owner.bounds;
 
-            if (SDL_IntersectRect(ref childBounds, ref ownerBounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE && !child.IsTrigger)
+#if false
+            float contactPointX, contactPointY;
+            int contactNormalX, contactNormalY;
+            float hitNear = 0;
+
+            IsOverlaping = false;
+            
+            if (Math.Abs(child.Owner.PosX - ownerBounds.x) < ownerBounds.w &&
+                Math.Abs(child.Owner.PosY - ownerBounds.y) < ownerBounds.h)
+            {
+                return;
+            }
+
+            if (SdlRectMath.RayVsRect(ownerBounds.x, ownerBounds.y, child.Owner.PosX - ownerBounds.x + ownerBounds.w, child.Owner.PosY - ownerBounds.y + ownerBounds.h, ref childBounds, out contactPointX, out contactPointY, out contactNormalX, out contactNormalY, out hitNear))
+            {
+                if (!IsStatic && hitNear <= 1)
+                {
+                    if (SDL_IntersectRect(ref childBounds, ref ownerBounds, out SdlRectMath.DummyEndResult) != SDL_bool.SDL_FALSE)
+                    {
+                        var x = contactNormalX * SdlRectMath.DummyEndResult.w;
+                        var y = contactNormalY * SdlRectMath.DummyEndResult.h;
+
+                        if (Owner.Name.Equals("mario"))
+                        {
+                            SDL_IntersectRect(ref childBounds, ref ownerBounds, out SdlRectMath.DummyEndResult);
+
+                            Console.WriteLine("Test");
+                        }
+
+                        Owner.AddWorldOffset(x, y);
+
+                        IsOverlaping = true;
+                    }
+                }
+            }
+
+
+#else
+            if (SDL_IntersectRect(ref childBounds, ref ownerBounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE && !child.isTrigger)
             {
                 SDL_Rect rect = SdlRectMath.DummyEndResult;
 
@@ -158,88 +212,86 @@ namespace WpfApp1
                 }
 
                 OverlapEvent evt = new OverlapEvent();
-                evt.Self = Owner;
-                evt.LastContact = child.Owner;
+                evt.self = owner;
+                evt.lastContact = child.owner;
 
-                Overlaped?.Invoke(evt);
-                _contacts.Add(child.Owner);
+                overlaped?.Invoke(evt);
+                _contacts.Add(child.owner);
             }
+#endif
         }
 
         private void CorrectVerticalLocation(SDL_Rect rect)
         {
-            Entity o = (Entity)Owner;
+            Entity o = (Entity)owner;
 
             if (o.HasComponent<CharacterMovementComponent>())
             {
                 CharacterMovementComponent movementComponent = o.GetComponent<CharacterMovementComponent>();
-                if (movementComponent.Velocity.Y > 0)
+                if (movementComponent.velocity.Y > 0)
                 {
-                    AccumulatedY = (float)rect.h + 0.01f;
-                    Owner.AddWorldOffset(0, -AccumulatedY);
-                    IsOverlaping = true;
+                    accumulatedY = rect.h + 0.05f;
+                    owner.AddWorldOffset(0, -accumulatedY);
+                    isOverlaping = true;
                 }
-                else if (movementComponent.Velocity.Y < 0)
+                else if (movementComponent.velocity.Y < 0)
                 {
-                    AccumulatedY = (float)rect.h + 0.01f;
-                    Owner.AddWorldOffset(0, AccumulatedY);
-                    IsOverlaping = true;
+                    accumulatedY = rect.h + 0.05f;
+                    owner.AddWorldOffset(0, accumulatedY);
+                    isOverlaping = true;
                 }
             }
             else
             {
-                if (!IsStatic)
-                {
-                    AccumulatedY = (float)rect.h + 0.01f;
-                    Owner.AddWorldOffset(0, -AccumulatedY);
-                    IsOverlaping = true;
-                }
+                accumulatedY = rect.h + 0.01f;
+                owner.AddWorldOffset(0, -accumulatedY);
+                isOverlaping = true;
             }
         }
 
         private void CorrectHorizontalLocation(CollisionComponent child, SDL_Rect rect)
         {
-            var x = Owner.PosX - child.Owner.PosX;
+            var x = owner.posX - child.owner.posX;
 
 
-            if (!IsStatic && rect.w > 0)
+            if (!isStatic && rect.w > 0)
             {
-                Owner.AddWorldOffset(Math.Sign(x) * (rect.w + Math.Sign(rect.w)), 0);
-                IsOverlaping = true;
+                owner.AddWorldOffset(Math.Sign(x) * (rect.w + Math.Sign(rect.w)), 0);
+                isOverlaping = true;
             }
         }
 
         private void TestForTrigger(SDL_Rect ownerBounds, CollisionComponent child)
         {
-            SDL_Rect cb = child.Owner.Bounds;
+            SDL_Rect cb = child.owner.bounds;
 
             if (_contacts.Find(e => e == child) != null)
             {
                 if (SDL_IntersectRect(ref cb, ref ownerBounds, out SdlRectMath.DummyEndResult) != SDL_bool.SDL_TRUE)
                 {
                     OverlapEvent evt = new OverlapEvent();
-                    evt.Self = Owner;
-                    evt.LastContact = child.Owner;
+                    evt.self = owner;
+                    evt.lastContact = child.owner;
 
-                    StopOverlaping?.Invoke(evt);
+                    stopsOverlaping?.Invoke(evt);
 
-                    _contacts.Remove(child.Owner);
+                    _contacts.Remove(child.owner);
                 }
             }
             else
             {
                 if (SDL_IntersectRect(ref cb, ref ownerBounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE)
                 {
-                    if (child.Owner.Name.Equals("mario"))
+                    if (child.owner.name.Equals("mario"))
                     {
-                        Console.WriteLine(Owner.Name);
+                        Console.WriteLine(owner.name);
                     }
                     OverlapEvent evt = new OverlapEvent();
-                    evt.Self = Owner;
-                    evt.LastContact = child.Owner;
+                    evt.self = owner;
+                    evt.lastContact = child.owner;
 
-                    Overlaped?.Invoke(evt);
-                    _contacts.Add(child.Owner);
+                    overlaped?.Invoke(evt);
+                    _contacts.Add(child.owner);
                 }
             }
         }

@@ -7,137 +7,61 @@ using static SDL2.SDL;
 
 namespace WpfApp1
 {
-    public class Entity : IEntity
+    public partial class Entity : IEntity
     {
-        private IEntity _parent;
         private float _posX;
         private float _posY;
+
         private SDL_Rect _bounds;
         private string _name;
         private bool _active = true;
 
-        private float _angle = 0;
-
-        private readonly IList<IEntity> _children = new List<IEntity>();
         private readonly IList<IRenderable> _renderablesComponents = new List<IRenderable>();
         private readonly List<Component> _tickyComponents = new List<Component>();
         private readonly IDictionary<Type, Component> _newComponents = new Dictionary<Type, Component>();
 
-        public static Entity RootEntity = new Entity("Root");
-        public static Entity Mario = null;
-        public static bool ShowedCountOfTickyComponents = false;
-        public static int NumTickyComponents = 0;
-        private static int FramesToSkip = 4;
+        public float _lastX = 0;
+        public float _lastY = 0;
 
-        public float lastX = 0;
-        public float lastY = 0;
-
-        static Entity()
-        {
-            RootEntity.AddComponent<SharedAnimationManager>();
-            if (SDLApp.ShouldShowFps)
-            {
-                RootEntity.AddComponent<FrameRateRendererComponent>();
-            }
-        }
-
-        public static Entity CreateEntity(string name)
-        {
-            Entity e = new Entity(name);
-            RootEntity.AttachChild(e);
-            return e;
-        }
-
-        public static Entity GetEntity(string name, bool shouldOnlyTop)
-        {
-            IEntity e = RootEntity.FindChild(name);
-            if (e == null)
-            {
-                if (!shouldOnlyTop)
-                {
-                    return null;
-                    throw new ArgumentException("Couldn't find such entity");
-                }
-
-                foreach (var ch in RootEntity._children)
-                {
-                    e = ch.FindChild(name);
-                    if (e != null)
-                    {
-                        return (Entity)e;
-                    }
-                }
-
-                foreach (var ch in RootEntity._children)
-                {
-                    var child = (Entity)ch;
-
-                    foreach (var ch2 in child._children)
-                    {
-                        e = ch2.FindChild(name);
-                        if (e != null)
-                        {
-                            return (Entity)e;
-                        }
-                    }
-                }
-            }
-
-            return (Entity)e;
-        }
+        public static RootEntity rootEntity = new RootEntity();
 
         public Entity(string name)
         {
-            _parent = null;
             _name = name;
             _bounds = new SDL_Rect();
             _posX = 0;
             _posY = 0;
         }
 
-        public float PosX
+        public float posX
         {
             get => _posX; set
             {
-                float offset = _posX - value;
+                _lastY = _posX;
                 _posX = value;
-
-                foreach (IEntity entity in _children)
-                {
-                    entity.AddWorldOffset(offset, 0);
-                }
-
-
-                lastX = offset + value;
-                SdlRectMath.FromXywh(_posX, _posY, Width, Height, out _bounds);
+                SdlRectMath.FromXywh(_posX, _posY, width, height, out _bounds);
             }
         }
 
-        public float PosY
+        public float posY
         {
             get => _posY; set
             {
-                float offset = _posY - value;
+                _lastY = _posY;
                 _posY = value;
-
-                foreach (IEntity entity in _children)
-                {
-                    entity.AddWorldOffset(0, offset);
-                }
-
-                lastY = offset + value;
-                SdlRectMath.FromXywh(_posX, _posY, Width, Height, out _bounds);
+                
+                SdlRectMath.FromXywh(_posX, _posY, width, height, out _bounds);
             }
         }
 
-        public float Width { get => _bounds.w; set { SdlRectMath.FromXywh(PosX, PosY, value, Height, out _bounds); } }
+        public float width { get => _bounds.w; set { SdlRectMath.FromXywh(posX, posY, value, height, out _bounds); } }
 
-        public string Name { get => _name; set => _name = value; }
-        public float Height { get => _bounds.h; set { SdlRectMath.FromXywh(PosX, PosY, Width, value, out _bounds); } }
+        public string name { get => _name; set => _name = value; }
+        public float height { get => _bounds.h; set { SdlRectMath.FromXywh(posX, posY, width, value, out _bounds); } }
 
-        public bool IsActive { get => _active; set => SetActive(value); }
+        public bool isActive { get => _active; set => SetActive(value); }
 
-        public SDL_Rect Bounds { get => _bounds; }
+        public SDL_Rect bounds { get => _bounds; }
 
         public void SetActive(bool active)
         {
@@ -186,27 +110,13 @@ namespace WpfApp1
 
         public void AddWorldOffset(float x, float y)
         {
-            lastX = _posX;
-            lastY = _posY;
-            PosX += x;
-            PosY += y;
+            posX += x;
+            posY += y;
 
             SdlRectMath.FromXywh(_posX, _posY, _bounds.w, _bounds.h, out _bounds);
         }
 
-        public void AttachChild(IEntity entity)
-        {
-            if (entity is Entity)
-            {
-                Entity e = (Entity)entity;
-                e._parent = this;
-            }
-
-            _children.Add(entity);
-        }
-
-
-        public void Destroy()
+        public virtual void Destroy()
         {
             foreach (var component in _newComponents)
             {
@@ -216,24 +126,10 @@ namespace WpfApp1
                 }
             }
 
-            foreach (var child in _children)
+            if (this != rootEntity)
             {
-                child.Destroy();
+                rootEntity.RemoveChild(this);
             }
-
-            _parent?.RemoveChild(this);
-            _children.Clear();
-            _parent = null;
-        }
-
-        public virtual void Destroyed()
-        {
-
-        }
-
-        public IEntity FindChild(string name)
-        {
-            return _children.FirstOrDefault(child => child.Name.Equals(name));
         }
 
         public T GetComponent<T>()
@@ -244,10 +140,13 @@ namespace WpfApp1
 
         public bool IsInViewRect(Entity other)
         {
-            return true;//  SDL_IntersectRect(ref _bounds, ref other._bounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE;
+            int w = SDLRendering._screenWidth;
+            int h = SDLRendering._screenHeight;
+            SdlRectMath.FromXywh(_bounds.x - w / 2 < 0 ? 0 : _bounds.x - w / 2, _bounds.y - h / 2 < 0 ? 0 : _bounds.y - h / 2, w, h, out SdlRectMath.DummyEndResult);
+            return SDL_IntersectRect(ref SdlRectMath.DummyEndResult, ref other._bounds, out SdlRectMath.DummyEndResultAlternative) == SDL_bool.SDL_TRUE;
         }
 
-        public void ReceiveRender()
+        public virtual void ReceiveRender()
         {
             if (!_active)
             {
@@ -271,34 +170,6 @@ namespace WpfApp1
             {
                 Mario = GetEntity("mario", true);
             }
-
-            foreach (var child in _children)
-            {
-                Entity e = (Entity)child;
-                if (Mario.IsInViewRect(e))
-                {
-                    child.ReceiveRender();
-                }
-            }
-        }
-
-        public bool RemoveChild(IEntity entity)
-        {
-            return _children.Remove(entity);
-        }
-
-        public void Rotate(float angle)
-        {
-            _angle += angle;
-
-            foreach (var child in _children)
-            {
-                child.Rotate(angle);
-            }
-        }
-
-        public void Spawned()
-        {
         }
 
         public virtual void Tick(float dt)
@@ -312,6 +183,7 @@ namespace WpfApp1
             {
                 component.OnTick(dt);
             }
+
             if (!ShowedCountOfTickyComponents)
             {
                 NumTickyComponents += _tickyComponents.Count;
@@ -322,39 +194,10 @@ namespace WpfApp1
                 Mario = GetEntity("mario", true);
             }
 
-            for (var i = 0; i < _children.Count; i++)
-            {
-                if (FramesToSkip == 0 || Mario.IsInViewRect((Entity)_children[i]))
-                {
-                    _children[i].Tick(dt);
-                }
-            }
-
-            FramesToSkip--;
-
-            if (FramesToSkip < 0)
-            {
-                FramesToSkip = 4;
-            }
-
-            if (PosY > SDLApp.GetInstance().GetAppHeight() /*&& !HasComponent<SkeletonComponent>()*/)
+            if (posY > SDLApp.GetInstance().GetAppHeight() /*&& !HasComponent<SkeletonComponent>()*/)
             {
                 Destroy();
             }
-
-            if (!ShowedCountOfTickyComponents)
-            {
-                if (Name.Equals("Root"))
-                {
-                    Console.WriteLine("Num ticky components: " + NumTickyComponents);
-                    ShowedCountOfTickyComponents = true;
-                }
-            }
-        }
-
-        public IEntity[] GetChildren()
-        {
-            return _children.ToArray();
         }
 
         public bool HasComponent<T>()
@@ -365,8 +208,8 @@ namespace WpfApp1
 
         public void UndoLastTranslation()
         {
-            PosX = lastX;
-            PosY = lastY;
+            posX = _lastX;
+            posY = _lastY;
         }
 
         public void AddToTickList(Component component)

@@ -6,42 +6,42 @@ namespace WpfApp1
 {
     public struct AnimationDataCache
     {
-        public AnimationData Data;
-        public float DeltaFrameSeconds;
-        public List<SDL_Rect> SpriteBounds;
+        public AnimationData data;
+        public float deltaFrameSeconds;
+        public List<SDL_Rect> spriteBounds;
 
         public AnimationDataCache(AnimationData data)
         {
-            Data = data;
-            SpriteBounds = new List<SDL_Rect>();
+            this.data = data;
+            spriteBounds = new List<SDL_Rect>();
             // build cache
-            DeltaFrameSeconds = 1.0f / data.FrameRatePerSecond;
+            deltaFrameSeconds = 1.0f / data.frameRatePerSecond;
 
-            for (int i = 0; i <= data.StartFrame; i++)
+            for (int i = 0; i <= data.startFrame; i++)
             {
                 SDL_Rect rect = new SDL_Rect();
-                SdlRectMath.FromXywh(i * data.Width, 0, data.Width, data.Height, out rect);
-                SpriteBounds.Insert(i, rect);
+                SdlRectMath.FromXywh(i * data.width, 0, data.width, data.height, out rect);
+                spriteBounds.Insert(i, rect);
             }
 
-            for (int i = data.StartFrame; i <= data.EndFrame; i++)
+            for (int i = data.startFrame; i <= data.endFrame; i++)
             {
                 SDL_Rect rect = new SDL_Rect();
-                SdlRectMath.FromXywh(i * data.Width, 0, data.Width, data.Height, out rect);
-                SpriteBounds.Insert(i, rect);
+                SdlRectMath.FromXywh(i * data.width, 0, data.width, data.height, out rect);
+                spriteBounds.Insert(i, rect);
             }
         }
 
         public SDL_Rect GetRect(int frame)
         {
-            return SpriteBounds[frame];
+            return spriteBounds[frame];
         }
 
         public int GetNextFrame(int frame)
         {
-            if (frame > Data.EndFrame)
+            if (frame > data.endFrame)
             {
-                frame = Data.StartFrame;
+                frame = data.startFrame;
             }
 
             return frame;
@@ -49,12 +49,12 @@ namespace WpfApp1
 
         public bool CanAdvanceToNextFrame(float dt)
         {
-            return dt > DeltaFrameSeconds;
+            return dt > deltaFrameSeconds;
         }
 
         public bool HasNextFrameResetsAnimation(int frame)
         {
-            return frame > Data.EndFrame;
+            return frame > data.endFrame;
         }
     }
 }

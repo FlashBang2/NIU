@@ -105,7 +105,7 @@ namespace WpfApp1
         private void SwitchToNewAnimation(string sprite, AnimationType newAnimation, SharedAnimation anims)
         {
             anims.usedAnimation = newAnimation;
-            anims.currentFrame = anims.animData[newAnimation].Data.StartFrame;
+            anims.currentFrame = anims.animData[newAnimation].data.startFrame;
             anims.lastFrameTime = 0;
             animations[sprite] = anims;
         }

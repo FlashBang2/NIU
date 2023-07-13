@@ -70,6 +70,7 @@
     <Compile Include="Components\SharedAnimationManager.cs" />
     <Compile Include="Components\SkeletonComponent.cs" />
     <Compile Include="Components\Sprite.cs" />
+    <Compile Include="RootEntity.cs" />
     <Compile Include="SpriteAnim\AnimationData.cs" />
     <Compile Include="SpriteAnim\AnimationDataCache.cs" />
     <Compile Include="SpriteAnim\AnimationType.cs" />

@@ -7,22 +7,22 @@ namespace WpfApp1
 {
     public struct Connection
     {
-        public JointType JointA;
-        public JointType JointB;
+        public JointType jointA;
+        public JointType jointB;
 
         public Connection(JointType a, JointType b)
         {
-            JointA = a;
-            JointB = b;
+            jointA = a;
+            jointB = b;
         }
 
         public void DrawConnection(Dictionary<JointType, DebugJoint> joints)
         {
-            var x = joints[JointA].PosX;
-            var y = joints[JointA].PosY;
+            var x = joints[jointA].posX;
+            var y = joints[jointA].posY;
 
-            var x2 = joints[JointB].PosX;
-            var y2 = joints[JointB].PosY;
+            var x2 = joints[jointB].posX;
+            var y2 = joints[jointB].posY;
 
             SDLRendering.DrawLine(new Vector(x, y), new Vector(x2, y2), Color.FromRgb(0, 0, 0));
         }
@@ -33,7 +33,7 @@ namespace WpfApp1
 
         public override string ToString()
         {
-            return JointA.ToString() + " => " + JointB.ToString();
+            return jointA.ToString() + " => " + jointB.ToString();
         }
 
         public static Connection[] Connections =

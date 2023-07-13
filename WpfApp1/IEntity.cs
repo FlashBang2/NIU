@@ -10,31 +10,25 @@ namespace WpfApp1
 {
     public interface IEntity
     {
-        float PosX { get; set; }
-        float PosY { get; set; }
+        float posX { get; set; }
+        float posY { get; set; }
 
         /// <summary>
         /// Approximate bounds width
         /// </summary>
-        float Width { get; set; }
-        float Height { get; set; }
+        float width { get; set; }
+        float height { get; set; }
 
-        string Name { get; set; }
-        SDL_Rect Bounds { get; }
+        string name { get; set; }
+        SDL_Rect bounds { get; }
 
         void AddWorldOffset(float x, float y);
 
-        void Rotate(float angle);
-
-        void AttachChild(IEntity entity);
-        bool RemoveChild(IEntity entity);
-
-        bool IsActive { get; set; }
+        bool isActive { get; set; }
 
         void SetActive(bool active);
 
         void Destroy();
-        IEntity FindChild(string name);
 
         void Tick(float dt);
 
@@ -45,7 +39,6 @@ namespace WpfApp1
 
         void ReceiveRender();
 
-        IEntity[] GetChildren();
         void UndoLastTranslation();
 
         void AddToTickList(Component component);

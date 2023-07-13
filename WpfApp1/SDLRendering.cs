@@ -281,10 +281,8 @@ namespace WpfApp1
             SDL_RenderCopyEx(_renderer, texture, ref sourceRect, ref spriteBounds, angle, ref p, flipMode);
         }
 
-        public static void DrawSprite(IntPtr texture, Rect spriteBounds, Rect sourceRect, double angle)
+        public static void DrawSprite(IntPtr texture, ref SDL_Rect spriteRect, ref SDL_Rect src, double angle)
         {
-            SDL_Rect spriteRect = spriteBounds.AsSDLRect;
-            SDL_Rect src = sourceRect.AsSDLRect;
             SDL_Point p = new SDL_Point();
             p.x = p.y = 0;
 
@@ -293,10 +291,8 @@ namespace WpfApp1
             SDL_RenderCopyEx(_renderer, texture, ref src, ref spriteRect, angle, ref p, SDL_RendererFlip.SDL_FLIP_NONE);
         }
 
-        public static void DrawSprite(IntPtr texture, Vector center, Rect spriteBounds, Rect sourceRect, double angle)
+        public static void DrawSprite(IntPtr texture, Vector center, ref SDL_Rect spriteRect, ref SDL_Rect src, double angle)
         {
-            SDL_Rect spriteRect = spriteBounds.AsSDLRect;
-            SDL_Rect src = sourceRect.AsSDLRect;
             SDL_Point p = new SDL_Point
             {
                 x = (int)center.X,
@@ -315,7 +311,9 @@ namespace WpfApp1
 
             TTF_SizeText(_fonts[fontId], text, out int w, out int h);
 
-            DrawSprite(texture, new Rect(posX + _cameraCenter.X, posY + _cameraCenter.Y, w, h), Rect.Unlimited, 0);
+            SdlRectMath.FromXywh((float)(posX + _cameraCenter.X), (float)(posY + _cameraCenter.Y), w, h, out SdlRectMath.DummyEndResult);
+
+            DrawSprite(texture, new Vector(), ref SdlRectMath.DummyEndResult, ref SdlRectMath.UnlimitedRect, 0);
         }
 
         public static void DrawTextOnCenterPivot(string text, string fontId, double posX, double posY, Color color)
@@ -324,7 +322,9 @@ namespace WpfApp1
 
             TTF_SizeText(_fonts[fontId], text, out int w, out int h);
 
-            DrawSprite(texture, Rect.FromOriginAndExtend(new Vector(posX - _cameraCenter.X, posY - _cameraCenter.Y), new Vector(w, h)), Rect.Unlimited, 0);
+            SdlRectMath.FromOriginAndExtend((float)(posX - _cameraCenter.X), (float)(posY - _cameraCenter.Y), w, h, out SdlRectMath.DummyEndResult);
+
+            DrawSprite(texture, new Vector(w, h), ref SdlRectMath.DummyEndResult, ref SdlRectMath.DummyEndResult, 0);
         }
 
         public static Vector GetTextSize(string text, string fontId)
@@ -410,8 +410,8 @@ namespace WpfApp1
         {
             SDL_Rect rect = new SDL_Rect();
             SDL_RenderGetViewport(_renderer, out rect);
-            _cameraCenter.X = entity.PosX + entity.Width / 2 - _screenWidth / 2 - 30;
-            _cameraCenter.Y = entity.PosY + entity.Height / 2 - 100 - _screenHeight / 2;
+            _cameraCenter.X = entity.posX + entity.width / 2 - _screenWidth / 2 - 30;
+            _cameraCenter.Y = entity.posY + entity.height / 2 - 100 - _screenHeight / 2;
 
             if (_cameraCenter.X < 0)
             {

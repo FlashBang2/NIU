@@ -8,7 +8,7 @@ namespace WpfApp1
 {
     public class Component
     {
-        public IEntity Owner { get; private set; }
+        public IEntity owner { get; private set; }
         private bool _isActive = false;
 
         public bool isActive { get => _isActive; set { SetActive(value); } }
@@ -29,7 +29,7 @@ namespace WpfApp1
 
         public void OnComponentRegistered(IEntity owner)
         {
-            Owner = owner;
+            this.owner = owner;
         }
 
         public virtual void OnTick(float dt)
@@ -71,7 +71,7 @@ namespace WpfApp1
             if (!_isActive)
             {
                 Activated();
-                Owner.AddToTickList(this);
+                owner.AddToTickList(this);
             }
 
             _isActive = true;
@@ -82,7 +82,7 @@ namespace WpfApp1
             if (_isActive)
             {
                 Deactivated();
-                Owner.RemoveFromTickList(this);
+                owner.RemoveFromTickList(this);
             }
 
             _isActive = false;
