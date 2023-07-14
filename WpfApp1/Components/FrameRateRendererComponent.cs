@@ -7,41 +7,41 @@ namespace WpfApp1
     {
         public bool shouldDraw => true;
         public float[] deltaTimes = new float[50];
-        public int index = 0;
+        public int lastAddedIndex = 0;
 
         public int lastFramerate = 0;
-        public int frames = 0;
+        public int numFramesPassedSinceLastFrameTextUpdate = 0;
 
         public override void ReceiveRender()
         {
             base.ReceiveRender();
 
-            deltaTimes[index++] = SDLApp.DeltaTime;
-            index %= deltaTimes.Length;
+            deltaTimes[lastAddedIndex++] = SDLApp.DeltaTime;
+            lastAddedIndex %= deltaTimes.Length;
 
-            if (frames > 40)
+            if (numFramesPassedSinceLastFrameTextUpdate > 40)
             {
                 UpdateFrameRate();
             }
 
             SDLRendering.DrawText(lastFramerate.ToString(), "arial-16", SDLRendering._screenWidth - 100, 60, Color.FromRgb(255, 255, 255));
-            frames++;
+            numFramesPassedSinceLastFrameTextUpdate++;
         }
 
         private void UpdateFrameRate()
         {
-            float AverageDeltaTime = deltaTimes[0];
+            float averageDeltaTime = deltaTimes[0];
 
-            for (int i = 1; i < index; i++)
+            for (int i = 1; i < lastAddedIndex; i++)
             {
-                AverageDeltaTime += deltaTimes[i];
+                averageDeltaTime += deltaTimes[i];
             }
 
-            AverageDeltaTime /= index;
-            AverageDeltaTime = 1000.0f / AverageDeltaTime;
+            averageDeltaTime /= lastAddedIndex;
+            averageDeltaTime = 1.0f / averageDeltaTime;
 
-            lastFramerate = (int)Math.Floor(AverageDeltaTime);
-            frames = 0;
+            lastFramerate = (int)Math.Floor(averageDeltaTime);
+            numFramesPassedSinceLastFrameTextUpdate = 0;
         }
     }
 

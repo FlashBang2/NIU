@@ -103,84 +103,82 @@ namespace WpfApp1
                 }
 
                 uint tick_time = SDL_GetTicks();
-                DeltaTime = tick_time - lastTick;
+                DeltaTime = (tick_time - lastTick) / 1000.0f;
                 lastTick = tick_time;
 
-                Entity.rootEntity.Tick(DeltaTime / 1000.0f);
+                Entity.rootEntity.Tick(DeltaTime);
 
                 SDLRendering.ClearFrame();
                 Entity.rootEntity.ReceiveRender();
                 SDLRendering.RenderFrame();
 
-#if false
-                if (Math.Abs(Entity.GetEntity("goomba", true).PosX
+                if (Math.Abs(Entity.GetEntity("goomba", true).posX
                     -
-                    Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                    Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
 
                     Entity.GetEntity("goomba", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba2", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba2", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba2", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba2", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba3", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba3", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba3", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba3", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba4", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba4", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba4", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba4", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba5", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba5", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba5", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba5", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba6", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba6", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba6", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba6", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba7", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba7", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba7", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba7", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba8", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba8", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba8", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba8", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba9", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba9", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba9", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba9", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba10", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba10", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba10", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba10", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba11", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba11", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba11", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba11", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba12", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba12", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba12", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba12", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba13", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba13", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba13", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba13", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba14", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba14", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba14", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba14", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba15", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba15", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba15", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba15", true).GetComponent<Sprite>().shouldMove = false;
-                if (Math.Abs(Entity.GetEntity("goomba16", true).PosX - Entity.GetEntity("mario", true).PosX) < 500 && canStartGoomba)
+                if (Math.Abs(Entity.GetEntity("goomba16", true).posX - Entity.GetEntity("mario", true).posX) < 500 && canStartGoomba)
                     Entity.GetEntity("goomba16", true).GetComponent<Sprite>().shouldMove = true;
                 else
                     Entity.GetEntity("goomba16", true).GetComponent<Sprite>().shouldMove = false;
-#endif
             }
 
             FreeResources();
@@ -375,7 +373,7 @@ namespace WpfApp1
             slowdownData.height = 48;
 
             mario.GetComponent<Sprite>().shouldUseSharedAnimationManager = false;
-            mario.GetComponent<Sprite>().isActive = true;
+            mario.GetComponent<Sprite>().shouldTick = true;
             mario.GetComponent<Sprite>().AddAnimation(AnimationType.Walk, walkData);
             mario.GetComponent<Sprite>().AddAnimation(AnimationType.SlowDown, slowdownData);
             mario.GetComponent<Sprite>().AddAnimation(AnimationType.Jump, jumpData);
@@ -1686,8 +1684,9 @@ namespace WpfApp1
             flag.posX = 9456;
             flag.posY = app.GetAppHeight() - 624;
             CollisionComponent flagCollision = flag.GetComponent<CollisionComponent>();
-            flagCollision.isTrigger = true;
-            flagCollision.overlaped += e =>
+            flagCollision.MarkItAsTrigger();
+
+            flagCollision.onOverlaped += e =>
             {
                 if (e.lastContact.name.Equals("mario"))
                 {

@@ -15,13 +15,14 @@ namespace WpfApp1
         public Vector extend;
         public bool isRay;
 
-        public Vector end { get => start + delta; }
+        public Vector end;
 
         public void Init(Vector start, Vector end)
         {
             delta = end - start;
             extend = new Vector();
-
+            this.end = end;
+            
             this.start = start;
             isRay = true;
         }

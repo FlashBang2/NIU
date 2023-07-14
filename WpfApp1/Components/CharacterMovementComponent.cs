@@ -12,29 +12,29 @@ namespace WpfApp1
         public float gravityScale = 6.0f;
         public bool isControlledByPlayer = false;
 
-        public float accumulatedY = 0;
+        public float yTotalVelocity = 0;
         public bool isFalling { get; private set; }
 
         private CollisionComponent _collision = null;
         private SkeletonComponent _skeleton = null;
         private Ray _ray = new Ray();
         
-        private List<IEntity> _ignoreList = new List<IEntity>();
+        private IList<IEntity> _rayCastIgnoreSelf = new List<IEntity>();
 
         public override void Spawned()
         {
             base.Spawned();
-            isActive = true;
-            _ignoreList.Add(owner);
+            shouldTick = true;
+            _rayCastIgnoreSelf.Add(owner);
         }
 
-        public override void OnTick(float dt)
+        public override void OnTick(float deltaTime)
         {
-            base.OnTick(dt);
+            base.OnTick(deltaTime);
 
-            ApplyMovement(dt);
+            ApplyMovement(deltaTime);
         }
-        private void ApplyMovement(float dt)
+        private void ApplyMovement(float deltaTime)
         {
             if (owner.HasComponent<SkeletonComponent>())
             {
@@ -51,7 +51,7 @@ namespace WpfApp1
 
             
             owner.AddWorldOffset((float)velocity.X, (float)velocity.Y);
-            velocity.Y += 9.81 * gravityScale * dt;
+            velocity.Y += 9.81 * gravityScale * deltaTime;
 
             if (_collision == null)
             {
@@ -60,16 +60,16 @@ namespace WpfApp1
 
             _collision.TestCollision();
 
-            accumulatedY += (float)velocity.Y * dt;
+            yTotalVelocity += (float)velocity.Y * deltaTime;
 
-            if (_collision.isOverlaping)
+            if (_collision.hasOverlapedInLastFrame)
             {
-                accumulatedY -= (float)velocity.Y * dt;
+                yTotalVelocity -= (float)velocity.Y * deltaTime;
                 velocity.Y = 0;
             }
 
             _ray.Init(new Vector(owner.posX + owner.width / 2, owner.posY + owner.height), new Vector(owner.posX + owner.width / 2, owner.posY + owner.height + 30));
-            isFalling = !CollisionComponent.RayCast(_ray, _ignoreList, out _);
+            isFalling = !CollisionComponent.RayCast(ref _ray, _rayCastIgnoreSelf, out _);
         }
 
         public override void Deactivated()

@@ -37,8 +37,6 @@ namespace WpfApp1
         }
 
         public Vector velocity { get => _velocity; set => _velocity = value; }
-        public bool shouldApplyGravity { get => _shouldApplyGravity; set => _shouldApplyGravity = value; }
-        public double gravityScale { get => _gravityScale; set => _gravityScale = value; }
         public bool isVisible
         {
             get => _joints[JointType.Head].isVisible;
@@ -266,37 +264,6 @@ namespace WpfApp1
             }
         }
 
-        public void PhysicsUpdate()
-        {
-
-            UpdateJumpState();
-        }
-
-        private void UpdateJumpState()
-        {
-            if (velocity.Y > 0)
-            {
-                if (_jumpState == JumpState.None)
-                {
-                    _jumpState = JumpState.DuringJump;
-                }
-            }
-            else if (velocity.Y < 0)
-            {
-                if (_jumpState == JumpState.DuringJump || _jumpState == JumpState.None)
-                {
-                    _jumpState = JumpState.DuringFall;
-                }
-            }
-            else
-            {
-                if (_jumpState == JumpState.DuringFall)
-                {
-                    _jumpState = JumpState.None;
-                }
-            }
-        }
-
         public void AddOffset(Vector offset)
         {
             MoveByOffsetEachChild(offset);
@@ -311,11 +278,6 @@ namespace WpfApp1
             }
 
             FindSkeletonBounds();
-        }
-
-        public void Jump()
-        {
-            velocity = new Vector(velocity.X, MaxJumpHeight);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace WpfApp1
 
         private readonly Dictionary<AnimationType, AnimationDataCache> _animData = new Dictionary<AnimationType, AnimationDataCache>();
         private int _currentFrame = 0;
-        private float _lastFrameTime = 0;
+        private float _totalFrameTime = 0;
         private AnimationType _currentAnim = AnimationType.Undefined;
         private SharedAnimationManager _animationManager;
 
@@ -27,10 +27,10 @@ namespace WpfApp1
             _animationManager = Entity.rootEntity.GetComponent<SharedAnimationManager>();
         }
 
-        public override void OnTick(float dt)
+        public override void OnTick(float deltaTime)
         {
-            base.OnTick(dt);
-            _lastFrameTime += dt;
+            base.OnTick(deltaTime);
+            _totalFrameTime += deltaTime;
 
             if (_currentAnim != AnimationType.Undefined)
             {
@@ -77,16 +77,16 @@ namespace WpfApp1
         private void UpdateAnimation()
         {
             AnimationDataCache data = _animData[_currentAnim];
-            if (data.CanAdvanceToNextFrame(_lastFrameTime))
+            if (data.CanAdvanceToNextFrame(_totalFrameTime))
             {
                 _currentFrame++;
-                _lastFrameTime = 0;
+                _totalFrameTime = 0;
             }
 
             if (data.HasNextFrameResetsAnimation(_currentFrame))
             {
                 _currentFrame = data.GetNextFrame(_currentFrame);
-                _lastFrameTime = 0;
+                _totalFrameTime = 0;
             }
         }
 
@@ -102,7 +102,7 @@ namespace WpfApp1
             {
                 _currentAnim = animationType;
                 _currentFrame = _animData[animationType].data.startFrame;
-                _lastFrameTime = 0;
+                _totalFrameTime = 0;
             }
         }
     }

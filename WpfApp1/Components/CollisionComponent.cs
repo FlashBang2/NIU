@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.ExceptionServices;
-using System.Security.Cryptography;
 using System.Windows;
-using System.Windows.Media;
 using static SDL2.SDL;
 
 namespace WpfApp1
@@ -15,25 +12,36 @@ namespace WpfApp1
         {
             public IEntity lastContact;
             public IEntity self;
-            public Vector contactPoint;
+            public float contactPointX;
+            public float contactPointY;
         }
 
-        public bool isStatic = true;
-        public bool isOverlaping = false;
-        public bool isTrigger = false;
-
-        public float accumulatedY = 0;
-
-        public event Action<OverlapEvent> overlaped;
-        public event Action<OverlapEvent> stopsOverlaping;
-
-        private List<IEntity> _contacts = new List<IEntity>();
-        private static List<CollisionComponent> _collisionComponents = new List<CollisionComponent>();
-        private static IList<IEntity> _emptyList = new List<IEntity>();
-
-        public static bool RayCast(Ray ray, out OverlapEvent evt)
+        public bool isStatic
         {
-            return RayCast(ray, _emptyList, out evt);
+            get => !shouldTick;
+            set => shouldTick = !value;
+        }
+
+        public bool hasOverlapedInLastFrame = false;
+        public bool shouldDraw => true;
+
+        public event Action<OverlapEvent> onOverlaped;
+        public event Action<OverlapEvent> onStopsOverlaping;
+
+        private IList<IEntity> _overlapContacts = new List<IEntity>();
+        private static readonly IList<CollisionComponent> _collisionComponents = new List<CollisionComponent>();
+        private static readonly IList<IEntity> _emptyEntitiesList = new List<IEntity>();
+        
+        private bool _isTrigger = false;
+        private CharacterMovementComponent _movementComponent = null;
+        private bool _isMovementComponentCached = false;
+
+        private bool _isFirstFrameEnded = true;
+        private OverlapEvent _overlapEvent;
+
+        public static bool RayCast(ref Ray ray, out OverlapEvent outOverlapEvent)
+        {
+            return RayCast(ref ray, _emptyEntitiesList, out outOverlapEvent);
         }
 
         public override void Activated()
@@ -55,56 +63,57 @@ namespace WpfApp1
             return false;
         }
 
-        public static bool RayCast(Ray ray, IList<IEntity> ignored, out OverlapEvent evt)
+        public static bool RayCast(ref Ray ray, IList<IEntity> ignoredEntities, out OverlapEvent outOverlapEvent)
         {
-            double t = 0.00;
+            double time = 0.00;
 
-            if (TestPointInAnyComponent(ignored, ray.start, out evt))
+            if (TestPointInAnyComponent(ignoredEntities, ref ray.start, out outOverlapEvent))
             {
                 return true;
             }
 
-            if (TestPointInAnyComponent(ignored, ray.end, out evt))
+            if (TestPointInAnyComponent(ignoredEntities, ref ray.end, out outOverlapEvent))
             {
                 return true;
             }
 
-            while (t < 1)
+            while (time < 1)
             {
-                Vector current = (1 - t) * ray.start + t * ray.end;
+                Vector current = (1 - time) * ray.start + time * ray.end;
 
-                if (TestPointInAnyComponent(ignored, current, out evt))
+                if (TestPointInAnyComponent(ignoredEntities, ref current, out outOverlapEvent))
                 {
                     return true;
                 }
 
-                t += 0.1f;
+                time += 0.1;
             }
 
-            evt = new OverlapEvent();
+            outOverlapEvent = new OverlapEvent();
             return false;
         }
 
-        static bool TestPointInAnyComponent(IList<IEntity> ignored, Vector point, out OverlapEvent evt)
+        static bool TestPointInAnyComponent(IList<IEntity> ignoredEntities, ref Vector point, out OverlapEvent outOverlapEvent)
         {
-            foreach (var child in _collisionComponents)
+            foreach (var collisionComponent in _collisionComponents)
             {
-                if (child.owner.isActive && ignored.FirstOrDefault(e => e == child.owner) == null)
+                if (collisionComponent.owner.isActive && ignoredEntities.FirstOrDefault(e => e == collisionComponent.owner) == null)
                 {
-                    var bounds = child.owner.bounds;
+                    var bounds = collisionComponent.owner.bounds;
 
                     if (SdlRectMath.IsPointInRect(ref bounds, (float)point.X, (float)point.Y))
                     {
-                        evt.self = null;
-                        evt.lastContact = child.owner;
-                        evt.contactPoint = point;
+                        outOverlapEvent.self = null;
+                        outOverlapEvent.lastContact = collisionComponent.owner;
+                        outOverlapEvent.contactPointX = (float)point.X;
+                        outOverlapEvent.contactPointY = (float)point.Y;
                         return true;
                     }
                 }
 
             }
 
-            evt = new OverlapEvent();
+            outOverlapEvent = new OverlapEvent();
             return false;
         }
 
@@ -112,20 +121,30 @@ namespace WpfApp1
         {
             base.Spawned();
             _collisionComponents.Add(this);
-            isActive = true;
+            isStatic = true;
+            _overlapEvent = new OverlapEvent
+            {
+                self = owner
+            };
         }
 
-        bool firstFrame = true;
-
-        public bool shouldDraw => true;
-
-        public override void OnTick(float dt)
+        public override void OnTick(float deltaTime)
         {
-            base.OnTick(dt);
-            if (firstFrame)
+            base.OnTick(deltaTime);
+            if (_isFirstFrameEnded)
             {
-                firstFrame = false;
+                _isFirstFrameEnded = false;
                 return;
+            }
+
+            if (!_isMovementComponentCached)
+            {
+                if (owner.HasComponent<CharacterMovementComponent>())
+                {
+                    _movementComponent = owner.GetComponent<CharacterMovementComponent>();
+                }
+
+                _isMovementComponentCached = true;
             }
 
             TestCollision();
@@ -133,166 +152,135 @@ namespace WpfApp1
 
         public void TestCollision()
         {
-            if (isStatic)
-            {
-                return;
-            }
-
             SDL_Rect ownerBounds = owner.bounds;
-            isOverlaping = false;
+            hasOverlapedInLastFrame = false;
 
-            foreach (var child in _collisionComponents)
+            foreach (var collisionComponent in _collisionComponents)
             {
-                if (child != this && child.owner.isActive)
+                if (collisionComponent != this && collisionComponent.owner.isActive)
                 {
-                    if (isTrigger)
+                    if (_isTrigger)
                     {
-                        TestForTrigger(ownerBounds, child);
+                        TestForTrigger(ref ownerBounds, collisionComponent);
                         continue;
                     }
 
-                    TestForCollision(ref ownerBounds, child);
+                    TestForCollision(ref ownerBounds, collisionComponent);
                 }
             }
         }
 
-        private void TestForCollision(ref SDL_Rect ownerBounds, CollisionComponent child)
+        private void TestForCollision(ref SDL_Rect ownerBounds, CollisionComponent collisionComponent)
         {
-            SDL_Rect childBounds = child.owner.bounds;
+            SDL_Rect childBounds = collisionComponent.owner.bounds;
 
-#if false
-            float contactPointX, contactPointY;
-            int contactNormalX, contactNormalY;
-            float hitNear = 0;
-
-            IsOverlaping = false;
-            
-            if (Math.Abs(child.Owner.PosX - ownerBounds.x) < ownerBounds.w &&
-                Math.Abs(child.Owner.PosY - ownerBounds.y) < ownerBounds.h)
+            if (collisionComponent._isTrigger)
             {
                 return;
             }
 
-            if (SdlRectMath.RayVsRect(ownerBounds.x, ownerBounds.y, child.Owner.PosX - ownerBounds.x + ownerBounds.w, child.Owner.PosY - ownerBounds.y + ownerBounds.h, ref childBounds, out contactPointX, out contactPointY, out contactNormalX, out contactNormalY, out hitNear))
+            if (SDL_IntersectRect(ref childBounds, ref ownerBounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE)
             {
-                if (!IsStatic && hitNear <= 1)
+                // SdlRectMath.DummyEndResult contains overlap rect
+                if (IsCollisionImpactFromLeftOrRight(ref SdlRectMath.DummyEndResult))
                 {
-                    if (SDL_IntersectRect(ref childBounds, ref ownerBounds, out SdlRectMath.DummyEndResult) != SDL_bool.SDL_FALSE)
-                    {
-                        var x = contactNormalX * SdlRectMath.DummyEndResult.w;
-                        var y = contactNormalY * SdlRectMath.DummyEndResult.h;
-
-                        if (Owner.Name.Equals("mario"))
-                        {
-                            SDL_IntersectRect(ref childBounds, ref ownerBounds, out SdlRectMath.DummyEndResult);
-
-                            Console.WriteLine("Test");
-                        }
-
-                        Owner.AddWorldOffset(x, y);
-
-                        IsOverlaping = true;
-                    }
-                }
-            }
-
-
-#else
-            if (SDL_IntersectRect(ref childBounds, ref ownerBounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE && !child.isTrigger)
-            {
-                SDL_Rect rect = SdlRectMath.DummyEndResult;
-
-                if (Math.Abs(rect.w) < Math.Abs(rect.h))
-                {
-                    CorrectHorizontalLocation(child, rect);
+                    CorrectHorizontalLocation(collisionComponent, ref SdlRectMath.DummyEndResult);
                 }
                 else
                 {
-                    CorrectVerticalLocation(rect);
+                    CorrectVerticalLocation(ref SdlRectMath.DummyEndResult);
                 }
 
-                OverlapEvent evt = new OverlapEvent();
-                evt.self = owner;
-                evt.lastContact = child.owner;
+                _overlapEvent.lastContact = collisionComponent.owner;
 
-                overlaped?.Invoke(evt);
-                _contacts.Add(child.owner);
+                onOverlaped?.Invoke(_overlapEvent);
+                _overlapContacts.Add(collisionComponent.owner);
             }
-#endif
         }
 
-        private void CorrectVerticalLocation(SDL_Rect rect)
+        private static bool IsCollisionImpactFromLeftOrRight(ref SDL_Rect overlapRect)
         {
-            Entity o = (Entity)owner;
+            return Math.Abs(overlapRect.w) < Math.Abs(overlapRect.h);
+        }
 
-            if (o.HasComponent<CharacterMovementComponent>())
+        public void MarkItAsTrigger()
+        {
+            _isTrigger = true;
+            shouldTick = true;
+        }
+
+        private void CorrectVerticalLocation(ref SDL_Rect overlapRect)
+        {
+            if (_movementComponent != null)
             {
-                CharacterMovementComponent movementComponent = o.GetComponent<CharacterMovementComponent>();
-                if (movementComponent.velocity.Y > 0)
-                {
-                    accumulatedY = rect.h + 0.05f;
-                    owner.AddWorldOffset(0, -accumulatedY);
-                    isOverlaping = true;
-                }
-                else if (movementComponent.velocity.Y < 0)
-                {
-                    accumulatedY = rect.h + 0.05f;
-                    owner.AddWorldOffset(0, accumulatedY);
-                    isOverlaping = true;
-                }
+                PushOutOfWall(ref overlapRect);
             }
             else
             {
-                accumulatedY = rect.h + 0.01f;
-                owner.AddWorldOffset(0, -accumulatedY);
-                isOverlaping = true;
+                owner.AddWorldOffset(0, -(overlapRect.h + 1));
+                hasOverlapedInLastFrame = true;
             }
         }
 
-        private void CorrectHorizontalLocation(CollisionComponent child, SDL_Rect rect)
+        private void PushOutOfWall(ref SDL_Rect overlapRect)
         {
-            var x = owner.posX - child.owner.posX;
-
-
-            if (!isStatic && rect.w > 0)
+            if (_movementComponent.velocity.Y > 0)
             {
-                owner.AddWorldOffset(Math.Sign(x) * (rect.w + Math.Sign(rect.w)), 0);
-                isOverlaping = true;
+                owner.AddWorldOffset(0, -(overlapRect.h + 1));
+                hasOverlapedInLastFrame = true;
+            }
+            else if (_movementComponent.velocity.Y < 0)
+            {
+                owner.AddWorldOffset(0, overlapRect.h + 1);
+                hasOverlapedInLastFrame = true;
             }
         }
 
-        private void TestForTrigger(SDL_Rect ownerBounds, CollisionComponent child)
+        private void CorrectHorizontalLocation(CollisionComponent collisionComponent, ref SDL_Rect overlapRect)
         {
-            SDL_Rect cb = child.owner.bounds;
+            int directionOfHit = Math.Sign(owner.posX - collisionComponent.owner.posX);
 
-            if (_contacts.Find(e => e == child) != null)
+            if (overlapRect.w > 0)
             {
-                if (SDL_IntersectRect(ref cb, ref ownerBounds, out SdlRectMath.DummyEndResult) != SDL_bool.SDL_TRUE)
-                {
-                    OverlapEvent evt = new OverlapEvent();
-                    evt.self = owner;
-                    evt.lastContact = child.owner;
+                owner.AddWorldOffset(directionOfHit * (overlapRect.w + 1), 0);
+                hasOverlapedInLastFrame = true;
+            }
+        }
 
-                    stopsOverlaping?.Invoke(evt);
+        private void TestForTrigger(ref SDL_Rect ownerBounds, CollisionComponent collisionComponent)
+        {
+            SDL_Rect childBounds = collisionComponent.owner.bounds;
 
-                    _contacts.Remove(child.owner);
-                }
+            if (_overlapContacts.Contains(collisionComponent.owner))
+            {
+                TestIsStillOverlapping(ref ownerBounds, collisionComponent, ref childBounds);
             }
             else
             {
-                if (SDL_IntersectRect(ref cb, ref ownerBounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE)
-                {
-                    if (child.owner.name.Equals("mario"))
-                    {
-                        Console.WriteLine(owner.name);
-                    }
-                    OverlapEvent evt = new OverlapEvent();
-                    evt.self = owner;
-                    evt.lastContact = child.owner;
+                TestIsOverlappingThisComponent(ref ownerBounds, collisionComponent, ref childBounds);
+            }
+        }
 
-                    overlaped?.Invoke(evt);
-                    _contacts.Add(child.owner);
-                }
+        private void TestIsOverlappingThisComponent(ref SDL_Rect ownerBounds, CollisionComponent collisionComponent, ref SDL_Rect childBounds)
+        {
+            if (SDL_IntersectRect(ref childBounds, ref ownerBounds, out SdlRectMath.DummyEndResult) == SDL_bool.SDL_TRUE)
+            {
+                _overlapEvent.lastContact = collisionComponent.owner;
+
+                onOverlaped?.Invoke(_overlapEvent);
+                _overlapContacts.Add(collisionComponent.owner);
+            }
+        }
+
+        private void TestIsStillOverlapping(ref SDL_Rect ownerBounds, CollisionComponent collisionComponent, ref SDL_Rect childBounds)
+        {
+            if (SDL_IntersectRect(ref childBounds, ref ownerBounds, out SdlRectMath.DummyEndResult) != SDL_bool.SDL_TRUE)
+            {
+                _overlapEvent.lastContact = collisionComponent.owner;
+
+                onStopsOverlaping?.Invoke(_overlapEvent);
+
+                _overlapContacts.Remove(collisionComponent.owner);
             }
         }
     }

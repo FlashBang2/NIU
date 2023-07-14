@@ -33,12 +33,12 @@ namespace WpfApp1
         private const int AccelerationRate = 20;
         private DebugSkeleton _skeleton;
 
-        private float _totalOffset = 0;
+        private float _skeletonOffset = 0;
         private float _lastDeltaTime;
 
 
-        private CharacterMovementComponent movementComponent;
-        private Sprite sprite;
+        private CharacterMovementComponent _movementComponent;
+        private Sprite _sprite;
 
 
         public override void Spawned()
@@ -68,11 +68,11 @@ namespace WpfApp1
             SDLRendering.LoadFont("arial.ttf", 96, "arial-32");
             SDLRendering.LoadFont("arial.ttf", 48, "arial-16");
             SDLRendering.GetTextTexture("Podnieś ręce", "arial-32", Color.FromRgb(0, 0, 0));
-            var TextSize = SDLRendering.GetTextSize("Podnieś ręce", "arial-32");
+            var textSize = SDLRendering.GetTextSize("Podnieś ręce", "arial-32");
 
-            owner.width = (float)TextSize.X;
-            owner.height = (float)TextSize.Y;
-            isActive = true;
+            owner.width = (float)textSize.X;
+            owner.height = (float)textSize.Y;
+            shouldTick = true;
         }
 
         private void StartupGame()
@@ -109,14 +109,6 @@ namespace WpfApp1
         {
             _skeleton.EndOfYCalibration();
             _skeleton.EndOfXCalibration();
-        }
-
-        private void OnKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Space)
-            {
-                _skeleton.Jump();
-            }
         }
 
         private void StartKinect()
@@ -165,7 +157,7 @@ namespace WpfApp1
 
             TryGetMovementComponent();
 
-            _skeleton.offset = new Vector(_totalOffset, owner.posY - owner.height / 6);
+            _skeleton.offset = new Vector(_skeletonOffset, owner.posY - owner.height / 6);
 
             if (shouldDrawDebugBounds && state == SkeletonComponentState.GameRunning)
             {
@@ -174,10 +166,10 @@ namespace WpfApp1
         }
         private void TryGetMovementComponent()
         {
-            if (movementComponent == null)
+            if (_movementComponent == null)
             {
-                movementComponent = owner.GetComponent<CharacterMovementComponent>();
-                sprite = owner.GetComponent<Sprite>();
+                _movementComponent = owner.GetComponent<CharacterMovementComponent>();
+                _sprite = owner.GetComponent<Sprite>();
             }
         }
 
@@ -206,7 +198,7 @@ namespace WpfApp1
             TryAccelerate(1);
 
             sprite.FlipMode = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
-            _skeleton.offset = new Vector(_totalOffset, owner.posY - owner.height / 6);
+            _skeleton.offset = new Vector(_skeletonOffset, owner.posY - owner.height / 6);
             lastActionType = ActionType.MoveRight;
         }
 
@@ -223,9 +215,9 @@ namespace WpfApp1
 
             TryAccelerate(-1);
 
-            _totalOffset += (int)-velocity.X;
+            _skeletonOffset += (int)-velocity.X;
             sprite.FlipMode = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
-            _skeleton.offset = new Vector(_totalOffset, owner.posY - owner.height / 6);
+            _skeleton.offset = new Vector(_skeletonOffset, owner.posY - owner.height / 6);
             lastActionType = ActionType.MoveLeft;
         }
 
@@ -233,18 +225,22 @@ namespace WpfApp1
         {
             if (direction > 0)
             {
-                velocity.X = velocity.X + _lastDeltaTime * AccelerationRate > maxVelocity ? maxVelocity : velocity.X + _lastDeltaTime * AccelerationRate;
+                bool hasExceedMaxVelocity = velocity.X + _lastDeltaTime * AccelerationRate > maxVelocity;
+
+                velocity.X = hasExceedMaxVelocity ? maxVelocity : velocity.X + _lastDeltaTime * AccelerationRate;
             }
             else
             {
-                velocity.X = velocity.X - _lastDeltaTime * AccelerationRate < -maxVelocity ? -maxVelocity : velocity.X - _lastDeltaTime * AccelerationRate;
+                bool hasExceedMaxVelocity = velocity.X - _lastDeltaTime * AccelerationRate < -maxVelocity;
+
+                velocity.X = hasExceedMaxVelocity ? -maxVelocity : velocity.X - _lastDeltaTime * AccelerationRate;
             }
         }
 
-        public override void OnTick(float dt)
+        public override void OnTick(float deltaTime)
         {
-            base.OnTick(dt);
-            _lastDeltaTime = dt;
+            base.OnTick(deltaTime);
+            _lastDeltaTime = deltaTime;
             TryGetMovementComponent();
 
             if (!_isKinnectAvailable && state == SkeletonComponentState.GameRunning)
@@ -261,50 +257,55 @@ namespace WpfApp1
 
         private void HandleKinnectMovement()
         {
-            var actionType = FindActionType();
+            ActionType actionType = FindActionType();
             bool isJumping = CheckIfJumping();
 
             switch (actionType)
             {
                 case ActionType.MoveLeft:
-                    MoveRight(sprite);
+                    MoveRight(_sprite);
                     break;
                 case ActionType.MoveRight:
-                    MoveLeft(sprite);
+                    MoveLeft(_sprite);
                     break;
                 default:
-                    SlowDown(sprite);
+                    SlowDown(_sprite);
                     break;
             }
 
             owner.AddWorldOffset((float)velocity.X, 0);
 
-            if (isJumping && !movementComponent.isFalling)
+            if (isJumping && !_movementComponent.isFalling)
             {
-                movementComponent.velocity = new Vector(movementComponent.velocity.X, -22);
+                _movementComponent.velocity = new Vector(_movementComponent.velocity.X, -GetJumpHeight());
             }
+        }
+
+        private static int GetJumpHeight()
+        {
+            return 22;
         }
 
         private void HandleKeyboardMovement()
         {
             if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_d))
             {
-                MoveRight(sprite);
+                MoveRight(_sprite);
             }
             else if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_a))
             {
-                MoveLeft(sprite);
+                MoveLeft(_sprite);
             }
             else
             {
-                SlowDown(sprite);
+                SlowDown(_sprite);
             }
 
             owner.AddWorldOffset((float)velocity.X, 0);
 
-            if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_SPACE) && !movementComponent.isFalling)
+            if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_SPACE) && !_movementComponent.isFalling)
             {
-                movementComponent.velocity = new Vector(movementComponent.velocity.X, -30);
+                _movementComponent.velocity = new Vector(_movementComponent.velocity.X, -GetJumpHeight());
             }
         }
 

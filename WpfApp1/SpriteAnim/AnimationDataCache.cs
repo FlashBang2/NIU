@@ -32,24 +32,24 @@ namespace WpfApp1
             }
         }
 
-        public SDL_Rect GetRect(int frame)
+        public SDL_Rect GetRect(int frameNo)
         {
-            return spriteBounds[frame];
+            return spriteBounds[frameNo];
         }
 
-        public int GetNextFrame(int frame)
+        public int GetNextFrame(int frameNo)
         {
-            if (frame > data.endFrame)
+            if (frameNo > data.endFrame)
             {
-                frame = data.startFrame;
+                frameNo = data.startFrame;
             }
 
-            return frame;
+            return frameNo;
         }
 
-        public bool CanAdvanceToNextFrame(float dt)
+        public bool CanAdvanceToNextFrame(float totalFrameTime)
         {
-            return dt > deltaFrameSeconds;
+            return totalFrameTime > deltaFrameSeconds;
         }
 
         public bool HasNextFrameResetsAnimation(int frame)

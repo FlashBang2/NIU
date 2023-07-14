@@ -11,46 +11,46 @@ namespace WpfApp1
             public IDictionary<AnimationType, AnimationDataCache> animData;
             public AnimationType usedAnimation;
             public int currentFrame;
-            public float lastFrameTime;
+            public float totalFrameTime;
             
-            public void UpdateAnimation(float dt)
+            public void UpdateAnimation(float deltaTime)
             {
                 AnimationDataCache data = animData[usedAnimation];
-                lastFrameTime += dt;
+                totalFrameTime += deltaTime;
 
-                if (data.CanAdvanceToNextFrame(lastFrameTime))
+                if (data.CanAdvanceToNextFrame(totalFrameTime))
                 {
                     currentFrame++;
-                    lastFrameTime = 0;
+                    totalFrameTime = 0;
                 }
 
                 if (data.HasNextFrameResetsAnimation(currentFrame))
                 {
                     currentFrame = data.GetNextFrame(currentFrame);
-                    lastFrameTime = 0;
+                    totalFrameTime = 0;
                 }
             }
         }
 
-        private IDictionary<string, SharedAnimation> animations = new Dictionary<string, SharedAnimation>();
+        private IDictionary<string, SharedAnimation> _animations = new Dictionary<string, SharedAnimation>();
 
         public override void Spawned()
         {
             base.Spawned();
-            isActive = true;
+            shouldTick = true;
         }
 
-        public override void OnTick(float dt)
+        public override void OnTick(float deltaTime)
         {
-            base.OnTick(dt);
-            UpdateAnimations(dt);
+            base.OnTick(deltaTime);
+            UpdateAnimations(deltaTime);
         }
 
-        public void GetRenderRect(string sprite, out SDL_Rect renderRect)
+        public void GetRenderRect(string spriteId, out SDL_Rect renderRect)
         {
-            if (animations.ContainsKey(sprite))
+            if (_animations.ContainsKey(spriteId))
             {
-                SharedAnimation animation = animations.FirstOrDefault(s => s.Key.Equals(sprite)).Value;
+                SharedAnimation animation = _animations.FirstOrDefault(s => s.Key.Equals(spriteId)).Value;
                 renderRect = animation.animData[animation.usedAnimation].GetRect(animation.currentFrame);
             }
             else
@@ -59,26 +59,26 @@ namespace WpfApp1
             }
         }
 
-        private void UpdateAnimations(float dt)
+        private void UpdateAnimations(float deltaTime)
         {
-            foreach (var sprite in animations.Keys)
+            foreach (var sprite in _animations.Keys)
             {
-                animations[sprite].UpdateAnimation(dt);
+                _animations[sprite].UpdateAnimation(deltaTime);
             }
         }
 
         public void AddAnimation(string sprite, AnimationType animationType, AnimationData data)
         {
-            if (!animations.ContainsKey(sprite))
+            if (!_animations.ContainsKey(sprite))
             {
                 CreateNewAnimationPool(sprite);
             }
 
             AnimationDataCache cache = new AnimationDataCache(data);
-            SharedAnimation animation = animations[sprite];
+            SharedAnimation animation = _animations[sprite];
 
             animation.animData.Add(animationType, cache);
-            animations[sprite] = animation;
+            _animations[sprite] = animation;
         }
 
         private void CreateNewAnimationPool(string sprite)
@@ -86,15 +86,15 @@ namespace WpfApp1
             SharedAnimation animation = new SharedAnimation();
             animation.animData = new Dictionary<AnimationType, AnimationDataCache>();
             animation.currentFrame = 0;
-            animation.lastFrameTime = 0;
+            animation.totalFrameTime = 0;
             animation.usedAnimation = AnimationType.Undefined;
 
-            animations.Add(sprite, animation);
+            _animations.Add(sprite, animation);
         }
 
         public void PlayAnim(string sprite, AnimationType animationType)
         {
-            SharedAnimation anims = animations[sprite];
+            SharedAnimation anims = _animations[sprite];
 
             if (anims.usedAnimation != animationType)
             {
@@ -106,8 +106,8 @@ namespace WpfApp1
         {
             anims.usedAnimation = newAnimation;
             anims.currentFrame = anims.animData[newAnimation].data.startFrame;
-            anims.lastFrameTime = 0;
-            animations[sprite] = anims;
+            anims.totalFrameTime = 0;
+            _animations[sprite] = anims;
         }
     }
 }

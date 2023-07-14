@@ -172,7 +172,7 @@ namespace WpfApp1
             }
         }
 
-        public virtual void Tick(float dt)
+        public virtual void Tick(float deltaTime)
         {
             if (!_active)
             {
@@ -181,7 +181,7 @@ namespace WpfApp1
 
             foreach (var component in _tickyComponents)
             {
-                component.OnTick(dt);
+                component.OnTick(deltaTime);
             }
 
             if (!ShowedCountOfTickyComponents)

@@ -16,20 +16,20 @@ namespace WpfApp1
         
         private const int Speed = 3;
         private Ray _ray = new Ray();
-        private List<IEntity> _ignoredEntities = new List<IEntity>();
+        private IList<IEntity> _ignoreSelfList = new List<IEntity>();
 
         private Sprite _sprite;
 
         public override void Spawned()
         {
             base.Spawned();
-            isActive = true;
-            _ignoredEntities.Add(owner);
+            shouldTick = true;
+            _ignoreSelfList.Add(owner);
         }
 
-        public override void OnTick(float dt)
+        public override void OnTick(float deltaTime)
         {
-            base.OnTick(dt);
+            base.OnTick(deltaTime);
 
             if (_movementComponent == null)
             {
@@ -39,30 +39,35 @@ namespace WpfApp1
 
             if (!_movementComponent.isFalling && _sprite.shouldMove)
             {
-                owner.AddWorldOffset(Speed * _directionScale, 0);
+                DoGumbaThink();
+            }
+        }
 
-                _ray.Init(new Vector(owner.posX, owner.posY), new Vector(owner.posX + owner.width * _directionScale + Speed * _directionScale, owner.posY));
+        private void DoGumbaThink()
+        {
+            owner.AddWorldOffset(Speed * _directionScale, 0);
 
-                OverlapEvent evt;
-                if (RayCast(_ray, _ignoredEntities, out evt))
-                {
-                    ReactToEntity(evt);
-                }
+            _ray.Init(new Vector(owner.posX, owner.posY), new Vector(owner.posX + owner.width * _directionScale + Speed * _directionScale, owner.posY));
 
-                _ray.Init(new Vector(owner.posX + owner.width * _directionScale + Speed * _directionScale, owner.posY + owner.height), 
-                    new Vector(owner.posX + owner.width * _directionScale + Speed * _directionScale, owner.posY + owner.height + 40));
+            if (RayCast(ref _ray, _ignoreSelfList, out OverlapEvent evt))
+            {
+                ReactToEntity(evt);
+            }
 
-                bool isObstacleInFront = !RayCast(_ray, _ignoredEntities, out evt);
-                if (isObstacleInFront)
-                {
-                    _directionScale *= -1;
-                }
+            _ray.Init(new Vector(owner.posX + owner.width * _directionScale + Speed * _directionScale, owner.posY + owner.height),
+                new Vector(owner.posX + owner.width * _directionScale + Speed * _directionScale, owner.posY + owner.height + 40));
+
+            bool isObstacleInFront = !RayCast(ref _ray, _ignoreSelfList, out _);
+            if (isObstacleInFront)
+            {
+                _directionScale *= -1;
             }
         }
 
         private void ReactToEntity(OverlapEvent evt)
         {
             bool isReactedWithMario = evt.lastContact.name.Equals("mario");
+
             if (isReactedWithMario) //reaction to other stuff
             {
                 Entity mario = Entity.GetEntity("mario", true);
@@ -79,8 +84,9 @@ namespace WpfApp1
                     mario.posY = SDLApp.GetInstance().GetAppHeight() - 144;
                 }
             }
-            else // reaction to mario
+            else
             {
+                // other obstacle
                 _directionScale *= -1;
             }
         }

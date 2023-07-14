@@ -9,9 +9,9 @@ namespace WpfApp1
     public class Component
     {
         public IEntity owner { get; private set; }
-        private bool _isActive = false;
+        private bool _shouldTick = false;
 
-        public bool isActive { get => _isActive; set { SetActive(value); } }
+        public bool shouldTick { get => _shouldTick; set { SetSimulateTick(value); } }
         
         public Component()
         {
@@ -32,7 +32,7 @@ namespace WpfApp1
             this.owner = owner;
         }
 
-        public virtual void OnTick(float dt)
+        public virtual void OnTick(float deltaTime)
         {
         }
 
@@ -48,18 +48,18 @@ namespace WpfApp1
         {
         }
 
-        public void SetActive(bool b)
+        public void SetSimulateTick(bool shouldSimulateTick)
         {
-            if (b)
+            if (shouldSimulateTick)
             {
-                if (b != _isActive)
+                if (shouldSimulateTick != _shouldTick)
                 {
                     Activate();   
                 }
             }
             else
             {
-                if (b != _isActive)
+                if (shouldSimulateTick != _shouldTick)
                 {
                     Deactivate();
                 }
@@ -68,24 +68,24 @@ namespace WpfApp1
 
         public void Activate()
         {
-            if (!_isActive)
+            if (!_shouldTick)
             {
                 Activated();
                 owner.AddToTickList(this);
             }
 
-            _isActive = true;
+            _shouldTick = true;
         }
 
         public void Deactivate()
         {
-            if (_isActive)
+            if (_shouldTick)
             {
                 Deactivated();
                 owner.RemoveFromTickList(this);
             }
 
-            _isActive = false;
+            _shouldTick = false;
         }
     }
 }
