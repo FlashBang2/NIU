@@ -16,7 +16,7 @@ namespace WpfApp1
         {
             base.ReceiveRender();
 
-            deltaTimes[lastAddedIndex++] = SDLApp.DeltaTime;
+            deltaTimes[lastAddedIndex++] = SDLApp.GlobalDeltaTime;
             lastAddedIndex %= deltaTimes.Length;
 
             if (numFramesPassedSinceLastFrameTextUpdate > 40)

@@ -9,7 +9,9 @@ namespace WpfApp1
         public static Entity Mario = null;
         public static bool ShowedCountOfTickyComponents = false;
         public static int NumTickyComponents = 0;
-        private static int FramesToSkip = 4;
+        public static int totalFrames = 0;
+        public static readonly int FrameDelay = 8;
+        private static int numFramesDelayLeft = FrameDelay;
 
         public class RootEntity : Entity
         {
@@ -80,7 +82,7 @@ namespace WpfApp1
 
                 for (var i = 0; i < _children.Count; i++)
                 {
-                    if (FramesToSkip == 0 || Mario.IsInViewRect((Entity)_children[i]))
+                    if (CanUpdateChild(i))
                     {
                         _children[i].Tick(dt);
                     }
@@ -88,18 +90,18 @@ namespace WpfApp1
 
                 base.Tick(dt);
 
-                FramesToSkip--;
+                numFramesDelayLeft--;
 
-                if (FramesToSkip < 0)
+                if (numFramesDelayLeft < 0)
                 {
-                    FramesToSkip = 4;
+                    numFramesDelayLeft = 4;
                 }
 
                 if (!ShowedCountOfTickyComponents)
                 {
                     if (name.Equals("Root"))
                     {
-                        Console.WriteLine("Num ticky components: " + NumTickyComponents);
+                        Console.WriteLine("Num ticky components in frame " + totalFrames + ": " + NumTickyComponents);
                         ShowedCountOfTickyComponents = true;
                     }
                 }
@@ -111,6 +113,15 @@ namespace WpfApp1
                 }
 
                 _numFrame++;
+                totalFrames++;
+            }
+
+            private bool CanUpdateChild(int childIndex)
+            {
+                // update when frame delay has passed
+                return numFramesDelayLeft == 0
+                    // or update entities when is visible
+                    || Mario.IsInViewRect((Entity)_children[childIndex]);
             }
 
             public IEntity[] GetChildren()

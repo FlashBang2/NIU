@@ -72,7 +72,25 @@ namespace WpfApp1
             }
 
             SDLRendering.Init(_renderer);
+            InitSound();
+
             _instance = this;
+        }
+
+        private void InitSound()
+        {
+            MIX_InitFlags mixerFlags = MIX_InitFlags.MIX_INIT_FLAC | MIX_InitFlags.MIX_INIT_OGG;
+            int intMixerFlags = (int)(mixerFlags);
+
+            if (Mix_Init(mixerFlags) != intMixerFlags)
+            {
+                FreeResources();
+                throw new ApplicationException("Sound library initialization failed");
+            }
+
+            MixerInitializationParams mixerParams = new MixerInitializationParams();
+            mixerParams.SetDefaults();
+            mixerParams.PassToOpenAudio();
         }
 
         public int GetAppWidth()
@@ -87,7 +105,7 @@ namespace WpfApp1
             return h;
         }
 
-        public static float DeltaTime = 0.0f;
+        public static float GlobalDeltaTime = 0.0f;
 
         public void Run()
         {
@@ -103,10 +121,10 @@ namespace WpfApp1
                 }
 
                 uint tick_time = SDL_GetTicks();
-                DeltaTime = (tick_time - lastTick) / 1000.0f;
+                GlobalDeltaTime = (tick_time - lastTick) / 1000.0f;
                 lastTick = tick_time;
 
-                Entity.rootEntity.Tick(DeltaTime);
+                Entity.rootEntity.Tick(GlobalDeltaTime);
 
                 SDLRendering.ClearFrame();
                 Entity.rootEntity.ReceiveRender();
@@ -205,25 +223,29 @@ namespace WpfApp1
             }
         }
 
+        static byte[] keys = null;
+        static IntPtr keyArrayFromNative = IntPtr.Zero;
+
         public static bool GetKey(SDL_Keycode _keycode)
         {
-            int arraySize;
-            bool isKeyPressed = false;
-            IntPtr origArray = SDL_GetKeyboardState(out arraySize);
-            byte[] keys = new byte[arraySize];
+            if (keyArrayFromNative == IntPtr.Zero)
+            {
+                keyArrayFromNative = SDL_GetKeyboardState(out int numKeys);
+                if (keys == null)
+                {
+                    keys = new byte[numKeys];
+                }
+            }
+
             byte keycode = (byte)SDL_GetScancodeFromKey(_keycode);
-            Marshal.Copy(origArray, keys, 0, arraySize);
-            isKeyPressed = keys[keycode] == 1;
-            return isKeyPressed;
+            Marshal.Copy(keyArrayFromNative, keys, 0, keys.Length);
+            return keys[keycode] == 1;
         }
 
         public static void Main(string[] args)
         {
             ShouldShowFps = true;
-            NumberFormatInfo nfi = CultureInfo.CurrentCulture.NumberFormat;
-            Console.WriteLine(nfi.NumberDecimalSeparator);
 
-#if true
             SDLApp app = new SDLApp(1920, 1080, "NIU");
 
             LoadTextures();
@@ -243,12 +265,6 @@ namespace WpfApp1
             spawnEnemiesAtStartLocation(app);
 
             app.Run();
-#else
-            SDL_Rect r = new SDL_Rect();
-
-            SdlRectMath.FromXywh(0, 0, 120, 120, out r);
-            int i = 0;
-#endif
         }
 
         private static void LoadTextures()
