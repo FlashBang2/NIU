@@ -13,12 +13,13 @@ namespace WpfApp1
         private float _directionScale = -1.0f;
         private bool _isKilled = false;
         private CharacterMovementComponent _movementComponent;
-        
+
         private const int Speed = 3;
         private Ray _ray = new Ray();
         private IList<IEntity> _ignoreSelfList = new List<IEntity>();
 
         private Sprite _sprite;
+        private IEntity _mario;
 
         public override void Spawned()
         {
@@ -31,11 +32,18 @@ namespace WpfApp1
         {
             base.OnTick(deltaTime);
 
+            if (_mario == null)
+            {
+                _mario = Entity.rootEntity.FindChild("mario");
+            }
+
             if (_movementComponent == null)
             {
                 _movementComponent = owner.GetComponent<CharacterMovementComponent>();
                 _sprite = owner.GetComponent<Sprite>();
             }
+
+            _sprite.shouldMove = Math.Abs(owner.posX - _mario.posX) < 500 && SDLApp.GetInstance().canStartGoomba;
 
             if (!_movementComponent.isFalling && _sprite.shouldMove)
             {
