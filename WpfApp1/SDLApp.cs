@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using WpfApp1.Components;
 using static SDL2.SDL;
 using static SDL2.SDL_image;
 using static SDL2.SDL_mixer;
@@ -1634,16 +1635,7 @@ namespace WpfApp1
             flag.height = 480;
             flag.posX = 9456;
             flag.posY = app.GetAppHeight() - 624;
-            CollisionComponent flagCollision = flag.GetComponent<CollisionComponent>();
-            flagCollision.MarkItAsTrigger();
-
-            flagCollision.onOverlaped += e =>
-            {
-                if (e.lastContact.name.Equals("mario"))
-                {
-                    Entity.GetEntity("mario", true).Destroy();
-                }
-            };
+            flag.AddComponent<FlagComponent>();
 
             Entity goomba = Entity.CreateEntity("goomba");
             goomba.AddComponent<CharacterMovementComponent>();
