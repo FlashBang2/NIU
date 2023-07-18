@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Kinect;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
-using Microsoft.Kinect;
 
 namespace WpfApp1
 {

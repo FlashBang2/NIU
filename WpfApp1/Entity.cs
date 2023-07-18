@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Windows;
+using WpfApp1.Components;
 using static SDL2.SDL;
 
 namespace WpfApp1
@@ -49,7 +49,7 @@ namespace WpfApp1
             {
                 _lastY = _posY;
                 _posY = value;
-                
+
                 SdlRectMath.FromXywh(_posX, _posY, width, height, out _bounds);
             }
         }
@@ -97,6 +97,11 @@ namespace WpfApp1
             }
 
             Component component = (Component)info.Invoke(null);
+            AddInDirectComponent(component, typeof(T));
+        }
+
+        public void AddInDirectComponent(Component component, Type type)
+        {
             component.OnComponentRegistered(this);
             if (typeof(IRenderable).IsInstanceOfType(component))
             {
@@ -105,7 +110,13 @@ namespace WpfApp1
 
             component.Spawned();
 
-            _newComponents.Add(typeof(T), component);
+            _newComponents.Add(type, component);
+        }
+
+        public bool HasComponent(Type componentType)
+        {
+            var x = _newComponents.ContainsKey(componentType);
+            return x;
         }
 
         public void AddWorldOffset(float x, float y)
@@ -137,6 +148,13 @@ namespace WpfApp1
             T component = (T)((object)_newComponents[typeof(T)]);
             return component;
         }
+
+        public Component GetComponent(Type type)
+        {
+            Component component = _newComponents[type];
+            return component;
+        }
+
 
         public bool IsInViewRect(Entity other)
         {
@@ -179,9 +197,9 @@ namespace WpfApp1
                 return;
             }
 
-            foreach (var component in _tickyComponents)
+            for (var i = 0; i < _tickyComponents.Count; i++)
             {
-                component.OnTick(deltaTime);
+                _tickyComponents[i].OnTick(deltaTime);
             }
 
             if (!ShowedCountOfTickyComponents)
@@ -220,6 +238,17 @@ namespace WpfApp1
         public void RemoveFromTickList(Component component)
         {
             _tickyComponents.Remove(component);
+        }
+
+        public EntitySerializableProxy CreateSerializableProxy()
+        {
+            EntitySerializableProxy proxy = new EntitySerializableProxy(this);
+            return proxy;
+        }
+
+        public List<Component> GetAllComponents()
+        {
+            return _newComponents.Values.ToList<Component>();
         }
     }
 }

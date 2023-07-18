@@ -12,7 +12,7 @@ namespace WpfApp1
         public ushort format;
 
         public int channels;
-        
+
         public int averageChunkSize;
 
         public void SetDefaults()

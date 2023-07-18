@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Media;
-using static SDL2.SDL;
 
 namespace WpfApp1
 {
@@ -17,8 +15,10 @@ namespace WpfApp1
 
         private CollisionComponent _collision = null;
         private SkeletonComponent _skeleton = null;
+        private bool _isSkeletonComponentCached = false;
+
         private Ray _ray = new Ray();
-        
+
         private IList<IEntity> _rayCastIgnoreSelf = new List<IEntity>();
 
         public override void Spawned()
@@ -32,24 +32,32 @@ namespace WpfApp1
         {
             base.OnTick(deltaTime);
 
-            ApplyMovement(deltaTime);
+            Move(deltaTime);
         }
-        private void ApplyMovement(float deltaTime)
+        private void Move(float deltaTime)
         {
-            if (owner.HasComponent<SkeletonComponent>())
+            if (!_isSkeletonComponentCached)
             {
-                if (_skeleton == null)
+                if (owner.HasComponent<SkeletonComponent>())
                 {
                     _skeleton = owner.GetComponent<SkeletonComponent>();
+                    if (_skeleton.state != SkeletonComponentState.GameRunning)
+                    {
+                        return;
+                    }
                 }
 
-                if (_skeleton.state != SkeletonComponentState.GameRunning)
-                {
-                    return;
-                }
+                _isSkeletonComponentCached = true;
             }
 
-            
+            ApplyMovement(deltaTime);
+
+            // check for up and down collision only when falling
+            _collision.verticalCollisionEnabled = isFalling;
+        }
+
+        private void ApplyMovement(float deltaTime)
+        {
             owner.AddWorldOffset((float)velocity.X, (float)velocity.Y);
 
             if (_collision == null)
@@ -70,15 +78,24 @@ namespace WpfApp1
                 owner.AddWorldOffset(0, -(float)velocity.Y);
                 velocity.Y = 0;
             }
-
-            // check for up and down collision only when falling
-            _collision.verticalCollisionEnabled = isFalling;
         }
 
         public override void Deactivated()
         {
             base.Deactivated();
             Console.WriteLine("Out of bounds maybe ?");
+        }
+
+        public override void OnSerialize(Dictionary<string, Tuple<int, string, bool>> keyValues)
+        {
+            base.OnSerialize(keyValues);
+            keyValues.Add("IsFalling", new Tuple<int, string, bool>(0, string.Empty, isFalling));
+        }
+
+        public override void OnDeserialize(Dictionary<string, Tuple<int, string, bool>> keyValues)
+        {
+            base.OnDeserialize(keyValues);
+            isFalling = keyValues["IsFalling"].Item3;
         }
     }
 }

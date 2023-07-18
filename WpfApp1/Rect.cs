@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
 using static SDL2.SDL;
 
 namespace WpfApp1

@@ -1,9 +1,5 @@
-﻿using Microsoft.Kinect;
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows;
 using System.Windows.Media;
-using System.Windows.Shapes;
-using System;
 using static SDL2.SDL;
 
 namespace WpfApp1

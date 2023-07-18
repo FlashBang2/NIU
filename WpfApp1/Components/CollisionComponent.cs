@@ -307,5 +307,20 @@ namespace WpfApp1
                 _overlapContacts.Remove(collisionComponent.owner);
             }
         }
+        public override void OnSerialize(Dictionary<string, Tuple<int, string, bool>> keyValues)
+        {
+            base.OnSerialize(keyValues);
+            keyValues.Add("verticalCollisionEnabled", new Tuple<int, string, bool>(0, string.Empty, verticalCollisionEnabled));
+            keyValues.Add("horizontalCollisionEnabled", new Tuple<int, string, bool>(0, string.Empty, horizontalCollisionEnabled));
+            keyValues.Add("isTrigger", new Tuple<int, string, bool>(0, string.Empty, _isTrigger));
+        }
+
+        public override void OnDeserialize(Dictionary<string, Tuple<int, string, bool>> keyValues)
+        {
+            base.OnDeserialize(keyValues);
+            verticalCollisionEnabled = keyValues["verticalCollisionEnabled"].Item3;
+            horizontalCollisionEnabled = keyValues["horizontalCollisionEnabled"].Item3;
+            _isTrigger = keyValues["isTrigger"].Item3;
+        }
     }
 }

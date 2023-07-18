@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Windows.Controls;
 using static SDL2.SDL;
 
 namespace WpfApp1

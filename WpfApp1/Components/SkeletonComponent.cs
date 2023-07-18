@@ -3,7 +3,6 @@ using Microsoft.Kinect;
 using SDL2;
 using System;
 using System.Linq;
-using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -25,7 +24,6 @@ namespace WpfApp1
         public SkeletonComponentState state = SkeletonComponentState.CalibrateX;
         public bool shouldDrawDebugBounds = false;
 
-        public Vector velocity = new Vector(0, 0);
         public float maxVelocity = 10;
         public ActionType lastActionType = ActionType.None;
 
@@ -70,8 +68,8 @@ namespace WpfApp1
             SDLRendering.GetTextTexture("Podnieś ręce", "arial-32", Color.FromRgb(0, 0, 0));
             var textSize = SDLRendering.GetTextSize("Podnieś ręce", "arial-32");
 
-            owner.width = (float)textSize.X;
-            owner.height = (float)textSize.Y;
+            //owner.width = (float)textSize.X;
+            //owner.height = (float)textSize.Y;
             shouldTick = true;
         }
 
@@ -175,18 +173,18 @@ namespace WpfApp1
 
         private void SlowDown(Sprite sprite)
         {
-            if (Math.Abs(velocity.X) < 1)
+            if (Math.Abs(_movementComponent.velocity.X) < 1)
             {
                 sprite.PlayAnim(AnimationType.Idle);
                 lastActionType = ActionType.None;
             }
 
-            velocity.X = 0.93 * velocity.X;
+            _movementComponent.velocity.X = 0.93 * _movementComponent.velocity.X;
         }
 
         private void MoveRight(Sprite sprite)
         {
-            if (velocity.X < 0)
+            if (_movementComponent.velocity.X < 0)
             {
                 sprite.PlayAnim(AnimationType.SlowDown);
             }
@@ -204,7 +202,7 @@ namespace WpfApp1
 
         private void MoveLeft(Sprite sprite)
         {
-            if (velocity.X > 0)
+            if (_movementComponent.velocity.X > 0)
             {
                 sprite.PlayAnim(AnimationType.SlowDown);
             }
@@ -215,7 +213,7 @@ namespace WpfApp1
 
             TryAccelerate(-1);
 
-            _skeletonOffset += (int)-velocity.X;
+            _skeletonOffset += (int)-_movementComponent.velocity.X;
             sprite.FlipMode = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
             _skeleton.offset = new Vector(_skeletonOffset, owner.posY - owner.height / 6);
             lastActionType = ActionType.MoveLeft;
@@ -225,15 +223,15 @@ namespace WpfApp1
         {
             if (direction > 0)
             {
-                bool hasExceedMaxVelocity = velocity.X + _lastDeltaTime * AccelerationRate > maxVelocity;
+                bool hasExceedMaxVelocity = _movementComponent.velocity.X + _lastDeltaTime * AccelerationRate > maxVelocity;
 
-                velocity.X = hasExceedMaxVelocity ? maxVelocity : velocity.X + _lastDeltaTime * AccelerationRate;
+                _movementComponent.velocity.X = hasExceedMaxVelocity ? maxVelocity : _movementComponent.velocity.X + _lastDeltaTime * AccelerationRate;
             }
             else
             {
-                bool hasExceedMaxVelocity = velocity.X - _lastDeltaTime * AccelerationRate < -maxVelocity;
+                bool hasExceedMaxVelocity = _movementComponent.velocity.X - _lastDeltaTime * AccelerationRate < -maxVelocity;
 
-                velocity.X = hasExceedMaxVelocity ? -maxVelocity : velocity.X - _lastDeltaTime * AccelerationRate;
+                _movementComponent.velocity.X = hasExceedMaxVelocity ? -maxVelocity : _movementComponent.velocity.X - _lastDeltaTime * AccelerationRate;
             }
         }
 
@@ -273,17 +271,16 @@ namespace WpfApp1
                     break;
             }
 
-            owner.AddWorldOffset((float)velocity.X, 0);
-
             if (isJumping && !_movementComponent.isFalling)
             {
-                _movementComponent.velocity = new Vector(_movementComponent.velocity.X, -GetJumpHeight());
+                _movementComponent.velocity = new Vector(_movementComponent.velocity.X, -GetJumpHeight() * _lastDeltaTime);
+                _sprite.PlayAnim(AnimationType.Jump);
             }
         }
 
         private static int GetJumpHeight()
         {
-            return 22;
+            return 1200;
         }
 
         private void HandleKeyboardMovement()
@@ -301,11 +298,10 @@ namespace WpfApp1
                 SlowDown(_sprite);
             }
 
-            owner.AddWorldOffset((float)velocity.X, 0);
-
             if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_SPACE) && !_movementComponent.isFalling)
             {
-                _movementComponent.velocity = new Vector(_movementComponent.velocity.X, -GetJumpHeight());
+                _movementComponent.velocity = new Vector(_movementComponent.velocity.X * _lastDeltaTime, -GetJumpHeight() * _lastDeltaTime);
+                _sprite.PlayAnim(AnimationType.Jump);
             }
         }
 
@@ -375,6 +371,8 @@ namespace WpfApp1
             owner.posY = SDLApp.GetInstance().GetAppHeight() - 144;
             return true;
         }
+
+
     }
 
 }

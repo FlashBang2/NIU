@@ -1,21 +1,12 @@
-﻿using ConsoleApp1;
-using Microsoft.Kinect;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
+using System.IO;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media;
 using static SDL2.SDL;
 using static SDL2.SDL_image;
 using static SDL2.SDL_mixer;
 using static SDL2.SDL_ttf;
+
 
 namespace WpfApp1
 {
@@ -27,6 +18,7 @@ namespace WpfApp1
 
         public bool canStartGoomba = false;
         public static bool ShouldShowFps = false;
+        public static bool shouldSaveSceneStateAfterExit = false;
 
         private static SDLApp _instance;
 
@@ -143,6 +135,11 @@ namespace WpfApp1
             TTF_Quit();
             SDL_Quit();
 
+            if (shouldSaveSceneStateAfterExit)
+            {
+                Entity.rootEntity.ReceiveSerialize();
+            }
+
             _window = IntPtr.Zero;
             _renderer = IntPtr.Zero;
         }
@@ -179,22 +176,28 @@ namespace WpfApp1
             ShouldShowFps = true;
 
             SDLApp app = new SDLApp(1920, 1080, "NIU");
-
             LoadTextures();
 
-            AddPlatforms(app);
+            if (File.Exists("scene.json"))
+            {
+                Entity.rootEntity.ReceiveLoad();
+            }
+            else
+            {
+                AddPlatforms(app);
 
-            playerCharacter(app);
+                playerCharacter(app);
 
-            questionMarksBlocks(app);
+                questionMarksBlocks(app);
 
-            brickBlocks(app);
+                brickBlocks(app);
 
-            renderStairs(app);
+                renderStairs(app);
 
-            renderPipes(app);
+                renderPipes(app);
 
-            spawnEnemiesAtStartLocation(app);
+                spawnEnemiesAtStartLocation(app);
+            }
 
             app.Run();
         }
@@ -219,7 +222,7 @@ namespace WpfApp1
             backgroundTexture = SDLRendering.LoadTexture("background_objects.png", "background_objects");
         }
 
-        static IntPtr backgroundTexture = IntPtr.Zero;
+        public static IntPtr backgroundTexture = IntPtr.Zero;
 
         private static void AddPlatforms(SDLApp app)
         {

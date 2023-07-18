@@ -56,7 +56,7 @@ namespace WpfApp1
         private readonly Dictionary<JointType, Vector> _jointLocations = new Dictionary<JointType, Vector>();
         private readonly Dictionary<JointType, Vector> _tempJointLocations = new Dictionary<JointType, Vector>();
         private readonly Dictionary<JointType, DebugJoint> _joints = new Dictionary<JointType, DebugJoint>();
-       
+
         private readonly Connection[] _connections;
         private double _maxY = 0;
         private double _minX = 0;

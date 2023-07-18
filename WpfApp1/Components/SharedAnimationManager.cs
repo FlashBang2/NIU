@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using static SDL2.SDL;
 
@@ -12,7 +14,7 @@ namespace WpfApp1
             public AnimationType usedAnimation;
             public int currentFrame;
             public float totalFrameTime;
-            
+
             public void UpdateAnimation(float deltaTime)
             {
                 AnimationDataCache data = animData[usedAnimation];
@@ -108,6 +110,20 @@ namespace WpfApp1
             anims.currentFrame = anims.animData[newAnimation].data.startFrame;
             anims.totalFrameTime = 0;
             _animations[sprite] = anims;
+        }
+
+        public override void OnSerialize(Dictionary<string, Tuple<int, string, bool>> keyValues)
+        {
+            base.OnSerialize(keyValues);
+            string animData = JsonConvert.SerializeObject(_animations);
+
+            keyValues.Add("animationData", new Tuple<int, string, bool>(0, animData, false));
+        }
+
+        public override void OnDeserialize(Dictionary<string, Tuple<int, string, bool>> keyValues)
+        {
+            base.OnDeserialize(keyValues);
+            _animations = JsonConvert.DeserializeObject<IDictionary<string, SharedAnimation>>(keyValues["animationData"].Item2);
         }
     }
 }

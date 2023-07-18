@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using static SDL2.SDL;
 
@@ -15,7 +16,7 @@ namespace WpfApp1
 
         bool IRenderable.shouldDraw => SkeletonComponent.isPostCalibrationStage;
 
-        private readonly IDictionary<AnimationType, AnimationDataCache> _animData = new Dictionary<AnimationType, AnimationDataCache>();
+        private IDictionary<AnimationType, AnimationDataCache> _animData = new Dictionary<AnimationType, AnimationDataCache>();
         private int _currentFrame = 0;
         private float _totalFrameTime = 0;
         private AnimationType _currentAnim = AnimationType.Undefined;
@@ -104,6 +105,44 @@ namespace WpfApp1
                 _currentFrame = _animData[animationType].data.startFrame;
                 _totalFrameTime = 0;
             }
+        }
+
+        /*
+         *  readonly IDictionary<AnimationType, AnimationDataCache> _animData = new Dictionary<AnimationType, AnimationDataCache>();
+         *  int _currentFrame = 0;
+         *  float _totalFrameTime = 0;
+         *  AnimationType _currentAnim = AnimationType.Undefined;
+         * */
+        public override void OnSerialize(Dictionary<string, Tuple<int, string, bool>> keyValues)
+        {
+            base.OnSerialize(keyValues);
+
+            keyValues.Add("ShouldMove", new Tuple<int, string, bool>(0, string.Empty, shouldMove));
+            keyValues.Add("shouldUseSharedAnimationManager", new Tuple<int, string, bool>(0, string.Empty, shouldUseSharedAnimationManager));
+            keyValues.Add("rotationAngle", new Tuple<int, string, bool>((int)rotationAngle, string.Empty, false));
+
+            keyValues.Add("AnimationData", new Tuple<int, string, bool>(0, JsonConvert.SerializeObject(_animData), false));
+            keyValues.Add("CurrentFrame", new Tuple<int, string, bool>(0, JsonConvert.SerializeObject(_currentFrame), false));
+            keyValues.Add("TotalFrameTime", new Tuple<int, string, bool>(0, JsonConvert.SerializeObject(_totalFrameTime), false));
+
+            keyValues.Add("SpriteId", new Tuple<int, string, bool>(0, spriteId, false));
+            keyValues.Add("CurrentAnimation", new Tuple<int, string, bool>(0, JsonConvert.SerializeObject(_currentAnim), false));
+        }
+
+        public override void OnDeserialize(Dictionary<string, Tuple<int, string, bool>> keyValues)
+        {
+            base.OnDeserialize(keyValues);
+
+            shouldMove = keyValues["ShouldMove"].Item3;
+            shouldUseSharedAnimationManager = keyValues["shouldUseSharedAnimationManager"].Item3;
+            rotationAngle = keyValues["rotationAngle"].Item1;
+
+            _animData = JsonConvert.DeserializeObject<IDictionary<AnimationType, AnimationDataCache>>(keyValues["AnimationData"].Item2);
+            _currentFrame = JsonConvert.DeserializeObject<int>(keyValues["CurrentFrame"].Item2);
+            _totalFrameTime = JsonConvert.DeserializeObject<float>(keyValues["TotalFrameTime"].Item2);
+            _currentAnim = JsonConvert.DeserializeObject<AnimationType>(keyValues["CurrentAnimation"].Item2);
+
+            spriteId = keyValues["SpriteId"].Item2;
         }
     }
 }

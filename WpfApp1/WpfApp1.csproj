@@ -42,6 +42,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Kinect, Version=1.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\ConsoleApp1\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -65,6 +68,8 @@
     <Compile Include="Components\CharacterMovementComponent.cs" />
     <Compile Include="Components\CollisionComponent.cs" />
     <Compile Include="Components\Component.cs" />
+    <Compile Include="Components\EntitySerializableProxy.cs" />
+    <Compile Include="Components\FlagComponent.cs" />
     <Compile Include="Components\FrameRateRendererComponent.cs" />
     <Compile Include="Components\Gumba.cs" />
     <Compile Include="Components\SharedAnimationManager.cs" />

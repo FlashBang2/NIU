@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static WpfApp1.CollisionComponent;
 using System.Windows;
+using static WpfApp1.CollisionComponent;
 
 namespace WpfApp1
 {
@@ -47,14 +44,14 @@ namespace WpfApp1
 
             if (!_movementComponent.isFalling && _sprite.shouldMove)
             {
-                DoGumbaThink();
+                DoGumbaThink(deltaTime);
             }
         }
 
-        private void DoGumbaThink()
+        private void DoGumbaThink(float deltaTime)
         {
-            _movementComponent.velocity.X = Speed * _directionScale;
-            
+            _movementComponent.velocity.X = Speed * _directionScale * deltaTime;
+
             _ray.Init(new Vector(owner.posX, owner.posY), new Vector(owner.posX + owner.width * _directionScale + Speed * _directionScale, owner.posY));
 
             if (RayCast(ref _ray, _ignoreSelfList, out OverlapEvent evt))
@@ -97,6 +94,20 @@ namespace WpfApp1
                 // other obstacle
                 _directionScale *= -1;
             }
+        }
+
+        public override void OnSerialize(Dictionary<string, Tuple<int, string, bool>> keyValues)
+        {
+            base.OnSerialize(keyValues);
+            keyValues.Add("directionScale", new Tuple<int, string, bool>(0, _directionScale.ToString(), false));
+            keyValues.Add("isKilled", new Tuple<int, string, bool>(0, string.Empty, _isKilled));
+        }
+
+        public override void OnDeserialize(Dictionary<string, Tuple<int, string, bool>> keyValues)
+        {
+            base.OnDeserialize(keyValues);
+            _directionScale = float.Parse(keyValues["directionScale"].Item2);
+            _isKilled = keyValues["isKilled"].Item3;
         }
     }
 }

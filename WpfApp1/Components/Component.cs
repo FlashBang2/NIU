@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WpfApp1
 {
@@ -12,7 +9,7 @@ namespace WpfApp1
         private bool _shouldTick = false;
 
         public bool shouldTick { get => _shouldTick; set { SetSimulateTick(value); } }
-        
+
         public Component()
         {
         }
@@ -54,7 +51,7 @@ namespace WpfApp1
             {
                 if (shouldSimulateTick != _shouldTick)
                 {
-                    Activate();   
+                    Activate();
                 }
             }
             else
@@ -86,6 +83,15 @@ namespace WpfApp1
             }
 
             _shouldTick = false;
+        }
+
+        public virtual void OnSerialize(Dictionary<string, Tuple<int, string, bool>> keyValues)
+        {
+            keyValues.Add("ShouldTick", new Tuple<int, string, bool>(0, string.Empty, _shouldTick));
+        }
+        public virtual void OnDeserialize(Dictionary<string, Tuple<int, string, bool>> keyValues)
+        {
+            shouldTick = keyValues["ShouldTick"].Item3;
         }
     }
 }

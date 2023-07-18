@@ -1,12 +1,8 @@
-﻿using SDL2;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using System.Timers;
 
 namespace ConsoleApp1
-{    
+{
     public class SDLTimer
     {
         public event Action onTimeElapsed;
@@ -25,7 +21,7 @@ namespace ConsoleApp1
             _handle.Elapsed += OnState;
             _handle.Start();
 
-            this.shouldLoop = shouldLoop; 
+            this.shouldLoop = shouldLoop;
         }
 
         private void OnState(object o, ElapsedEventArgs args)

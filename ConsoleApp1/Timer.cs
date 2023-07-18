@@ -1,9 +1,5 @@
 ﻿using SDL2;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleApp1
 {
@@ -18,7 +14,7 @@ namespace ConsoleApp1
             TotalSeconds = totalSeconds;
         }
     }
-    
+
     public class Timer
     {
         public event Action TimeElapsed;
@@ -34,7 +30,7 @@ namespace ConsoleApp1
             ShouldLoop = false;
             _id = SDL.SDL_AddTimer((uint)(seconds * 1000.0f), OnTimerTick, IntPtr.Zero);
             _totalTime = 0;
-            ShouldLoop = shouldLoop; 
+            ShouldLoop = shouldLoop;
         }
 
         private uint OnTimerTick(uint inverval, IntPtr param)
@@ -42,7 +38,7 @@ namespace ConsoleApp1
             float secondsSinceLastTick = inverval / 1000.0f;
 
             _totalTime += secondsSinceLastTick;
-            
+
             Tick?.Invoke(new TimeEvent(secondsSinceLastTick, _totalTime));
 
             if (!ShouldLoop)

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Collections.Generic;
 using static SDL2.SDL;
 
 namespace WpfApp1
@@ -43,5 +38,7 @@ namespace WpfApp1
 
         void AddToTickList(Component component);
         void RemoveFromTickList(Component component);
+
+        List<Component> GetAllComponents();
     }
 }

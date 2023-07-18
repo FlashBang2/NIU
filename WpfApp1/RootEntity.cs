@@ -1,6 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using WpfApp1.Components;
+
+using static SDL2.SDL;
 
 namespace WpfApp1
 {
@@ -128,6 +134,78 @@ namespace WpfApp1
             {
                 return _children.ToArray();
             }
+
+            public void ReceiveSerialize()
+            {
+                List<EntitySerializableProxy> entities = new List<EntitySerializableProxy>
+                {
+                    new EntitySerializableProxy(this)
+                };
+
+                foreach (var child in _children)
+                {
+                    entities.Add(new EntitySerializableProxy(child));
+                }
+
+                File.WriteAllText("Scene.json", JsonConvert.SerializeObject(entities));
+            }
+
+            public void ReceiveLoad()
+            {
+                List<EntitySerializableProxy> entities = JsonConvert.DeserializeObject<List<EntitySerializableProxy>>(File.ReadAllText("Scene.json"));
+
+                var self = entities.FirstOrDefault(e => e.EntityName.Equals("Root"));
+                entities.Remove(self);
+                _posX = self.PositionX;
+                _posY = self.PositionY;
+                width = self.Width;
+                height = self.Height;
+                isActive = self.IsActive;
+
+                AddComponentsFromProxy(self);
+
+                foreach (var entity in entities)
+                {
+                    Entity e = CreateEntity(entity.EntityName);
+
+                    e._posX = entity.PositionX;
+                    e._posY = entity.PositionY;
+                    e.width = entity.Width;
+                    e.height = entity.Height;
+                    e.isActive = entity.IsActive;
+                    e.AddComponentsFromProxy(entity);
+                }
+
+                SDL_QueryTexture(SDLApp.backgroundTexture, out uint format, out int access, out int w, out int h);
+                SDLRendering.SetWorldBounds(w, h);
+            }
+        }
+
+        public void AddComponentsFromProxy(EntitySerializableProxy proxy)
+        {
+            foreach (var component in proxy.ComponentProxies)
+            {
+                Type type = Type.GetType(component.TypeName);
+
+                if (!HasComponent(type))
+                {
+                    ConstructorInfo info = type.GetConstructors().Where(constructor => constructor.GetParameters().Length == 0).FirstOrDefault();
+
+                    if (info == null)
+                    {
+                        throw new ArgumentException(type.Name + " doesn't contain default constructor");
+                    }
+
+                    Component c = (Component)info.Invoke(null);
+                    AddInDirectComponent(c, type);
+                    c.OnDeserialize(component.KeyValues);
+                }
+                else
+                {
+                    Component c = GetComponent(type);
+                    c.OnDeserialize(component.KeyValues);
+                }
+            }
         }
 
         public static Entity CreateEntity(string name)
@@ -142,5 +220,7 @@ namespace WpfApp1
             IEntity e = rootEntity.FindChild(name);
             return (Entity)e;
         }
+
+
     }
 }

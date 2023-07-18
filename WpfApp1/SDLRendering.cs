@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-
+using System.Windows;
+using System.Windows.Media;
 using static SDL2.SDL;
 using static SDL2.SDL_image;
-using static SDL2.SDL_mixer;
 using static SDL2.SDL_ttf;
-using System.Windows.Media;
-using System.Diagnostics;
-using System.Windows;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace WpfApp1
 {
