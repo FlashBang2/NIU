@@ -51,7 +51,6 @@ namespace WpfApp1
 
             
             owner.AddWorldOffset((float)velocity.X, (float)velocity.Y);
-            velocity.Y += 9.81 * gravityScale * deltaTime;
 
             if (_collision == null)
             {
@@ -60,16 +59,20 @@ namespace WpfApp1
 
             _collision.TestCollision();
 
+            velocity.Y += 9.81 * gravityScale * deltaTime;
             yTotalVelocity += (float)velocity.Y * deltaTime;
 
-            if (_collision.hasOverlapedInLastFrame)
+            _ray.Init(new Vector(owner.posX + owner.width / 2, owner.posY + owner.height), new Vector(owner.posX + owner.width / 2, owner.posY + owner.height + 2));
+            isFalling = !CollisionComponent.RayCast(ref _ray, _rayCastIgnoreSelf, out _);
+
+            if (!isFalling && velocity.Y > 0)
             {
-                yTotalVelocity -= (float)velocity.Y * deltaTime;
+                owner.AddWorldOffset(0, -(float)velocity.Y);
                 velocity.Y = 0;
             }
 
-            _ray.Init(new Vector(owner.posX + owner.width / 2, owner.posY + owner.height), new Vector(owner.posX + owner.width / 2, owner.posY + owner.height + 30));
-            isFalling = !CollisionComponent.RayCast(ref _ray, _rayCastIgnoreSelf, out _);
+            // check for up and down collision only when falling
+            _collision.verticalCollisionEnabled = isFalling;
         }
 
         public override void Deactivated()

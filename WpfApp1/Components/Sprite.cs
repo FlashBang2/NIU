@@ -15,7 +15,7 @@ namespace WpfApp1
 
         bool IRenderable.shouldDraw => SkeletonComponent.isPostCalibrationStage;
 
-        private readonly Dictionary<AnimationType, AnimationDataCache> _animData = new Dictionary<AnimationType, AnimationDataCache>();
+        private readonly IDictionary<AnimationType, AnimationDataCache> _animData = new Dictionary<AnimationType, AnimationDataCache>();
         private int _currentFrame = 0;
         private float _totalFrameTime = 0;
         private AnimationType _currentAnim = AnimationType.Undefined;

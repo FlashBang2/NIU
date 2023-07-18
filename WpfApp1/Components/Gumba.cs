@@ -53,8 +53,8 @@ namespace WpfApp1
 
         private void DoGumbaThink()
         {
-            owner.AddWorldOffset(Speed * _directionScale, 0);
-
+            _movementComponent.velocity.X = Speed * _directionScale;
+            
             _ray.Init(new Vector(owner.posX, owner.posY), new Vector(owner.posX + owner.width * _directionScale + Speed * _directionScale, owner.posY));
 
             if (RayCast(ref _ray, _ignoreSelfList, out OverlapEvent evt))

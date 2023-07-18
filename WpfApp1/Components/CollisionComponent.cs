@@ -14,6 +14,8 @@ namespace WpfApp1
             public IEntity self;
             public float contactPointX;
             public float contactPointY;
+
+            public static OverlapEvent Empty = new OverlapEvent();
         }
 
         public bool isStatic
@@ -24,6 +26,10 @@ namespace WpfApp1
 
         public bool hasOverlapedInLastFrame = false;
         public bool shouldDraw => true;
+        public bool lastHitWasVertical = false;
+
+        public bool verticalCollisionEnabled = false;
+        public bool horizontalCollisionEnabled = true;
 
         public event Action<OverlapEvent> onOverlaped;
         public event Action<OverlapEvent> onStopsOverlaping;
@@ -31,13 +37,15 @@ namespace WpfApp1
         private IList<IEntity> _overlapContacts = new List<IEntity>();
         private static readonly IList<CollisionComponent> _collisionComponents = new List<CollisionComponent>();
         private static readonly IList<IEntity> _emptyEntitiesList = new List<IEntity>();
-        
+
         private bool _isTrigger = false;
         private CharacterMovementComponent _movementComponent = null;
         private bool _isMovementComponentCached = false;
 
         private bool _isFirstFrameEnded = true;
         private OverlapEvent _overlapEvent;
+        private Ray _ray;
+        private IList<IEntity> _ignoredSelf;
 
         public static bool RayCast(ref Ray ray, out OverlapEvent outOverlapEvent)
         {
@@ -126,6 +134,12 @@ namespace WpfApp1
             {
                 self = owner
             };
+
+            _ray = new Ray();
+            _ignoredSelf = new List<IEntity>
+            {
+                owner
+            };
         }
 
         public override void OnTick(float deltaTime)
@@ -184,11 +198,17 @@ namespace WpfApp1
                 // SdlRectMath.DummyEndResult contains overlap rect
                 if (IsCollisionImpactFromLeftOrRight(ref SdlRectMath.DummyEndResult))
                 {
-                    CorrectHorizontalLocation(collisionComponent, ref SdlRectMath.DummyEndResult);
+                    if (horizontalCollisionEnabled)
+                    {
+                        CorrectHorizontalLocation(collisionComponent, ref SdlRectMath.DummyEndResult);
+                    }
                 }
                 else
                 {
-                    CorrectVerticalLocation(ref SdlRectMath.DummyEndResult);
+                    if (verticalCollisionEnabled)
+                    {
+                        CorrectVerticalLocation(ref SdlRectMath.DummyEndResult);
+                    }
                 }
 
                 _overlapEvent.lastContact = collisionComponent.owner;
@@ -224,14 +244,21 @@ namespace WpfApp1
 
         private void PushOutOfWall(ref SDL_Rect overlapRect)
         {
-            if (_movementComponent.velocity.Y > 0)
+            _ray.Init(new Vector(owner.posX + owner.width / 2, owner.posY + owner.height), new Vector(owner.posX + owner.width / 2, owner.posY + owner.height + 30));
+            lastHitWasVertical = false;
+
+            // check has hit ground
+            if (RayCast(ref _ray, _ignoredSelf, out OverlapEvent.Empty))
             {
-                owner.AddWorldOffset(0, -(overlapRect.h + 1));
-                hasOverlapedInLastFrame = true;
+                lastHitWasVertical = true;
+                return;
             }
-            else if (_movementComponent.velocity.Y < 0)
+
+            // test has hit ceiling
+            if (_movementComponent.velocity.Y < 0)
             {
-                owner.AddWorldOffset(0, overlapRect.h + 1);
+                _movementComponent.velocity.Y = 0;
+                owner.AddWorldOffset(0, (overlapRect.h + 1));
                 hasOverlapedInLastFrame = true;
             }
         }
@@ -240,11 +267,8 @@ namespace WpfApp1
         {
             int directionOfHit = Math.Sign(owner.posX - collisionComponent.owner.posX);
 
-            if (overlapRect.w > 0)
-            {
-                owner.AddWorldOffset(directionOfHit * (overlapRect.w + 1), 0);
-                hasOverlapedInLastFrame = true;
-            }
+            owner.AddWorldOffset(directionOfHit * (overlapRect.w + 1), 0);
+            hasOverlapedInLastFrame = true;
         }
 
         private void TestForTrigger(ref SDL_Rect ownerBounds, CollisionComponent collisionComponent)

@@ -1745,9 +1745,9 @@ namespace WpfApp1
             koopa.GetComponent<Sprite>().spriteId = "koopa";
             //koopa.GetComponent<CollisionComponent>().IsStatic = false;
             koopa.width = 48;
-            koopa.height = 36;
-            koopa.posX = goomba7.posX + 480;
-            koopa.posY = goomba7.posY - 48;
+            koopa.height = 72;
+            koopa.posX = 240;
+            koopa.posY = app.GetAppHeight() - 144 - 24;
 
             Entity goomba9 = Entity.CreateEntity("goomba9");
             goomba9.AddComponent<CharacterMovementComponent>();
@@ -1850,7 +1850,7 @@ namespace WpfApp1
             koopaData.endFrame = 1;
             koopaData.frameRatePerSecond = 4;
             koopaData.width = 48;
-            koopaData.height = 36;
+            koopaData.height = 72;
 
             AnimationData gumbaaData = new AnimationData();
             gumbaaData.startFrame = 0;
