@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using WpfApp1.Components;
 using static SDL2.SDL;
 using static SDL2.SDL_image;
-using static SDL2.SDL_mixer;
 using static SDL2.SDL_ttf;
 
 
@@ -23,7 +22,7 @@ namespace WpfApp1
 
         private static SDLApp _instance;
 
-
+        private SoundDevice _soundDevice;
         public static SDLApp GetInstance()
         {
             return _instance;
@@ -65,25 +64,9 @@ namespace WpfApp1
             }
 
             SDLRendering.Init(_renderer);
-            InitSound();
+            _soundDevice = SoundDevice.CreateSoundDevice();
 
             _instance = this;
-        }
-
-        private void InitSound()
-        {
-            MIX_InitFlags mixerFlags = MIX_InitFlags.MIX_INIT_FLAC | MIX_InitFlags.MIX_INIT_OGG;
-            int intMixerFlags = (int)(mixerFlags);
-
-            if (Mix_Init(mixerFlags) != intMixerFlags)
-            {
-                FreeResources();
-                throw new ApplicationException("Sound library initialization failed");
-            }
-
-            MixerInitializationParams mixerParams = new MixerInitializationParams();
-            mixerParams.SetDefaults();
-            mixerParams.PassToOpenAudio();
         }
 
         public int GetAppWidth()
@@ -136,6 +119,7 @@ namespace WpfApp1
             TTF_Quit();
             SDL_Quit();
 
+            _soundDevice.OnFreeDispatched();
             if (shouldSaveSceneStateAfterExit)
             {
                 Entity.rootEntity.ReceiveSerialize();
@@ -178,6 +162,8 @@ namespace WpfApp1
 
             SDLApp app = new SDLApp(1920, 1080, "NIU");
             LoadTextures();
+            SoundDevice.OnMusicEnded += (id) => Console.WriteLine("{0} music stops playing", id);
+
 
             if (File.Exists("scene.json"))
             {
