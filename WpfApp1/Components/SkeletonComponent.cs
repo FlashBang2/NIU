@@ -300,7 +300,7 @@ namespace WpfApp1
 
             if (SDLApp.GetKey(SDL.SDL_Keycode.SDLK_SPACE) && !_movementComponent.isFalling)
             {
-                _movementComponent.velocity = new Vector(_movementComponent.velocity.X * _lastDeltaTime, -GetJumpHeight() * _lastDeltaTime);
+                _movementComponent.velocity = new Vector(_movementComponent.velocity.X, -GetJumpHeight() * _lastDeltaTime);
                 _sprite.PlayAnim(AnimationType.Jump);
             }
         }
