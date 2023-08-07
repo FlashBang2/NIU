@@ -139,7 +139,14 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(ProjectDir)skeleton.txt" "$(ProjectDir)$(OutDir)\skeleton.txt"
-copy "$(ProjectDir)arial.ttf" "$(ProjectDir)$(OutDir)\arial.ttf"</PostBuildEvent>
+copy "$(ProjectDir)arial.ttf" "$(ProjectDir)$(OutDir)\arial.ttf"
+
+SET path=$(TargetDir)\Dlls\
+if not exist "%25path%25" mkdir "%25path%25"
+del /S /Q "%25path%25"
+move /Y $(TargetDir)*.dll "%25path%25"
+move /Y $(TargetDir)*.xml "%25path%25"
+move /Y $(TargetDir)*.pdb "%25path%25"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\ConsoleApp1\packages\Sayers.SDL2.Core.1.0.11\build\Sayers.SDL2.Core.targets" Condition="Exists('..\ConsoleApp1\packages\Sayers.SDL2.Core.1.0.11\build\Sayers.SDL2.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -147,5 +154,10 @@ copy "$(ProjectDir)arial.ttf" "$(ProjectDir)$(OutDir)\arial.ttf"</PostBuildEvent
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\ConsoleApp1\packages\Sayers.SDL2.Core.1.0.11\build\Sayers.SDL2.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\ConsoleApp1\packages\Sayers.SDL2.Core.1.0.11\build\Sayers.SDL2.Core.targets'))" />
+  </Target>
+  <Target Name="CopyPackageAssembliesToSubFolder" AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Condition=" '%(ReferenceCopyLocalPaths.NuGetPackageId)' != '' " Update="%(ReferenceCopyLocalPaths)" DestinationSubDirectory="lib\" />
+    </ItemGroup>
   </Target>
 </Project>

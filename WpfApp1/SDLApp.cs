@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using WpfApp1.Components;
 using static SDL2.SDL;
@@ -30,10 +32,16 @@ namespace WpfApp1
 
         public SDLApp(int width, int height, string title)
         {
+
             if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
             {
                 throw new ApplicationException("SDL2 library couldn't be initialized");
             }
+
+            // It's required for SDL_Image library
+            // Because SDL_image uses many subdlls
+            // Also SDL_mixer uses subdlls
+            Directory.SetCurrentDirectory("Dlls");
 
             IMG_InitFlags flags = IMG_InitFlags.IMG_INIT_PNG | IMG_InitFlags.IMG_INIT_JPG;
 
@@ -67,6 +75,10 @@ namespace WpfApp1
             _soundDevice = SoundDevice.CreateSoundDevice();
 
             _instance = this;
+
+            // Restore old working directory, because all asset loading depends
+            // from base path
+            Directory.SetCurrentDirectory("../");
         }
 
         public int GetAppWidth()
