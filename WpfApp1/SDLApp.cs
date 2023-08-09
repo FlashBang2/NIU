@@ -1735,11 +1735,12 @@ namespace WpfApp1
             koopa.AddComponent<CharacterMovementComponent>();
             koopa.AddComponent<CollisionComponent>();
             koopa.AddComponent<Sprite>();
+            koopa.AddComponent<Gumba>();
             koopa.GetComponent<Sprite>().spriteId = "koopa";
-            //koopa.GetComponent<CollisionComponent>().IsStatic = false;
+            koopa.GetComponent<CollisionComponent>().isStatic = false;
             koopa.width = 48;
             koopa.height = 72;
-            koopa.posX = 240;
+            koopa.posX = goomba8.posX + 230;
             koopa.posY = app.GetAppHeight() - 144 - 24;
 
             Entity goomba9 = Entity.CreateEntity("goomba9");

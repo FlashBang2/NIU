@@ -35,11 +35,6 @@ namespace WpfApp1
 
             public void AttachChild(IEntity entity)
             {
-                if (entity is Entity)
-                {
-                    Entity e = (Entity)entity;
-                }
-
                 _children.Add(entity);
             }
 
