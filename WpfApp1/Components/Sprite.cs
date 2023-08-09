@@ -7,7 +7,7 @@ namespace WpfApp1
 {
     public class Sprite : Component, IRenderable
     {
-        public bool shouldMove = false;
+        public bool shouldMove = true;
         public bool shouldUseSharedAnimationManager = true;
         public string spriteId;
 

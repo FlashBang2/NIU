@@ -11,7 +11,7 @@ namespace WpfApp1
         private bool _isKilled = false;
         private CharacterMovementComponent _movementComponent;
 
-        private const int Speed = 3;
+        private const int Speed = 120;
         private Ray _ray = new Ray();
         private IList<IEntity> _ignoreSelfList = new List<IEntity>();
 
@@ -52,7 +52,7 @@ namespace WpfApp1
         {
             _movementComponent.velocity.X = Speed * _directionScale * deltaTime;
 
-            _ray.Init(new Vector(owner.posX, owner.posY), new Vector(owner.posX + owner.width * _directionScale + Speed * _directionScale, owner.posY));
+            _ray.Init(new Vector(owner.posX, owner.posY), new Vector(owner.posX + owner.width * _directionScale + 3 * _directionScale, owner.posY));
 
             if (RayCast(ref _ray, _ignoreSelfList, out OverlapEvent evt))
             {
@@ -77,12 +77,6 @@ namespace WpfApp1
             {
                 Entity mario = Entity.GetEntity("mario", true);
                 mario.posX = 144;
-
-                if (mario.posY < owner.posY)
-                {
-                    owner.GetComponent<Sprite>().shouldMove = false;
-                    owner.SetActive(false);
-                }
 
                 if (!_isKilled)
                 {
