@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Microsoft.Kinect;
+using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.Kinect;
 
-namespace ConsoleApp1 {
-    internal class Program {
+namespace ConsoleApp1
+{
+    internal class Program
+    {
         static void SkeletonFrameReady(object sender,
             SkeletonFrameReadyEventArgs args)
         {
@@ -33,9 +32,9 @@ namespace ConsoleApp1 {
 
                             foreach (var joint in user.Joints)
                             {
-                              Console.WriteLine(user.Joints[JointType.Head].Position.Y);
-                              Console.WriteLine(user.Joints[JointType.HandRight].Position.X);
-                              Console.WriteLine(user.Joints[JointType.HandLeft].Position.X);
+                                Console.WriteLine(user.Joints[JointType.Head].Position.Y);
+                                Console.WriteLine(user.Joints[JointType.HandRight].Position.X);
+                                Console.WriteLine(user.Joints[JointType.HandLeft].Position.X);
                             }
                         }
                     }
@@ -43,7 +42,8 @@ namespace ConsoleApp1 {
             }
         }
 
-        static void Main(string[] args) {
+        static void Main(string[] args)
+        {
             var kinect = KinectSensor
                    .KinectSensors
                    .FirstOrDefault

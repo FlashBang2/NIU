@@ -4,21 +4,21 @@
     {
         public AnimationData(int startFrame, int endFrame, int width, int height, int frameRatePerSecond) : this()
         {
-            StartFrame = startFrame;
-            EndFrame = endFrame;
-            Width = width;
-            Height = height;
-            FrameRatePerSecond = frameRatePerSecond;
-            ShouldFlip = false;
+            this.startFrame = startFrame;
+            this.endFrame = endFrame;
+            this.width = width;
+            this.height = height;
+            this.frameRatePerSecond = frameRatePerSecond;
+            shouldFlip = false;
         }
 
-        public int EndFrame;
-        public int StartFrame;
+        public int endFrame;
+        public int startFrame;
 
-        public int Width;
-        public int Height;
-        public int FrameRatePerSecond;
+        public int width;
+        public int height;
+        public int frameRatePerSecond;
 
-        public bool ShouldFlip;
+        public bool shouldFlip;
     }
 }

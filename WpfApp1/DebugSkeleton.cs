@@ -1,10 +1,12 @@
 ﻿using Microsoft.Kinect;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using static SDL2.SDL;
 
 namespace WpfApp1
 {
@@ -17,75 +19,63 @@ namespace WpfApp1
             DuringFall
         }
 
-        public Vector JointSize = new Vector(0.01, 0.01);
+        public Vector jointSize = new Vector(0.01, 0.01);
 
-        public double Scale = 1;
-        public double NormalizedMaxY { get => _maxY; }
-        public double NormalizedMaxX { get => _maxX; }
-        public double NormalizedMinX { get => _minX; }
-        public Rect Bounds { get => _bounds; }
-        public double PosX
+        public double scale = 1;
+        public double normalizedMaxY { get => _maxY; }
+        public double normalizedMaxX { get => _maxX; }
+        public double normalizedMinX { get => _minX; }
+        public SDL_Rect bounds { get => _bounds; }
+        public double posX
         {
-            get => _bounds.Center.X;
-            set
-            {
-            }
+            get => _bounds.x;
         }
 
-        public double PosY
+        public double posY
         {
-            get => _bounds.Center.Y;
-            set
-            {
-            }
+            get => _bounds.y;
         }
 
-        public Vector Velocity { get => _velocity; set => _velocity = value; }
-        public bool ShouldApplyGravity { get => _shouldApplyGravity; set => _shouldApplyGravity = value; }
-        public double GravityScale { get => _gravityScale; set => _gravityScale = value; }
-        public bool IsVisible
+        public Vector velocity { get => _velocity; set => _velocity = value; }
+        public bool isVisible
         {
-            get => _joints[JointType.Head].IsVisible;
+            get => _joints[JointType.Head].isVisible;
             set
             {
                 foreach (var joint in _joints)
                 {
-                    joint.Value.IsVisible = value;
+                    joint.Value.isVisible = value;
                 }
             }
         }
         public double MaxJumpHeight = 7;
-        public bool IsTrigger { get => _isTrigger; set => _isTrigger = value; }
+        public bool isTrigger { get => _isTrigger; set => _isTrigger = value; }
+        public Vector offset = new Vector();
+        public bool isFalling { get => _jumpState != JumpState.None; }
 
         private readonly Dictionary<JointType, Vector> _jointLocations = new Dictionary<JointType, Vector>();
         private readonly Dictionary<JointType, Vector> _tempJointLocations = new Dictionary<JointType, Vector>();
         private readonly Dictionary<JointType, DebugJoint> _joints = new Dictionary<JointType, DebugJoint>();
-        private readonly Connection[] _connections;
 
+        private readonly Connection[] _connections;
         private double _maxY = 0;
         private double _minX = 0;
+
         private double _maxX = 0;
-
-        private Rect _bounds;
-
-
+        private SDL_Rect _bounds;
         private bool _isTrigger;
-        private bool _isStatic;
 
         private Vector _velocity = new Vector();
-
-        public Vector offset = new Vector();
         private bool _shouldApplyGravity = true;
         private double _gravityScale = 1;
 
-        public bool IsFalling { get => _jumpState != JumpState.None; }
         private JumpState _jumpState = JumpState.None;
 
         public DebugSkeleton()
         {
             _connections = Connection.Connections;
             AddJoints();
-            _bounds = new Rect(new Vector(), new Vector());
+            _bounds = new SDL_Rect();
 
             foreach (var x in Enum.GetValues(typeof(JointType)).Cast<JointType>())
             {
@@ -93,7 +83,7 @@ namespace WpfApp1
                 _tempJointLocations[x] = new Vector();
             }
 
-            IsVisible = false;
+            isVisible = false;
         }
 
         private void AddJoints()
@@ -124,9 +114,9 @@ namespace WpfApp1
                 else
                 {
                     string[] pos = line.Split(';');
+                    NumberFormatInfo nfi = CultureInfo.CurrentCulture.NumberFormat;
 
-                    //pos = pos.Select(v => v.Replace(',', '.')).ToArray();
-
+                    pos = pos.Select(v => v.Replace(",", nfi.NumberDecimalSeparator)).ToArray();
                     double x = double.Parse(pos[0]);
                     double y = -double.Parse(pos[1]);
 
@@ -219,10 +209,10 @@ namespace WpfApp1
 
             foreach (KeyValuePair<JointType, DebugJoint> joint in _joints)
             {
-                CalculateScaledBounds(Scale, joint);
+                CalculateScaledBounds(scale, joint);
 
                 DebugJoint j = joint.Value;
-                j.DrawDebugJoint(_tempJointLocations[joint.Key], Scale * JointSize, offset, boneColor);
+                j.DrawDebugJoint(_tempJointLocations[joint.Key], scale * jointSize, offset, boneColor);
             }
 
             FindSkeletonBounds();
@@ -235,22 +225,22 @@ namespace WpfApp1
 
         private void FindSkeletonBounds()
         {
-            double minX = double.PositiveInfinity;
-            double minY = double.PositiveInfinity;
-            double maxX = double.NegativeInfinity;
-            double maxY = double.NegativeInfinity;
+            float minX = float.PositiveInfinity;
+            float minY = float.PositiveInfinity;
+            float maxX = float.NegativeInfinity;
+            float maxY = float.NegativeInfinity;
 
             foreach (var i in _joints)
             {
-                Rect bounds = i.Value.Bounds;
-                minX = Math.Min(minX, bounds.Left);
-                minY = Math.Min(minY, bounds.Top);
+                SDL_Rect bounds = i.Value.bounds;
+                minX = Math.Min(minX, bounds.x);
+                minY = Math.Min(minY, bounds.y);
 
-                maxX = Math.Max(maxX, bounds.Right);
-                maxY = Math.Max(maxY, bounds.Down);
+                maxX = Math.Max(maxX, bounds.x + bounds.w);
+                maxY = Math.Max(maxY, bounds.y + bounds.h);
             }
 
-            _bounds = new Rect(new Vector(minX, minY), new Vector(maxX, maxY));
+            SdlRectMath.FromMinAndMax(minX, minY, maxX, maxY, out _bounds);
         }
 
         private void CalculateScaledBounds(double scale, KeyValuePair<JointType, DebugJoint> joint)
@@ -274,39 +264,6 @@ namespace WpfApp1
             }
         }
 
-        private bool isInFloor = false;
-
-        public void PhysicsUpdate()
-        {
-
-            UpdateJumpState();
-        }
-
-        private void UpdateJumpState()
-        {
-            if (Velocity.Y > 0)
-            {
-                if (_jumpState == JumpState.None)
-                {
-                    _jumpState = JumpState.DuringJump;
-                }
-            }
-            else if (Velocity.Y < 0)
-            {
-                if (_jumpState == JumpState.DuringJump || _jumpState == JumpState.None)
-                {
-                    _jumpState = JumpState.DuringFall;
-                }
-            }
-            else
-            {
-                if (_jumpState == JumpState.DuringFall)
-                {
-                    _jumpState = JumpState.None;
-                }
-            }
-        }
-
         public void AddOffset(Vector offset)
         {
             MoveByOffsetEachChild(offset);
@@ -317,15 +274,10 @@ namespace WpfApp1
             foreach (var joint in _joints)
             {
                 joint.Value.AddOffset(new Vector(0, offset.Y));
-                joint.Value.DrawDebugJoint(_tempJointLocations[joint.Key], JointSize, this.offset, Color.FromRgb(0, 0, 0));
+                joint.Value.DrawDebugJoint(_tempJointLocations[joint.Key], jointSize, this.offset, Color.FromRgb(0, 0, 0));
             }
 
             FindSkeletonBounds();
-        }
-
-        public void Jump()
-        {
-            Velocity = new Vector(Velocity.X, MaxJumpHeight);
         }
     }
 }

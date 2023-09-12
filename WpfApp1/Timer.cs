@@ -1,57 +1,38 @@
-﻿using SDL2;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using System.Timers;
 
 namespace ConsoleApp1
 {
-    public struct TimeEvent
-    {
-        public float SecondsSinceLastTick;
-        public float TotalSeconds;
-
-        public TimeEvent(float secondsSinceLastTick, float totalSeconds)
-        {
-            SecondsSinceLastTick = secondsSinceLastTick;
-            TotalSeconds = totalSeconds;
-        }
-    }
-    
     public class SDLTimer
     {
-        public event Action TimeElapsed;
-        public event Action Tick;
+        public event Action onTimeElapsed;
+        public event Action onTick;
 
-        public bool ShouldLoop;
-
-        private int _id;
-        private float _totalTime;
-
-        private Timer _Handle;
+        public bool shouldLoop;
+        private Timer _handle;
 
         public SDLTimer(float seconds, bool shouldLoop)
         {
-            _Handle = new Timer(seconds * 1000);
-            _Handle.AutoReset = shouldLoop;
-            _Handle.Elapsed += OnState;
-            _Handle.Start();
+            _handle = new Timer(seconds * 1000)
+            {
+                AutoReset = shouldLoop
+            };
 
-            ShouldLoop = false;
-            _totalTime = 0;
-            ShouldLoop = shouldLoop; 
+            _handle.Elapsed += OnState;
+            _handle.Start();
+
+            this.shouldLoop = shouldLoop;
         }
 
         private void OnState(object o, ElapsedEventArgs args)
         {
-            if (!ShouldLoop)
+            if (!shouldLoop)
             {
-                TimeElapsed?.Invoke();
-                _Handle.Stop();
+                onTimeElapsed?.Invoke();
+                _handle.Stop();
             }
 
-            Tick?.Invoke();
+            onTick?.Invoke();
         }
     }
 }

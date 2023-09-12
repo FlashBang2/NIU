@@ -1,53 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Collections.Generic;
+using static SDL2.SDL;
 
 namespace WpfApp1
 {
     public interface IEntity
     {
-        double PosX { get; set; }
-        double PosY { get; set; }
+        float posX { get; set; }
+        float posY { get; set; }
 
         /// <summary>
         /// Approximate bounds width
         /// </summary>
-        double Width { get; set; }
+        float width { get; set; }
+        float height { get; set; }
 
-        string Name { get; set; }
+        string name { get; set; }
+        SDL_Rect bounds { get; }
 
-        /// <summary>
-        /// Approximate bounds height
-        /// </summary>
-        double Height { get; set; }
+        void AddWorldOffset(float x, float y);
 
-        Vector Right { get; }
-        Vector Left { get; }
-
-        Vector Up { get; }
-        Vector Down { get; }
-
-        Rect Bounds { get; }
-
-        void AddLocalOffset(double x, double y);
-        void AddWorldOffset(double x, double y);
-
-        void Rotate(double angle);
-
-        void AttachChild(IEntity entity);
-        bool RemoveChild(IEntity entity);
-
-        bool IsActive { get; set; }
+        bool isActive { get; set; }
 
         void SetActive(bool active);
 
         void Destroy();
-        IEntity FindChild(string name);
 
-        void Tick(double dt);
+        void Tick(float dt);
 
         T GetComponent<T>();
         bool HasComponent<T>();
@@ -56,7 +34,11 @@ namespace WpfApp1
 
         void ReceiveRender();
 
-        IEntity[] GetChildren();
         void UndoLastTranslation();
+
+        void AddToTickList(Component component);
+        void RemoveFromTickList(Component component);
+
+        List<Component> GetAllComponents();
     }
 }

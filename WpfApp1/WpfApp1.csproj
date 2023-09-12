@@ -42,6 +42,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Kinect, Version=1.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\ConsoleApp1\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -62,13 +65,24 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Gumba.cs" />
+    <Compile Include="Components\CharacterMovementComponent.cs" />
+    <Compile Include="Components\CollisionComponent.cs" />
+    <Compile Include="Components\Component.cs" />
+    <Compile Include="Components\EntitySerializableProxy.cs" />
+    <Compile Include="Components\FlagComponent.cs" />
+    <Compile Include="Components\FrameRateRendererComponent.cs" />
+    <Compile Include="Components\Gumba.cs" />
+    <Compile Include="SoundDevice\MixerSoundDevice.cs" />
+    <Compile Include="SoundDevice\NullSoundDevice.cs" />
+    <Compile Include="Components\SharedAnimationManager.cs" />
+    <Compile Include="Components\SkeletonComponent.cs" />
+    <Compile Include="SoundDevice\SoundDevice.cs" />
+    <Compile Include="Components\Sprite.cs" />
+    <Compile Include="SoundDevice\MixerInitializationParams.cs" />
+    <Compile Include="RootEntity.cs" />
     <Compile Include="SpriteAnim\AnimationData.cs" />
     <Compile Include="SpriteAnim\AnimationDataCache.cs" />
     <Compile Include="SpriteAnim\AnimationType.cs" />
-    <Compile Include="CharacterMovementComponent.cs" />
-    <Compile Include="CollisionComponent.cs" />
-    <Compile Include="Component.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="IEntity.cs" />
     <Compile Include="IRenderable.cs" />
@@ -81,10 +95,7 @@
     <Compile Include="SDL2-CS\SDL2_mixer.cs" />
     <Compile Include="SDL2-CS\SDL2_ttf.cs" />
     <Compile Include="SDLRendering.cs" />
-    <Compile Include="SkeletonComponent.cs" />
-    <Compile Include="Sprite.cs" />
     <Compile Include="Timer.cs" />
-    <Compile Include="WpfPhysicsBody.cs" />
     <Compile Include="Rect.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
@@ -124,6 +135,7 @@
   <ItemGroup>
     <Resource Include="skeleton.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(ProjectDir)skeleton.txt" "$(ProjectDir)$(OutDir)\skeleton.txt"
