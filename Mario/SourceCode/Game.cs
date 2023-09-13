@@ -294,6 +294,12 @@ namespace Mario
         {
             const byte LeftMouseButton = (byte)SDL.SDL_BUTTON_LEFT;
 
+            // Block user from playing too many music in same time
+            if (!_inMainMenu)
+            {
+                return;
+            }
+
             switch (e.button.button)
             {
                 case LeftMouseButton:
