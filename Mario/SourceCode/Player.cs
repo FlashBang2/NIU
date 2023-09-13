@@ -30,6 +30,10 @@ namespace Mario
             }
             if (Game.Controls.isPressingW && counter < 13)
             {
+                if (onGround == true) {
+                    System.Media.SoundPlayer smallJump = new System.Media.SoundPlayer(@"Assets\Sounds\jump.wav");
+                    smallJump.Play();
+                }
                 onGround = false;
                 offset = 288;
                 animationFrames = 1;
