@@ -7,7 +7,7 @@ namespace Mario
     {
         public int _positionX, _positionY, _frames, velocityX, velocityY;
         public SDL.SDL_RendererFlip flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
-        public bool onGround = true;
+        public bool onGround = true, isWinning = false, isReseting = false, isEnding = false;
         protected SDL.SDL_Rect surface, destination;
         protected TextureManager.TextureInfo textureInfo;
         protected SDL.SDL_Point point;
@@ -71,6 +71,7 @@ namespace Mario
             }
         }
 
+        public virtual void UpdateAnimation () { }
         public void Render ()
         {
             SDL.SDL_RenderCopyEx(Game._Renderer, textureInfo.Texture, ref surface, ref destination, 0, ref point, flipFlag);

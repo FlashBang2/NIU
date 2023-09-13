@@ -6,7 +6,7 @@ namespace Mario
     internal class Map
     {
         public int[,] data;
-        public int cameraOffset;
+        public int cameraOffset, flagDescend = 0;
         private System.Data.DataSet _set;
         private TextureManager.TextureInfo[] textureData;
 
@@ -69,13 +69,26 @@ namespace Mario
             {
                 for (int columnIndex = 0; columnIndex < data.GetLength(1); columnIndex++)
                 {
-                    if (data[rowIndex, columnIndex] != 0 && data[rowIndex, columnIndex] != 2)
+                    if (data[rowIndex, columnIndex] != 0 && data[rowIndex, columnIndex] != 2 &&
+                        data[rowIndex, columnIndex] != 24 && data[rowIndex, columnIndex] != 25)
                     {
                         TextureManager.DrawTexture(textureData[data[rowIndex, columnIndex] - 1], columnIndex * 48 - cameraOffset, rowIndex * 48, 1);
                     }
                     if (data[rowIndex, columnIndex] == 2)
                     {
                         TextureManager.DrawTexture(textureData[data[rowIndex, columnIndex] - 1], columnIndex * 48 - cameraOffset, rowIndex * 48, 3);
+                    }
+                    if (data[rowIndex, columnIndex] == 24 || data[rowIndex, columnIndex] == 25)
+                    {
+                        if (Game._Player.isWinning) 
+                        {
+                            if (rowIndex * 48 + flagDescend < 816)
+                            {
+                                flagDescend += 2;
+                            }
+                            if (data[rowIndex, columnIndex] == 25) TextureManager.DrawTexture(textureData[23 - 1], columnIndex * 48 - cameraOffset, rowIndex * 48, 1);
+                        }
+                        TextureManager.DrawTexture(textureData[data[rowIndex, columnIndex] - 1], columnIndex * 48 - cameraOffset, rowIndex * 48 + flagDescend, 1);
                     }
                 }
             }
