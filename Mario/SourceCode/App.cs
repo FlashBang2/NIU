@@ -4,8 +4,13 @@ namespace Mario
 {
     internal class App
     {
-        public const int screenWidth = 1792, screenHeight = 1008, FPS = 60, desiredFrameTime = 1000 / FPS;
-        public static int gameFrameTime, frame = 0;
+        public const int screenWidth = 1792;
+        public const int screenHeight = 1008;
+        public const int FPS = 60;
+        public const int desiredFrameTime = 1000 / FPS;
+        public static int gameFrameTime;
+        public static int frame = 0;
+
         public static SDL.SDL_Rect AssignValuesForRectangle (int x, int y, int w, int h)
         {
             SDL.SDL_Rect rect;
@@ -18,11 +23,10 @@ namespace Mario
         
         static void Main()
         {
-
             Game game = new Game();
             game.Init("Mario", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE); 
 
-            while (game._IsRunning)
+            while (game.IsRunning)
             {
                 uint lastFrameTimeInMiliseconds = SDL.SDL_GetTicks();
                 game.HandleEvents();
@@ -30,7 +34,7 @@ namespace Mario
                 game.Render();
                 gameFrameTime = (int)(SDL.SDL_GetTicks() - lastFrameTimeInMiliseconds);
 
-                if (desiredFrameTime > gameFrameTime)
+                if (IsGeneratingTooMuchFrames())
                 {
                     SDL.SDL_Delay((uint)(desiredFrameTime - gameFrameTime));
                 }
@@ -39,6 +43,11 @@ namespace Mario
             }
 
             game.CleanUp();
+        }
+
+        static bool IsGeneratingTooMuchFrames()
+        {
+            return desiredFrameTime > gameFrameTime;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Mario
     {
         public int _positionX, _positionY, _frames, velocityX, velocityY;
         public SDL.SDL_RendererFlip flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
-        public bool onGround = true;
+        public bool IsTouchingGround = true;
         protected SDL.SDL_Rect surface, destination;
         protected TextureManager.TextureInfo textureInfo;
         protected SDL.SDL_Point point;
@@ -33,8 +33,8 @@ namespace Mario
 
             if (velocityX <= 0)
             {
-                if (Game.immpasableBlocks.Contains(Game._CurrentLevel.data[oldPositionY / 48, _positionX / 48]) ||
-                    Game.immpasableBlocks.Contains(Game._CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48]))
+                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[oldPositionY / 48, _positionX / 48]) ||
+                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48]))
                 {
                     _positionX -= velocityX;
                     velocityX = 0;
@@ -42,8 +42,8 @@ namespace Mario
             }
             else
             {
-                if (Game.immpasableBlocks.Contains(Game._CurrentLevel.data[oldPositionY / 48, _positionX / 48 + 1]) ||
-                    Game.immpasableBlocks.Contains(Game._CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48 + 1]))
+                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[oldPositionY / 48, _positionX / 48 + 1]) ||
+                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48 + 1]))
                 {
                     _positionX -= velocityX;
                     velocityX = 0;
@@ -52,8 +52,8 @@ namespace Mario
 
             if (velocityY <= 0)
             {
-                if (Game.immpasableBlocks.Contains(Game._CurrentLevel.data[_positionY / 48, _positionX / 48]) ||
-                    Game.immpasableBlocks.Contains(Game._CurrentLevel.data[_positionY / 48, _positionX / 48 + 1]))
+                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[_positionY / 48, _positionX / 48]) ||
+                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[_positionY / 48, _positionX / 48 + 1]))
                 {
                     _positionY -= velocityY;
                     velocityY = 0;
@@ -61,10 +61,10 @@ namespace Mario
             }
             else
             {
-                if (Game.immpasableBlocks.Contains(Game._CurrentLevel.data[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48]) ||
-                    Game.immpasableBlocks.Contains(Game._CurrentLevel.data[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48 + 1]))
+                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48]) ||
+                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48 + 1]))
                 {
-                    onGround = true;
+                    IsTouchingGround = true;
                     _positionY -= velocityY;
                     velocityY = 0;
                 }
@@ -73,7 +73,7 @@ namespace Mario
 
         public void Render ()
         {
-            SDL.SDL_RenderCopyEx(Game._Renderer, textureInfo.Texture, ref surface, ref destination, 0, ref point, flipFlag);
+            SDL.SDL_RenderCopyEx(Game.Renderer, textureInfo.Texture, ref surface, ref destination, 0, ref point, flipFlag);
         }
 
         public void Clean()

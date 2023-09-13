@@ -4,8 +4,14 @@ namespace Mario
 {
     internal class Player : GameObject
     {
-        private int offset = 0, counter = 0, animationFrames = 1;
-        public Player(string path, int positionX, int positionY, int frames) : base(path, positionX, positionY, frames) {}
+        private int _offset = 0;
+        private int _counter = 0;
+        private int _animationFrames = 1;
+
+        public Player(string path, int positionX, int positionY, int frames) : 
+            base(path, positionX, positionY, frames) 
+        { 
+        }
 
         public override void Update()
         {
@@ -19,46 +25,53 @@ namespace Mario
                 else
                 {
                     velocityX = 5;
-                    Game._ScrollSpeed = 5;
+                    Game.ScrollSpeed = 5;
                 }
             }
+
             if (Game.Controls.isPressingA)
             {
                 flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
                 velocityX = -5;
-                Game._ScrollSpeed = -5;
+                Game.ScrollSpeed = -5;
             }
-            if (Game.Controls.isPressingW && counter < 13)
+
+            if (Game.Controls.isPressingW && _counter < 13)
             {
-                onGround = false;
-                offset = 288;
-                animationFrames = 1;
+                IsTouchingGround = false;
+                _offset = 288;
+                _animationFrames = 1;
                 velocityY = -12;
-                counter++;
+                _counter++;
             }
-            if (!Game.Controls.isPressingD && !Game.Controls.isPressingA && onGround)
+
+            if (!Game.Controls.isPressingD && !Game.Controls.isPressingA && IsTouchingGround)
             {
                 velocityX = 0;
-                Game._ScrollSpeed = 0;
-                offset = 0;
-                animationFrames = 1;
+                Game.ScrollSpeed = 0;
+                _offset = 0;
+                _animationFrames = 1;
             }
+
             if (!Game.Controls.isPressingW)
             {
-                counter = 0;
+                _counter = 0;
             }
-            if (onGround && (Game.Controls.isPressingD || Game.Controls.isPressingA))
+
+            if (IsTouchingGround && (Game.Controls.isPressingD || Game.Controls.isPressingA))
             {
-                animationFrames = 4;
-                offset = 48;
+                _animationFrames = 4;
+                _offset = 48;
             }
-            if (onGround && !Game.Controls.isPressingD && !Game.Controls.isPressingA)
+
+            if (IsTouchingGround && !Game.Controls.isPressingD && !Game.Controls.isPressingA)
             {
-                offset = 0;
+                _offset = 0;
             }
+
             base.Update();
-            surface = App.AssignValuesForRectangle(offset + 48 * (int)((SDL.SDL_GetTicks() / 125) % animationFrames), 0, textureInfo.Width / _frames, textureInfo.Height);
-            destination = App.AssignValuesForRectangle(_positionX - Game._CurrentLevel.cameraOffset, _positionY, textureInfo.Width / _frames, textureInfo.Height);
+            surface = App.AssignValuesForRectangle(_offset + 48 * (int)((SDL.SDL_GetTicks() / 125) % _animationFrames), 0, textureInfo.Width / _frames, textureInfo.Height);
+            destination = App.AssignValuesForRectangle(_positionX - Game.CurrentLevel.cameraOffset, _positionY, textureInfo.Width / _frames, textureInfo.Height);
         }
     }
 }

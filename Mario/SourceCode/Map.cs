@@ -51,7 +51,7 @@ namespace Mario
         {
             if (cameraOffset >= 0 && cameraOffset < data.GetLength(1) * 48 - App.screenWidth)
             {
-                cameraOffset += Game._ScrollSpeed;
+                cameraOffset += Game.ScrollSpeed;
                 if (cameraOffset < 0)
                 {
                     cameraOffset = 0;
