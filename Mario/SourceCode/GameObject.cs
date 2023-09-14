@@ -8,6 +8,8 @@ namespace Mario
         public int _positionX, _positionY, _frames, velocityX, velocityY;
         public SDL.SDL_RendererFlip flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
         public bool IsTouchingGround = true;
+        bool isWinning = false, isReseting = false, isEnding = false, isDying = false,
+                    hasReachedPit = false, hasLost = false;
         protected SDL.SDL_Rect surface, destination;
         protected TextureManager.TextureInfo textureInfo;
         protected SDL.SDL_Point point;
@@ -22,55 +24,9 @@ namespace Mario
             textureInfo = TextureManager.LoadTexture(path);
         }
 
-        public virtual void Update() 
-        {
-            velocityY += 1;
+        public virtual void Update() {}
 
-            _positionX += velocityX;
-
-            int oldPositionY = _positionY;
-            _positionY += velocityY;
-
-            if (velocityX <= 0)
-            {
-                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[oldPositionY / 48, _positionX / 48]) ||
-                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48]))
-                {
-                    _positionX -= velocityX;
-                    velocityX = 0;
-                }
-            }
-            else
-            {
-                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[oldPositionY / 48, _positionX / 48 + 1]) ||
-                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48 + 1]))
-                {
-                    _positionX -= velocityX;
-                    velocityX = 0;
-                }
-            }
-
-            if (velocityY <= 0)
-            {
-                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[_positionY / 48, _positionX / 48]) ||
-                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[_positionY / 48, _positionX / 48 + 1]))
-                {
-                    _positionY -= velocityY;
-                    velocityY = 0;
-                }
-            }
-            else
-            {
-                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48]) ||
-                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48 + 1]))
-                {
-                    IsTouchingGround = true;
-                    _positionY -= velocityY;
-                    velocityY = 0;
-                }
-            }
-        }
-
+        public virtual void UpdateAnimation () { }
         public void Render ()
         {
             SDL.SDL_RenderCopyEx(Game.Renderer, textureInfo.Texture, ref surface, ref destination, 0, ref point, flipFlag);

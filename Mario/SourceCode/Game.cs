@@ -113,6 +113,7 @@ namespace Mario
             public static bool isPressingA = false;
             public static bool isPressingD = false;
             public static bool isPressingS = false;
+            public static bool isPressingShift = false;
         }
 
         private TextureManager.TextureInfo _titleGraphic;
@@ -263,6 +264,12 @@ namespace Mario
                 case SDL.SDL_Keycode.SDLK_s:
                     Controls.isPressingS = true;
                     break;
+                case SDL.SDL_Keycode.SDLK_LSHIFT:
+                    Controls.isPressingShift = true;
+                    break;
+                case SDL.SDL_Keycode.SDLK_RSHIFT:
+                    Controls.isPressingShift = true;
+                    break;
             }
         }
 
@@ -316,52 +323,109 @@ namespace Mario
 
         public void Update()
         {
-            CurrentLevel.UpdateCameraOffset();
-            _player.Update();
-
-            for (int i = 0; i < _enemies.Length; i++)
+            if (!_Player.isReseting || inGameTime > 0)
             {
-                _enemies[i].Update();
+                _CurrentLevel.UpdateCameraOffset();
+                _Player.Update();
+                _Player.UpdateAnimation();
+                for (int i = 0; i < _Enemies.Length; i++)
+                {
+                    if (!inMainMenu) _Enemies[i].Update();
+                    _Enemies[i].UpdateAnimation();
+                }
             }
         }
 
         public void Render()
         {
-            SDL.SDL_RenderClear(Renderer);
-            CurrentLevel.DrawMap();
-            _player.Render();
-
-            for (int i = 0; i < _enemies.Length; i++)
+            if (!_player.isReseting || inGameTime > 0)
             {
-                _enemies[i].Render();
-            }
+                SDL.SDL_RenderClear(Renderer);
+                CurrentLevel.DrawMap();
+                _player.Render();
 
-            TextureManager.DrawTexture(_coinIcon, 572, 34, 3);
-
-            for (int i = 0; i < _fonts.Length; i++)
-            {
-                if (_fonts[i].AvailabilityCondition(_fonts[i]))
+                for (int i = 0; i < _enemies.Length; i++)
                 {
-                    SDL.SDL_RenderCopy(Renderer, _fonts[i].Texture, IntPtr.Zero, ref _fonts[i].RenderRectangle);
+                    _enemies[i].Render();
+                }
+
+                TextureManager.DrawTexture(_coinIcon, 572, 34, 3);
+
+                for (int i = 0; i < _fonts.Length; i++)
+                {
+                    if (_fonts[i].AvailabilityCondition(_fonts[i]))
+                    {
+                        SDL.SDL_RenderCopy(Renderer, _fonts[i].Texture, IntPtr.Zero, ref _fonts[i].RenderRectangle);
+                    }
+                }
+
+                if (_Player.isReseting && inGameTime == 1)
+                {
+                    SDL.SDL_SetRenderDrawColor(_Renderer, 0, 0, 0, 255);
+                    SDL.SDL_RenderClear(_Renderer);
+                    SDL.SDL_RenderPresent(_Renderer);
+                    SDL.SDL_Delay(2000);
+                    _Player.onGround = true;
+                    _Player.isEnding = false;
+                    _Player.isReseting = false;
+                    _Player.isWinning = false;
+                    _CurrentLevel.flagDescend = 0;
+                    _CurrentLevel.cameraOffset = 0;
+                    inMainMenu = true;
+                    score = "000000";
+                    inGameTime = 400;
+                    _ScrollSpeed = 0;
+                    for (int i = 0; i < _Enemies.Length; i++)
+                    {
+                        _Enemies[i]._positionX = _EnemiesPositionsX[i];
+                        _Enemies[i]._positionY = _EnemiesPositionsY[i];
+                    }
+                    SDL.SDL_SetRenderDrawColor(_Renderer, 142, 140, 237, 255);
+                }
+                if (_Player.hasLost)
+                {
+                    _Player.velocityY += 1;
+                    _Player._positionY += _Player.velocityY;
+                    if (_Player._positionY > App.screenHeight)
+                    {
+                        _Player._positionX = 96;
+                        _Player._positionY = 864;
+                        _Player.velocityY = 0;
+                        _Player.onGround = true;
+                        _Player.isDying = false;
+                        _Player.hasReachedPit = false;
+                        _Player.hasLost = false;
+                        _Player.isEnding = false;
+                        _Player.isReseting = false;
+                        _Player.isWinning = false;
+                        inMainMenu = true;
+                        _CurrentLevel.cameraOffset = 0;
+                        score = "000000";
+                        inGameTime = 400;
+                        _ScrollSpeed = 0;
+                        for (int i = 0; i < _Enemies.Length; i++)
+                        {
+                            _Enemies[i]._positionX = _EnemiesPositionsX[i];
+                            _Enemies[i]._positionY = _EnemiesPositionsY[i];
+                        }
+                    }
+
+                    SDL.SDL_RenderPresent(Renderer);
+                }
+
+                public void CleanUp()
+                {
+                    SDL.SDL_DestroyRenderer(Renderer);
+                    CurrentLevel.CleanMapTexture();
+                    _player.Clean();
+
+                    for (int i = 0; i < _enemies.Length; i++)
+                    {
+                        _enemies[i].Clean();
+                    }
+
+                    SDL.SDL_DestroyWindow(_window);
+                    SDL.SDL_Quit();
                 }
             }
-
-            SDL.SDL_RenderPresent(Renderer);
         }
-
-        public void CleanUp()
-        {
-            SDL.SDL_DestroyRenderer(Renderer);
-            CurrentLevel.CleanMapTexture();
-            _player.Clean();
-
-            for (int i = 0; i < _enemies.Length; i++)
-            {
-                _enemies[i].Clean();
-            }
-
-            SDL.SDL_DestroyWindow(_window);
-            SDL.SDL_Quit();
-        }
-    }
-}

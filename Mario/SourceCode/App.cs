@@ -32,6 +32,7 @@ namespace Mario
                 game.HandleEvents();
                 game.Update();
                 game.Render();
+
                 gameFrameTime = (int)(SDL.SDL_GetTicks() - lastFrameTimeInMiliseconds);
 
                 if (IsGeneratingTooMuchFrames())
@@ -39,6 +40,12 @@ namespace Mario
                     SDL.SDL_Delay((uint)(desiredFrameTime - gameFrameTime));
                 }
 
+                if (frame >= 24 && !game.inMainMenu && Game.inGameTime > 0 && !Game._Player.isWinning &&
+                    !Game._Player.isDying) 
+                {
+                    frame = 0;
+                    Game.inGameTime -= 1;
+                }
                 frame++;
             }
 
