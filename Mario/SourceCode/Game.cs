@@ -109,10 +109,10 @@ namespace Mario
             {
                 if (i == 8)
                 {
-                    _Enemies[i] = new Enemy("Assets/Characters/Enemies/koopa.png", _EnemiesPositionsX[i], _EnemiesPositionsY[i], 2);
+                    _Enemies[i] = new Enemy("Assets/Characters/Enemies/koopa.png", _EnemiesPositionsX[i], _EnemiesPositionsY[i], 2, "koopa");
                     continue;
                 }
-                _Enemies[i] = new Enemy("Assets/Characters/Enemies/goomba.png", _EnemiesPositionsX[i], _EnemiesPositionsY[i], 2);
+                _Enemies[i] = new Enemy("Assets/Characters/Enemies/goomba.png", _EnemiesPositionsX[i], _EnemiesPositionsY[i], 2, "goomba");
             }
 
             System.IntPtr fontPointer = SDL_ttf.TTF_OpenFont("Assets/Fonts/super-mario-bros-nes.ttf", 8);
@@ -242,7 +242,7 @@ namespace Mario
                                 if (inMainMenu)
                                 {
                                     inMainMenu = false;
-                                    SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 2048);
+                                    SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, 4, 2048);
                                     gameMusic = SDL_mixer.Mix_LoadWAV("Assets/Music/OverworldTheme.wav");
                                     SDL_mixer.Mix_Volume(-1, 20);
                                     SDL_mixer.Mix_PlayChannel(-1, gameMusic, -1);
@@ -263,7 +263,8 @@ namespace Mario
                 _Player.UpdateAnimation();
                 for (int i = 0; i < _Enemies.Length; i++)
                 {
-                    _Enemies[i].Update();
+                    if (!inMainMenu) _Enemies[i].Update();
+                    _Enemies[i].UpdateAnimation();
                 }
             }
         }
@@ -323,18 +324,51 @@ namespace Mario
                 SDL.SDL_SetRenderDrawColor(_Renderer, 0, 0, 0, 255);
                 SDL.SDL_RenderClear(_Renderer);
                 SDL.SDL_RenderPresent(_Renderer);
-                SDL.SDL_Delay(5000);
+                SDL.SDL_Delay(2000);
                 _Player.onGround = true;
                 _Player.isEnding = false;
                 _Player.isReseting = false;
                 _Player.isWinning = false;
                 _CurrentLevel.flagDescend = 0;
+                _CurrentLevel.cameraOffset = 0;
                 inMainMenu = true;
                 score = "000000";
                 inGameTime = 400;
                 _ScrollSpeed = 0;
-                _CurrentLevel.cameraOffset = 0;
+                for (int i = 0; i < _Enemies.Length; i++)
+                {
+                    _Enemies[i]._positionX = _EnemiesPositionsX[i];
+                    _Enemies[i]._positionY = _EnemiesPositionsY[i];
+                }
                 SDL.SDL_SetRenderDrawColor(_Renderer, 142, 140, 237, 255);
+            }
+            if (_Player.hasLost)
+            {
+                _Player.velocityY += 1;
+                _Player._positionY += _Player.velocityY;
+                if (_Player._positionY > App.screenHeight)
+                {
+                    _Player._positionX = 96;
+                    _Player._positionY = 864;
+                    _Player.velocityY = 0;
+                    _Player.onGround = true;
+                    _Player.isDying = false;
+                    _Player.hasReachedPit = false;
+                    _Player.hasLost = false;
+                    _Player.isEnding = false;
+                    _Player.isReseting = false;
+                    _Player.isWinning = false;
+                    inMainMenu = true;
+                    _CurrentLevel.cameraOffset = 0;
+                    score = "000000";
+                    inGameTime = 400;
+                    _ScrollSpeed = 0;
+                    for (int i = 0; i < _Enemies.Length; i++)
+                    {
+                        _Enemies[i]._positionX = _EnemiesPositionsX[i];
+                        _Enemies[i]._positionY = _EnemiesPositionsY[i];
+                    }
+                }
             }
             SDL.SDL_RenderPresent(_Renderer);
         }

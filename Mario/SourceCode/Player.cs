@@ -11,6 +11,33 @@ namespace Mario
 
         public override void Update()
         {
+            if (isDying)
+            {
+                if ((_positionY >= App.screenHeight || hasReachedPit) && !hasLost)
+                {
+                    hasReachedPit = true;
+                    offset = 336;
+                    animationFrames = 1;
+                    velocityY = -6;
+                    _positionY += velocityY;
+                    if (_positionY <= App.screenHeight - 96)
+                    {
+                        velocityY += 1;
+                        _positionY += velocityY;
+                        hasLost = true;
+                    }
+                }
+                if (!hasReachedPit)
+                {
+                    velocityY += 1;
+                    _positionY += velocityY;
+                    SDL_mixer.Mix_FreeChunk(Game.gameMusic);
+                    System.IntPtr playerDeathSFX = SDL_mixer.Mix_LoadWAV("Assets/SFX/deathMario.wav");
+                    SDL_mixer.Mix_Volume(-1, 20);
+                    SDL_mixer.Mix_PlayChannel(-1, playerDeathSFX, 0);
+                }
+                return;
+            }
             if (isWinning) 
             {
                 if (_positionY < 816)
@@ -112,10 +139,18 @@ namespace Mario
             int oldPositionY = _positionY;
             _positionY += velocityY;
 
+            if (_positionY + 48 >= App.screenHeight)
+            {
+                isDying = true;
+                velocityX = 0;
+                Game._ScrollSpeed = 0;
+                return;
+            }
+
             if (velocityX <= 0)
             {
-                if (Game.immpasableBlocks.Contains(Game._CurrentLevel.data[oldPositionY / 48, _positionX / 48]) ||
-                    Game.immpasableBlocks.Contains(Game._CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48]))
+                if (Game.immpasableBlocks.Contains(Game._CurrentLevel.data[oldPositionY / 48, _positionX / 48].value) ||
+                    Game.immpasableBlocks.Contains(Game._CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48].value))
                 {
                     _positionX -= velocityX;
                     velocityX = 0;
@@ -129,11 +164,11 @@ namespace Mario
             }
             else
             {
-                if (Game.immpasableBlocks.Contains(Game._CurrentLevel.data[oldPositionY / 48, _positionX / 48 + 1]) ||
-                    Game.immpasableBlocks.Contains(Game._CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48 + 1]))
+                if (Game.immpasableBlocks.Contains(Game._CurrentLevel.data[oldPositionY / 48, _positionX / 48 + 1].value) ||
+                    Game.immpasableBlocks.Contains(Game._CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48 + 1].value))
                 {
-                    if ((Game._CurrentLevel.data[oldPositionY / 48, _positionX / 48 + 1] == 23 ||
-                        Game._CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48 + 1] == 23) &&
+                    if ((Game._CurrentLevel.data[oldPositionY / 48, _positionX / 48 + 1].value == 23 ||
+                        Game._CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48 + 1].value == 23) &&
                         !isWinning)
                     {
                         isWinning = true;
@@ -158,17 +193,30 @@ namespace Mario
 
             if (velocityY <= 0)
             {
-                if (Game.immpasableBlocks.Contains(Game._CurrentLevel.data[_positionY / 48, _positionX / 48]) ||
-                    Game.immpasableBlocks.Contains(Game._CurrentLevel.data[_positionY / 48, _positionX / 48 + 1]))
+                if (Game.immpasableBlocks.Contains(Game._CurrentLevel.data[_positionY / 48, _positionX / 48].value))
+                {
+                    Game._CurrentLevel.data[_positionY / 48, _positionX / 48].isBumped = true;
+                    Game._CurrentLevel.bumpAnimation = 24;
+                }
+                if (Game.immpasableBlocks.Contains(Game._CurrentLevel.data[_positionY / 48, _positionX / 48 + 1].value))
+                {
+                    Game._CurrentLevel.data[_positionY / 48, _positionX / 48 + 1].isBumped = true;
+                    Game._CurrentLevel.bumpAnimation = 24;
+                }
+                if (Game.immpasableBlocks.Contains(Game._CurrentLevel.data[_positionY / 48, _positionX / 48].value) ||
+                    Game.immpasableBlocks.Contains(Game._CurrentLevel.data[_positionY / 48, _positionX / 48 + 1].value))
                 {
                     _positionY -= velocityY;
                     velocityY = 0;
+                    System.IntPtr bumpSFX = SDL_mixer.Mix_LoadWAV("Assets/SFX/bump.wav");
+                    SDL_mixer.Mix_Volume(2, 60);
+                    SDL_mixer.Mix_PlayChannel(2, bumpSFX, 0);  
                 }
             }
             else
             {
-                if (Game.immpasableBlocks.Contains(Game._CurrentLevel.data[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48]) ||
-                    Game.immpasableBlocks.Contains(Game._CurrentLevel.data[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48 + 1]))
+                if (Game.immpasableBlocks.Contains(Game._CurrentLevel.data[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48].value) ||
+                    Game.immpasableBlocks.Contains(Game._CurrentLevel.data[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48 + 1].value))
                 {
                     onGround = true;
                     _positionY -= velocityY;
@@ -176,8 +224,8 @@ namespace Mario
                 }
             }
 
-            if ((isEnding && Game._CurrentLevel.data[oldPositionY / 48, _positionX / 48] == 28 ||
-                Game._CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48] == 28) || isReseting)
+            if ((isEnding && Game._CurrentLevel.data[oldPositionY / 48, _positionX / 48].value == 28 ||
+                Game._CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48].value == 28) || isReseting)
             {
                 isReseting = true;
                 _positionX -= velocityX;
