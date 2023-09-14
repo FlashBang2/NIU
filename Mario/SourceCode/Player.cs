@@ -296,16 +296,10 @@ namespace Mario
             switch (actionType)
             {
                 case ActionType.MoveLeft:
-                    TryAccelerate(-1);
-                    _animationFrames = 4;
-                    _offset = 0;
-                    flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
+                    MoveRight();
                     break;
                 case ActionType.MoveRight:
-                    flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
-                    TryAccelerate(1);
-                    _animationFrames = 4;
-                    _offset = 0;
+                    MoveLeft();
                     break;
                 default:
                     SlowDown();
@@ -314,23 +308,39 @@ namespace Mario
 
             if (isJumping && IsTouchingGround)
             {
-                velocityY = (int)(-GetJumpHeight());
+                velocityY = -GetJumpHeight();
                 IsTouchingGround = false;
                 _offset = 288;
                 _animationFrames = 1;
             }
         }
 
-        private static int GetJumpHeight()
+        private void MoveLeft()
         {
-            return 25;
+            TryAccelerate(1);
+            _animationFrames = 4;
+            _offset = 0;
+            flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
         }
 
-        private void TryAccelerate(int direction)
+        private void MoveRight()
+        {
+            TryAccelerate(-1);
+            _animationFrames = 4;
+            _offset = 0;
+            flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
+        }
+
+        private static int GetJumpHeight()
+        {
+            return 23;
+        }
+
+        private void TryAccelerate(int directionX)
         {
             const int accelerationRate = 1;
 
-            if (direction > 0)
+            if (directionX > 0)
             {
                 bool hasExceedMaxVelocity = velocityX + accelerationRate > maxVelocity;
                 velocityX = hasExceedMaxVelocity ? maxVelocity : velocityX + accelerationRate;
@@ -343,9 +353,10 @@ namespace Mario
 
             if (_positionX > App.screenWidth / 2)
             {
-                Game.ScrollSpeed = 5 * direction;
+                Game.ScrollSpeed = 5 * directionX;
             }
         }
+
         private void SlowDown()
         {
             velocityX = 0;
@@ -356,34 +367,21 @@ namespace Mario
 
         private bool CheckIfJumping()
         {
-            bool isJumping = false;
+            return IsHeadUnderAnyHand();
+        }
 
+        private bool IsHeadUnderAnyHand()
+        {
             var head = Kinnect.GetKinnect()[JointType.Head];
             var leftHand = Kinnect.GetKinnect()[JointType.HandLeft];
             var rightHand = Kinnect.GetKinnect()[JointType.HandRight];
 
-            if (head.Item2 < leftHand.Item2 || head.Item2 < rightHand.Item2)
-            {
-                isJumping = true;
-            }
-            else
-            {
-                isJumping = false;
-            }
-
-            return isJumping;
+            return head.Item2 < leftHand.Item2 || head.Item2 < rightHand.Item2;
         }
 
         private ActionType FindActionType()
         {
             ActionType actionType = ActionType.None;
-
-            // ankle left nearly equal kneeRight -> accelerate
-            // ankle right nearly equal kneeLeft -> accelerate
-            var ankleLeft = Kinnect.GetKinnect()[JointType.AnkleLeft];
-            var kneeRight = Kinnect.GetKinnect()[JointType.KneeRight];
-            var ankleRight = Kinnect.GetKinnect()[JointType.AnkleRight];
-            var kneeLeft = Kinnect.GetKinnect()[JointType.KneeLeft];
 
             if (ShouldTurnRight())
             {
