@@ -11,7 +11,7 @@ namespace Mario
         private int _offset = 0;
         private int _counter = 0;
         private int _animationFrames = 1;
-        public const int maxVelocity = 4;
+        public const int maxVelocity = 5;
 
         public enum ActionType
         {
@@ -29,6 +29,11 @@ namespace Mario
 
         public override void Update()
         {
+            if (Kinnect._isKinnectAvailable)
+            {
+                HandleKinnectMovement();
+            }
+
             if (isDying)
             {
                 if ((_positionY >= App.screenHeight || hasReachedPit) && !hasLost)
@@ -121,7 +126,7 @@ namespace Mario
                 _counter++;
             }
 
-            if (!Game.Controls.isPressingD && !Game.Controls.isPressingA && IsTouchingGround)
+            if (!Game.Controls.isPressingD && !Game.Controls.isPressingA && IsTouchingGround && !Kinnect._isKinnectAvailable)
             {
                 velocityX = 0;
                 Game.ScrollSpeed = 0;
@@ -134,16 +139,6 @@ namespace Mario
                 _counter = 0;
             }
 
-            if (IsTouchingGround && !Game.Controls.isPressingD && !Game.Controls.isPressingA)
-            {
-                _animationFrames = 4;
-                _offset = 48;
-            }
-
-            if (IsTouchingGround && !Game.Controls.isPressingD && !Game.Controls.isPressingA)
-            {
-                _offset = 0;
-            }
 
             base.Update();
             surface = App.AssignValuesForRectangle(_offset + 48 * (int)((SDL.SDL_GetTicks() / 125) % _animationFrames), 0, textureInfo.Width / _frames, textureInfo.Height);
@@ -278,7 +273,6 @@ namespace Mario
                 }
             }
 
-            HandleKinnectMovement();
         }
 
         private void HandleKinnectMovement()
@@ -319,7 +313,7 @@ namespace Mario
 
         private static int GetJumpHeight()
         {
-            return 20;
+            return 25;
         }
 
         private void TryAccelerate(int direction)
@@ -329,23 +323,25 @@ namespace Mario
             if (direction > 0)
             {
                 bool hasExceedMaxVelocity = velocityX + accelerationRate > maxVelocity;
-
                 velocityX = hasExceedMaxVelocity ? maxVelocity : velocityX + accelerationRate;
             }
             else
             {
-                bool hasExceedMaxVelocity = velocityX - accelerationRate > maxVelocity;
-                velocityX = hasExceedMaxVelocity ? maxVelocity : velocityX - accelerationRate;
+                bool hasExceedMaxVelocity = velocityX - accelerationRate < -maxVelocity;
+                velocityX = hasExceedMaxVelocity ? -maxVelocity : velocityX - accelerationRate;
+            }
+
+            if (_positionX > App.screenWidth / 2)
+            {
+                Game.ScrollSpeed = 5 * direction;
             }
         }
         private void SlowDown()
         {
-            if (Math.Abs(velocityX) < 1)
-            {
-
-            }
-
-            velocityX = (int)(0.93 * velocityX);
+            velocityX = 0;
+            Game.ScrollSpeed = 0;
+            _offset = 0;
+            _animationFrames = 1;
         }
 
         private bool CheckIfJumping()
@@ -379,16 +375,26 @@ namespace Mario
             var ankleRight = Kinnect.GetKinnect()[JointType.AnkleRight];
             var kneeLeft = Kinnect.GetKinnect()[JointType.KneeLeft];
 
-            if (ankleLeft.Item2 < kneeRight.Item2)
+            if (ShouldTurnRight())
             {
                 actionType = ActionType.MoveRight;
             }
-            else if (ankleRight.Item2 < kneeLeft.Item2)
+            else if (ShouldTurnLeft())
             {
                 actionType = ActionType.MoveLeft;
             }
 
             return actionType;
+        }
+
+        private bool ShouldTurnRight()
+        {
+            return Kinnect.GetKinnect()[JointType.AnkleRight].Item2 > Kinnect.GetKinnect()[JointType.KneeLeft].Item2;
+        }
+
+        private bool ShouldTurnLeft()
+        {
+            return Kinnect.GetKinnect()[JointType.AnkleLeft].Item2 > Kinnect.GetKinnect()[JointType.KneeRight].Item2;
         }
 
         public override void UpdateAnimation()
