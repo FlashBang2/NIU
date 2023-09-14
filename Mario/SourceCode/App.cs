@@ -11,7 +11,7 @@ namespace Mario
         public static int gameFrameTime;
         public static int frame = 0;
 
-        public static SDL.SDL_Rect AssignValuesForRectangle (int x, int y, int w, int h)
+        public static SDL.SDL_Rect AssignValuesForRectangle(int x, int y, int w, int h)
         {
             SDL.SDL_Rect rect;
             rect.x = x;
@@ -20,11 +20,11 @@ namespace Mario
             rect.h = h;
             return rect;
         }
-        
+
         static void Main()
         {
             Game game = new Game();
-            game.Init("Mario", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE); 
+            game.Init("Mario", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
 
             while (game.IsRunning)
             {
@@ -40,16 +40,22 @@ namespace Mario
                     SDL.SDL_Delay((uint)(desiredFrameTime - gameFrameTime));
                 }
 
-                if (frame >= 24 && !Game._inMainMenu && Game.inGameTime > 0 && !Game._player.isWinning &&
-                    !Game._player.isDying) 
+                if (IsFirstFrame())
                 {
                     frame = 0;
                     Game.inGameTime -= 1;
                 }
+
                 frame++;
             }
 
             game.CleanUp();
+        }
+
+        private static bool IsFirstFrame()
+        {
+            return frame >= 24 && !Game._inMainMenu && Game.inGameTime > 0 && !Game._player.isWinning &&
+                                !Game._player.isDying;
         }
 
         static bool IsGeneratingTooMuchFrames()

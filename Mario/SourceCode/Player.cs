@@ -13,6 +13,8 @@ namespace Mario
         private int _animationFrames = 1;
         public const int maxVelocity = 5;
 
+        public const int MarioFrameWidth = 48;
+
         public enum ActionType
         {
             None = 0,
@@ -108,6 +110,9 @@ namespace Mario
                     velocityX = 5;
                     Game.ScrollSpeed = 5;
                 }
+
+                _animationFrames = 4;
+                _offset = 48;
             }
 
             if (Game.Controls.isPressingA && !isEnding)
@@ -115,6 +120,8 @@ namespace Mario
                 flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
                 velocityX = -5;
                 Game.ScrollSpeed = -5;
+                _animationFrames = 4;
+                _offset = 48;
             }
 
             if (Game.Controls.isPressingW && _counter < 13 && !isEnding)
@@ -155,6 +162,7 @@ namespace Mario
             if (_positionY + 48 >= App.screenHeight)
             {
                 isDying = true;
+                IsTouchingGround = false;
                 velocityX = 0;
                 Game.ScrollSpeed = 0;
                 return;
@@ -277,7 +285,7 @@ namespace Mario
 
         private void HandleKinnectMovement()
         {
-            if (!Kinnect._isKinnectAvailable || Game._inMainMenu)
+            if (!Kinnect._isKinnectAvailable || Game._inMainMenu || isDying)
             {
                 return;
             }
@@ -290,12 +298,14 @@ namespace Mario
                 case ActionType.MoveLeft:
                     TryAccelerate(-1);
                     _animationFrames = 4;
-                    _offset = 48;
+                    _offset = 0;
+                    flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
                     break;
                 case ActionType.MoveRight:
+                    flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
                     TryAccelerate(1);
                     _animationFrames = 4;
-                    _offset = 48;
+                    _offset = 0;
                     break;
                 default:
                     SlowDown();

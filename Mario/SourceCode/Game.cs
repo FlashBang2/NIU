@@ -176,7 +176,7 @@ namespace Mario
 
             SDL.SDL_SetRenderDrawColor(Renderer, 142, 140, 237, 255);
             CurrentLevel = new Map("Data/Levels/1-1.xml");
-            _player = new Player("Assets/Characters/Player/marioSmall.png", 96, 864, 8);
+            _player = new Player("Assets/Characters/Player/marioSmall.png", 96, 864, 10);
 
             for (int i = 0; i < _enemies.Length; i++)
             {
