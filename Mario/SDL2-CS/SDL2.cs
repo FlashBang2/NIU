@@ -1791,7 +1791,7 @@ namespace SDL2
 		/// <param name="rect">an SDL_Rect structure representing the area to lock for access;
 		/// NULL to lock the entire texture </param>
 		/// <param name="pixels">this is filled in with a pointer to the locked pixels, appropriately
-		/// offset by the locked area (refers to a void*)</param>
+		/// _offset by the locked area (refers to a void*)</param>
 		/// <param name="pitch">this is filled in with the pitch of the locked pixels </param>
 		/// <returns>Returns 0 on success or a negative error code if the texture is not valid or
 		/// was not created with SDL_TEXTUREACCESS_STREAMING; call <see cref="SDL_GetError()"/> for more information. </returns>
@@ -1812,7 +1812,7 @@ namespace SDL2
 		/// <param name="rect">an SDL_Rect structure representing the area to lock for access;
 		/// NULL to lock the entire texture </param>
 		/// <param name="pixels">this is filled in with a pointer to the locked pixels, appropriately
-		/// offset by the locked area (refers to a void*)</param>
+		/// _offset by the locked area (refers to a void*)</param>
 		/// <param name="pitch">this is filled in with the pitch of the locked pixels </param>
 		/// <returns>Returns 0 on success or a negative error code if the texture is not valid or
 		/// was not created with SDL_TEXTUREACCESS_STREAMING; call <see cref="SDL_GetError()"/> for more information. </returns>
@@ -4959,7 +4959,7 @@ namespace SDL2
 			// Periodic
 			public ushort period;
 			public short magnitude;
-			public short offset;
+			public short _offset;
 			public ushort phase;
 			// Envelope
 			public ushort attack_length;

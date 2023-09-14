@@ -1,5 +1,6 @@
 ﻿using SDL2;
 using System;
+using Mario.SourceCode;
 
 namespace Mario
 {
@@ -17,7 +18,9 @@ namespace Mario
         };
 
         public bool IsRunning = true;
-        private bool _inMainMenu = true;
+        public static int inGameTime = 400;
+        public static string score = "000000";
+        public static bool _inMainMenu = true;
 
         public struct Font
         {
@@ -36,7 +39,7 @@ namespace Mario
         private IntPtr _window;
         private Font[] _fonts = new Font[AvailableNumFonts];
 
-        private GameObject _player;
+        public static GameObject _player;
 
         private GameObject[] _enemies = new GameObject[17];
         private int[] _enemiesPositionsX = new int[] {
@@ -118,6 +121,9 @@ namespace Mario
 
         private TextureManager.TextureInfo _titleGraphic;
         private TextureManager.TextureInfo _coinIcon;
+        private Kinnect kinnect;
+        private IntPtr fontPointer;
+        public static IntPtr gameMusic;
 
         public Game()
         {
@@ -146,7 +152,9 @@ namespace Mario
                 throw new ApplicationException(exceptionMessage);
             }
 
+
             System.IO.Directory.SetCurrentDirectory("../");
+            kinnect = new Kinnect();
         }
 
         public void Init(string title, int x, int y, int w, int h, SDL.SDL_WindowFlags flags)
@@ -174,10 +182,10 @@ namespace Mario
             {
                 if (i == 8)
                 {
-                    _enemies[i] = new Enemy("Assets/Characters/Enemies/koopa.png", _enemiesPositionsX[i], _enemiesPositionsY[i], 2);
+                    _enemies[i] = new Enemy("Assets/Characters/Enemies/koopa.png", _enemiesPositionsX[i], _enemiesPositionsY[i], 2, "koopa");
                     continue;
                 }
-                _enemies[i] = new Enemy("Assets/Characters/Enemies/goomba.png", _enemiesPositionsX[i], _enemiesPositionsY[i], 2);
+                _enemies[i] = new Enemy("Assets/Characters/Enemies/goomba.png", _enemiesPositionsX[i], _enemiesPositionsY[i], 2, "goomba");
             }
 
             GenerateFonts();
@@ -188,9 +196,9 @@ namespace Mario
 
         private void GenerateFonts()
         {
-            IntPtr font = SDL_ttf.TTF_OpenFont("Assets/Fonts/super-mario-bros-nes.ttf", 8);
+            fontPointer = SDL_ttf.TTF_OpenFont("Assets/Fonts/super-mario-bros-nes.ttf", 8);
 
-            if (font == IntPtr.Zero)
+            if (fontPointer == IntPtr.Zero)
             {
                 string exceptionMessage = string.Format("Error occured during loading font \'Assets/Fonts/super-mario-bros-nes.ttf\': Error {0}", SDL.SDL_GetError());
                 throw new ApplicationException(exceptionMessage);
@@ -204,7 +212,7 @@ namespace Mario
 
             for (int i = 0; i < AvailableNumFonts; i++)
             {
-                IntPtr fontRenderSurface = SDL_ttf.TTF_RenderText_Solid(font, _fontLabels[i], fontColor);
+                IntPtr fontRenderSurface = SDL_ttf.TTF_RenderText_Solid(fontPointer, _fontLabels[i], fontColor);
                 IntPtr texture = SDL.SDL_CreateTextureFromSurface(Renderer, fontRenderSurface);
                 SDL.SDL_FreeSurface(fontRenderSurface);
 
@@ -313,9 +321,9 @@ namespace Mario
                     {
                         _inMainMenu = false;
                         SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 2048);
-                        IntPtr music = SDL_mixer.Mix_LoadWAV("Assets/Music/OverworldTheme.wav");
+                        gameMusic = SDL_mixer.Mix_LoadWAV("Assets/Music/OverworldTheme.wav");
                         SDL_mixer.Mix_Volume(-1, 20);
-                        SDL_mixer.Mix_PlayChannel(-1, music, -1);
+                        SDL_mixer.Mix_PlayChannel(-1, gameMusic, -1);
                         break;
                     }
             }
@@ -323,15 +331,15 @@ namespace Mario
 
         public void Update()
         {
-            if (!_Player.isReseting || inGameTime > 0)
+            if (!_player.isReseting || inGameTime > 0)
             {
-                _CurrentLevel.UpdateCameraOffset();
-                _Player.Update();
-                _Player.UpdateAnimation();
-                for (int i = 0; i < _Enemies.Length; i++)
+                CurrentLevel.UpdateCameraOffset();
+                _player.Update();
+                _player.UpdateAnimation();
+                for (int i = 0; i < _enemies.Length; i++)
                 {
-                    if (!inMainMenu) _Enemies[i].Update();
-                    _Enemies[i].UpdateAnimation();
+                    if (!_inMainMenu) _enemies[i].Update();
+                    _enemies[i].UpdateAnimation();
                 }
             }
         }
@@ -350,6 +358,16 @@ namespace Mario
                 }
 
                 TextureManager.DrawTexture(_coinIcon, 572, 34, 3);
+                SDL.SDL_Color fontColor;
+                fontColor.r = 255;
+                fontColor.g = 255;
+                fontColor.b = 255;
+                fontColor.a = 255;
+
+                var fontSurface = SDL_ttf.TTF_RenderText_Solid(fontPointer, score, fontColor);
+                SDL.SDL_DestroyTexture(_fonts[1].Texture);
+                _fonts[1].Texture = SDL.SDL_CreateTextureFromSurface(Renderer, fontSurface);
+                SDL.SDL_FreeSurface(fontSurface);
 
                 for (int i = 0; i < _fonts.Length; i++)
                 {
@@ -359,73 +377,75 @@ namespace Mario
                     }
                 }
 
-                if (_Player.isReseting && inGameTime == 1)
+                if (_player.isReseting && inGameTime == 1)
                 {
-                    SDL.SDL_SetRenderDrawColor(_Renderer, 0, 0, 0, 255);
-                    SDL.SDL_RenderClear(_Renderer);
-                    SDL.SDL_RenderPresent(_Renderer);
+                    SDL.SDL_SetRenderDrawColor(Renderer, 0, 0, 0, 255);
+                    SDL.SDL_RenderClear(Renderer);
+                    SDL.SDL_RenderPresent(Renderer);
                     SDL.SDL_Delay(2000);
-                    _Player.onGround = true;
-                    _Player.isEnding = false;
-                    _Player.isReseting = false;
-                    _Player.isWinning = false;
-                    _CurrentLevel.flagDescend = 0;
-                    _CurrentLevel.cameraOffset = 0;
-                    inMainMenu = true;
+                    _player.IsTouchingGround = true;
+                    _player.isEnding = false;
+                    _player.isReseting = false;
+                    _player.isWinning = false;
+                    CurrentLevel.flagDescend = 0;
+                    CurrentLevel.cameraOffset = 0;
+                    _inMainMenu = true;
                     score = "000000";
                     inGameTime = 400;
-                    _ScrollSpeed = 0;
-                    for (int i = 0; i < _Enemies.Length; i++)
+                    ScrollSpeed = 0;
+                    for (int i = 0; i < _enemies.Length; i++)
                     {
-                        _Enemies[i]._positionX = _EnemiesPositionsX[i];
-                        _Enemies[i]._positionY = _EnemiesPositionsY[i];
+                        _enemies[i]._positionX = _enemiesPositionsX[i];
+                        _enemies[i]._positionY = _enemiesPositionsY[i];
                     }
-                    SDL.SDL_SetRenderDrawColor(_Renderer, 142, 140, 237, 255);
+                    SDL.SDL_SetRenderDrawColor(Renderer, 142, 140, 237, 255);
                 }
-                if (_Player.hasLost)
+                if (_player.hasLost)
                 {
-                    _Player.velocityY += 1;
-                    _Player._positionY += _Player.velocityY;
-                    if (_Player._positionY > App.screenHeight)
+                    _player.velocityY += 1;
+                    _player._positionY += _player.velocityY;
+                    if (_player._positionY > App.screenHeight)
                     {
-                        _Player._positionX = 96;
-                        _Player._positionY = 864;
-                        _Player.velocityY = 0;
-                        _Player.onGround = true;
-                        _Player.isDying = false;
-                        _Player.hasReachedPit = false;
-                        _Player.hasLost = false;
-                        _Player.isEnding = false;
-                        _Player.isReseting = false;
-                        _Player.isWinning = false;
-                        inMainMenu = true;
-                        _CurrentLevel.cameraOffset = 0;
+                        _player._positionX = 96;
+                        _player._positionY = 864;
+                        _player.velocityY = 0;
+                        _player.IsTouchingGround = true;
+                        _player.isDying = false;
+                        _player.hasReachedPit = false;
+                        _player.hasLost = false;
+                        _player.isEnding = false;
+                        _player.isReseting = false;
+                        _player.isWinning = false;
+                        _inMainMenu = true;
+                        CurrentLevel.cameraOffset = 0;
                         score = "000000";
                         inGameTime = 400;
-                        _ScrollSpeed = 0;
-                        for (int i = 0; i < _Enemies.Length; i++)
+                        ScrollSpeed = 0;
+                        for (int i = 0; i < _enemies.Length; i++)
                         {
-                            _Enemies[i]._positionX = _EnemiesPositionsX[i];
-                            _Enemies[i]._positionY = _EnemiesPositionsY[i];
+                            _enemies[i]._positionX = _enemiesPositionsX[i];
+                            _enemies[i]._positionY = _enemiesPositionsY[i];
                         }
                     }
 
-                    SDL.SDL_RenderPresent(Renderer);
                 }
-
-                public void CleanUp()
-                {
-                    SDL.SDL_DestroyRenderer(Renderer);
-                    CurrentLevel.CleanMapTexture();
-                    _player.Clean();
-
-                    for (int i = 0; i < _enemies.Length; i++)
-                    {
-                        _enemies[i].Clean();
-                    }
-
-                    SDL.SDL_DestroyWindow(_window);
-                    SDL.SDL_Quit();
-                }
+                SDL.SDL_RenderPresent(Renderer);
             }
         }
+
+        public void CleanUp()
+        {
+            SDL.SDL_DestroyRenderer(Renderer);
+            CurrentLevel.CleanMapTexture();
+            _player.Clean();
+
+            for (int i = 0; i < _enemies.Length; i++)
+            {
+                _enemies[i].Clean();
+            }
+
+            SDL.SDL_DestroyWindow(_window);
+            SDL.SDL_Quit();
+        }
+    }
+}

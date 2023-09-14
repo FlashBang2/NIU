@@ -8,7 +8,7 @@ namespace Mario
         public int _positionX, _positionY, _frames, velocityX, velocityY;
         public SDL.SDL_RendererFlip flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
         public bool IsTouchingGround = true;
-        bool isWinning = false, isReseting = false, isEnding = false, isDying = false,
+        public bool isWinning = false, isReseting = false, isEnding = false, isDying = false,
                     hasReachedPit = false, hasLost = false;
         protected SDL.SDL_Rect surface, destination;
         protected TextureManager.TextureInfo textureInfo;

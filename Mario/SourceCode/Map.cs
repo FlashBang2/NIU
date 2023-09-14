@@ -102,7 +102,7 @@ namespace Mario
                     }
                     if (data[rowIndex, columnIndex].value == 24 || data[rowIndex, columnIndex].value == 25)
                     {
-                        if (Game._Player.isWinning) 
+                        if (Game._player.isWinning) 
                         {
                             if (rowIndex * 48 + flagDescend < 816)
                             {

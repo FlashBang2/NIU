@@ -83,6 +83,7 @@
     <Compile Include="SDL2-CS\SDL2_mixer.cs" />
     <Compile Include="SDL2-CS\SDL2_ttf.cs" />
     <Compile Include="SourceCode\App.cs" />
+    <Compile Include="SourceCode\Kinnect.cs" />
     <Compile Include="SourceCode\Player.cs" />
     <Compile Include="SourceCode\Enemy.cs" />
     <Compile Include="SourceCode\Game.cs" />
