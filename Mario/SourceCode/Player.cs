@@ -31,226 +31,64 @@ namespace Mario
 
         public override void Update()
         {
-            if (Kinnect._isKinnectAvailable)
+            if (!HandleInput())
             {
-                HandleKinnectMovement();
-            }
-
-            if (isDying)
-            {
-                if ((_positionY >= App.screenHeight || hasReachedPit) && !hasLost)
-                {
-                    hasReachedPit = true;
-                    _offset = 336;
-                    _animationFrames = 1;
-                    velocityY = -6;
-                    _positionY += velocityY;
-                    if (_positionY <= App.screenHeight - 96)
-                    {
-                        velocityY += 1;
-                        _positionY += velocityY;
-                        hasLost = true;
-                    }
-                }
-                if (!hasReachedPit)
-                {
-                    velocityY += 1;
-                    _positionY += velocityY;
-                    SDL_mixer.Mix_FreeChunk(Game.gameMusic);
-                    System.IntPtr playerDeathSFX = SDL_mixer.Mix_LoadWAV("Assets/SFX/deathMario.wav");
-                    SDL_mixer.Mix_Volume(-1, 20);
-                    SDL_mixer.Mix_PlayChannel(-1, playerDeathSFX, 0);
-                }
                 return;
             }
-            if (isWinning)
-            {
-                if (_positionY < 816)
-                {
-                    velocityY = 1;
-                    _positionY += velocityY;
-                    _animationFrames = 1;
-                }
-                if (_positionY >= 816 && Game.CurrentLevel.flagDescend >= 432)
-                {
-                    if (!isEnding)
-                    {
-                        isEnding = true;
-                        _positionX += 46;
-                        flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
-                        System.IntPtr levelClear = SDL_mixer.Mix_LoadWAV("Assets/SFX/levelClear.wav");
-                        SDL_mixer.Mix_Volume(-1, 20);
-                        SDL_mixer.Mix_PlayChannel(-1, levelClear, 0);
-                    }
-                }
-                if (isEnding)
-                {
-                    _offset = 48;
-                    _animationFrames = 4;
-                    flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
-                }
-                else
-                {
-                    return;
-                }
-            }
-
-            if (Game.Controls.isPressingD && !isEnding)
-            {
-                if (IsTouchingGround)
-                {
-                    flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
-                }
-                if (_positionX < App.screenWidth / 2)
-                {
-                    velocityX = 5;
-                }
-                else
-                {
-                    velocityX = 5;
-                    Game.ScrollSpeed = 5;
-                }
-
-                _animationFrames = 4;
-                _offset = 48;
-            }
-
-            if (Game.Controls.isPressingA && !isEnding)
-            {
-                flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
-                velocityX = -5;
-                Game.ScrollSpeed = -5;
-                _animationFrames = 4;
-                _offset = 48;
-            }
-
-            if (Game.Controls.isPressingW && _counter < 13 && !isEnding)
-            {
-                IsTouchingGround = false;
-                _offset = 288;
-                _animationFrames = 1;
-                velocityY = -12;
-                _counter++;
-            }
-
-            if (!Game.Controls.isPressingD && !Game.Controls.isPressingA && IsTouchingGround && !Kinnect._isKinnectAvailable)
-            {
-                velocityX = 0;
-                Game.ScrollSpeed = 0;
-                _offset = 0;
-                _animationFrames = 1;
-            }
-
-            if (!Game.Controls.isPressingW)
-            {
-                _counter = 0;
-            }
-
 
             base.Update();
-            surface = App.AssignValuesForRectangle(_offset + 48 * (int)((SDL.SDL_GetTicks() / 125) % _animationFrames), 0, textureInfo.Width / _frames, textureInfo.Height);
-            destination = App.AssignValuesForRectangle(_positionX - Game.CurrentLevel.cameraOffset, _positionY, textureInfo.Width / _frames, textureInfo.Height);
-            if (isEnding) velocityX = 5;
+            UpdateTextureFrames();
+            int oldPositionY = UpdatePhysics();
 
-            velocityY += 1;
+            if (oldPositionY == int.MinValue)
+            {
+                return;
+            }
 
-            _positionX += velocityX;
+            if (IsNearSideDoor(oldPositionY))
+            {
+                UpdateScore();
+            }
+        }
+
+        private int UpdatePhysics()
+        {
+            ApplyVelocity();
 
             int oldPositionY = _positionY;
             _positionY += velocityY;
 
-            if (_positionY + 48 >= App.screenHeight)
+            if (HasFallIntoPit())
             {
-                isDying = true;
-                IsTouchingGround = false;
-                velocityX = 0;
-                Game.ScrollSpeed = 0;
-                return;
+                Die();
+                return int.MinValue;
             }
 
             if (velocityX <= 0)
             {
-                if (_positionX < 0)
+                if (ShouldBlockScrollingLeft())
                 {
-                    _positionX -= velocityX;
-                    velocityX = 0;
-                    if (IsTouchingGround)
-                    {
-                        _offset = 0;
-                        _animationFrames = 1;
-                    }
-                    Game.ScrollSpeed = 0;
-                    return;
+                    BlockFromScrollingAtLeftCorner();
+                    return int.MinValue;
                 }
 
-                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[oldPositionY / 48, _positionX / 48].value) ||
-                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48].value))
+                if (IsPreviousBlockImpassable(oldPositionY))
                 {
-                    _positionX -= velocityX;
-                    velocityX = 0;
-                    if (IsTouchingGround)
-                    {
-                        _offset = 0;
-                        _animationFrames = 1;
-                    }
-                    Game.ScrollSpeed = 0;
+                    StopMovingTowardsBlock();
                 }
             }
             else
             {
-                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[oldPositionY / 48, _positionX / 48 + 1].value) ||
-                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48 + 1].value))
-                {
-                    if ((Game.CurrentLevel.data[oldPositionY / 48, _positionX / 48 + 1].value == 23 ||
-                        Game.CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48 + 1].value == 23) &&
-                        !isWinning)
-                    {
-                        isWinning = true;
-                        _positionX += 26;
-                        SDL_mixer.Mix_FreeChunk(Game.gameMusic);
-                        System.IntPtr flagSlideSound = SDL_mixer.Mix_LoadWAV("Assets/SFX/flagpoleSlide.wav");
-                        SDL_mixer.Mix_Volume(-1, 20);
-                        SDL_mixer.Mix_PlayChannel(-1, flagSlideSound, 0);
-                        _animationFrames = 2;
-                        _offset = 384;
-                    }
-                    _positionX -= velocityX;
-                    velocityX = 0;
-                    if (IsTouchingGround && !isWinning)
-                    {
-                        _offset = 0;
-                        _animationFrames = 1;
-                    }
-                    Game.ScrollSpeed = 0;
-                }
+                CheckForCollisionFromRightSide(oldPositionY);
             }
 
             if (velocityY <= 0)
             {
-                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[_positionY / 48, _positionX / 48].value))
-                {
-                    Game.CurrentLevel.data[_positionY / 48, _positionX / 48].isBumped = true;
-                    Game.CurrentLevel.bumpAnimation = 24;
-                }
-                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[_positionY / 48, _positionX / 48 + 1].value))
-                {
-                    Game.CurrentLevel.data[_positionY / 48, _positionX / 48 + 1].isBumped = true;
-                    Game.CurrentLevel.bumpAnimation = 24;
-                }
-                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[_positionY / 48, _positionX / 48].value) ||
-                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[_positionY / 48, _positionX / 48 + 1].value))
-                {
-                    _positionY -= velocityY;
-                    velocityY = 0;
-                    System.IntPtr bumpSFX = SDL_mixer.Mix_LoadWAV("Assets/SFX/bump.wav");
-                    SDL_mixer.Mix_Volume(2, 60);
-                    SDL_mixer.Mix_PlayChannel(2, bumpSFX, 0);
-                }
+                CheckForHitAboveHead();
             }
             else
             {
-                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48].value) ||
-                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48 + 1].value))
+                if (IsOnGround())
                 {
                     IsTouchingGround = true;
                     _positionY -= velocityY;
@@ -258,34 +96,381 @@ namespace Mario
                 }
             }
 
-            if ((isEnding && Game.CurrentLevel.data[oldPositionY / 48, _positionX / 48].value == 28 ||
-                Game.CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48].value == 28) || isReseting)
+            return oldPositionY;
+        }
+
+        private void CheckForCollisionFromRightSide(int oldPositionY)
+        {
+            if (IsNextBlockImpassable(oldPositionY))
             {
-                isReseting = true;
-                _positionX -= velocityX;
-                velocityX = 0;
+                if (ShouldStartPoleDownSequence(oldPositionY))
+                {
+                    StartPostPoleDownSequence();
+                }
+                else
+                {
+                    StopMovingTowardsBlock();
+                }
+            }
+        }
+
+        private void CheckForHitAboveHead()
+        {
+            if (IsBlockOverHeadImpassable())
+            {
+                HitBlockAt(_positionX / 48, _positionY / 48);
+            }
+            if (IsBlockNearHeadImpassable())
+            {
+                HitBlockAt(_positionX / 48 + 1, _positionY / 48);
+            }
+            if (IsBlockNearHeadImpassable() || IsBlockOverHeadImpassable())
+            {
+                StartHitSequence();
+            }
+        }
+
+        private void UpdateScore()
+        {
+            IsReseting = true;
+            _positionX -= velocityX;
+            velocityX = 0;
+            _offset = 0;
+            _animationFrames = 1;
+            _positionX = 96;
+            _positionY = 864;
+
+            if (Game.inGameTime > 0)
+            {
+                Game.inGameTime -= 1;
+                int newValue = int.Parse(Game.score) + 100;
+                string replaceValue = newValue.ToString();
+                while (replaceValue.Length < 6)
+                {
+                    replaceValue = "0" + replaceValue;
+                }
+                Game.score = replaceValue;
+            }
+        }
+
+        private bool IsNearSideDoor(int oldPositionY)
+        {
+            return IsEnding && Game.CurrentLevel.IsSideDoorOnTile(oldPositionY / 48, _positionX / 48) ||
+                            Game.CurrentLevel.IsSideDoorOnTile(
+                                (int)Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48
+                            ) || IsReseting;
+        }
+
+        private bool IsOnGround()
+        {
+            return Game.immpasableBlocks.Contains(
+                Game.CurrentLevel.Tiles[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48].Value) ||
+                Game.immpasableBlocks.Contains(
+                    Game.CurrentLevel.Tiles[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48 + 1].Value);
+        }
+
+        private void StartHitSequence()
+        {
+            _positionY -= velocityY;
+            velocityY = 0;
+            System.IntPtr bumpSFX = SDL_mixer.Mix_LoadWAV("Assets/SFX/bump.wav");
+            SDL_mixer.Mix_Volume(2, 60);
+            SDL_mixer.Mix_PlayChannel(2, bumpSFX, 0);
+        }
+
+        private static void HitBlockAt(int blockX, int blockY)
+        {
+            Game.CurrentLevel.Tiles[blockY, blockX].WasHit = true;
+            Game.CurrentLevel.BumpAnimation = 24;
+        }
+
+        private bool IsBlockNearHeadImpassable()
+        {
+            return Game.immpasableBlocks.Contains(Game.CurrentLevel.Tiles[_positionY / 48, _positionX / 48 + 1].Value);
+        }
+
+        private bool IsBlockOverHeadImpassable()
+        {
+            return Game.immpasableBlocks.Contains(Game.CurrentLevel.Tiles[_positionY / 48, _positionX / 48].Value);
+        }
+
+        private bool ShouldStartPoleDownSequence(int oldPositionY)
+        {
+            int tileY = (int)System.Math.Round((float)oldPositionY / 48 + 0.36f);
+            int tileX = _positionX / 48 + 1;
+
+            return (Game.CurrentLevel.Tiles[oldPositionY / 48, tileX].IsFlagPolePlacedHere() ||
+                                    Game.CurrentLevel.Tiles[tileY, tileX].IsFlagPolePlacedHere()) &&
+                                    !IsWinning;
+        }
+
+        private bool IsNextBlockImpassable(int oldPositionY)
+        {
+            return Game.immpasableBlocks.Contains(Game.CurrentLevel.Tiles[oldPositionY / 48, _positionX / 48 + 1].Value) ||
+                                Game.immpasableBlocks.Contains(
+                                    Game.CurrentLevel.Tiles[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f),
+                                    _positionX / 48 + 1].Value);
+        }
+
+        private bool IsPreviousBlockImpassable(int oldPositionY)
+        {
+            return Game.immpasableBlocks.Contains(Game.CurrentLevel.Tiles[oldPositionY / 48, _positionX / 48].Value) ||
+                                Game.immpasableBlocks.Contains(
+                                    Game.CurrentLevel.Tiles[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f),
+                                    _positionX / 48].Value);
+        }
+
+        private void StartPostPoleDownSequence()
+        {
+            IsWinning = true;
+            _positionX += 26;
+            SDL_mixer.Mix_FreeChunk(Game.gameMusic);
+            System.IntPtr flagSlideSound = SDL_mixer.Mix_LoadWAV("Assets/SFX/flagpoleSlide.wav");
+            SDL_mixer.Mix_Volume(-1, 20);
+            SDL_mixer.Mix_PlayChannel(-1, flagSlideSound, 0);
+            _animationFrames = 2;
+            _offset = 384;
+        }
+
+        private void StopMovingTowardsBlock()
+        {
+            _positionX -= velocityX;
+            velocityX = 0;
+            if (IsTouchingGround && !IsWinning)
+            {
                 _offset = 0;
                 _animationFrames = 1;
-                _positionX = 96;
-                _positionY = 864;
-                if (Game.inGameTime > 0)
+            }
+            Game.ScrollSpeed = 0;
+        }
+
+        private bool ShouldBlockScrollingLeft()
+        {
+            return _positionX < 0;
+        }
+
+        private void BlockFromScrollingAtLeftCorner()
+        {
+            _positionX -= velocityX;
+            velocityX = 0;
+            if (IsTouchingGround)
+            {
+                _offset = 0;
+                _animationFrames = 1;
+            }
+            Game.ScrollSpeed = 0;
+        }
+
+        private void Die()
+        {
+            IsDying = true;
+            IsTouchingGround = false;
+            velocityX = 0;
+            Game.ScrollSpeed = 0;
+        }
+
+        private bool HasFallIntoPit()
+        {
+            return _positionY + 48 >= App.ScreenHeight;
+        }
+
+        private void ApplyVelocity()
+        {
+            if (IsEnding)
+            {
+                velocityX = 5;
+            }
+
+            velocityY += 1;
+
+            _positionX += velocityX;
+        }
+
+        private void UpdateTextureFrames()
+        {
+            _surface = App.AssignValuesForRectangle(_offset + 48 * (int)((SDL.SDL_GetTicks() / 125) % _animationFrames),
+                0, _textureInfo.Width / _frames, _textureInfo.Height);
+
+            _destination = App.AssignValuesForRectangle(_positionX - Game.CurrentLevel.CameraOffset, _positionY,
+                _textureInfo.Width / _frames, _textureInfo.Height);
+        }
+
+        private bool HandleInput()
+        {
+            if (Kinnect.IsKinnectAvailable)
+            {
+                HandleKinnectMovement();
+            }
+
+            if (IsDying)
+            {
+                if (ShouldMarioFallDownAndDie())
                 {
-                    Game.inGameTime -= 1;
-                    int newValue = int.Parse(Game.score) + 100;
-                    string replaceValue = newValue.ToString();
-                    while (replaceValue.Length < 6)
+                    FallDown();
+                }
+                if (!HasReachedPit)
+                {
+                    StartMarioDeadAnimation();
+                }
+
+                return false;
+            }
+            if (IsWinning)
+            {
+                if (ShouldMarioClimbUp())
+                {
+                    velocityY = 1;
+                    _positionY += velocityY;
+                    _animationFrames = 1;
+                }
+                if (HasFlagReachedEndLocation())
+                {
+                    if (!IsEnding)
                     {
-                        replaceValue = "0" + replaceValue;
+                        StartEndingSequence();
                     }
-                    Game.score = replaceValue;
+                }
+                if (IsEnding)
+                {
+                    _offset = 48;
+                    _animationFrames = 4;
+                    flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
+                }
+                else
+                {
+                    return false;
                 }
             }
 
+            if (Game.Controls.isPressingD && !IsEnding)
+            {
+                MoveMarioForward();
+            }
+
+            if (Game.Controls.isPressingA && !IsEnding)
+            {
+                MoveMarioBackward();
+            }
+
+            if (Game.Controls.isPressingW && _counter < 13 && !IsEnding)
+            {
+                Jump();
+            }
+
+            if (!Game.Controls.isPressingD && !Game.Controls.isPressingA && IsTouchingGround && !Kinnect.IsKinnectAvailable)
+            {
+                StopImmediatelly();
+            }
+
+            if (!Game.Controls.isPressingW)
+            {
+                _counter = 0;
+            }
+
+            return true;
+        }
+
+        private void StopImmediatelly()
+        {
+            velocityX = 0;
+            Game.ScrollSpeed = 0;
+            _offset = 0;
+            _animationFrames = 1;
+        }
+
+        private void Jump()
+        {
+            IsTouchingGround = false;
+            _offset = 288;
+            _animationFrames = 1;
+            velocityY = -12;
+            _counter++;
+        }
+
+        private void MoveMarioBackward()
+        {
+            flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
+            velocityX = -5;
+            Game.ScrollSpeed = -5;
+            _animationFrames = 4;
+            _offset = 48;
+        }
+
+        private void MoveMarioForward()
+        {
+            if (IsTouchingGround)
+            {
+                flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
+            }
+            if (_positionX < App.ScreenWidth / 2)
+            {
+                velocityX = 5;
+            }
+            else
+            {
+                velocityX = 5;
+                Game.ScrollSpeed = 5;
+            }
+
+            _animationFrames = 4;
+            _offset = 48;
+        }
+
+        private void StartEndingSequence()
+        {
+            IsEnding = true;
+            _positionX += 46;
+            flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
+            IntPtr levelClear = SDL_mixer.Mix_LoadWAV("Assets/SFX/levelClear.wav");
+            SDL_mixer.Mix_Volume(-1, 20);
+            SDL_mixer.Mix_PlayChannel(-1, levelClear, 0);
+        }
+
+        private bool HasFlagReachedEndLocation()
+        {
+            return _positionY >= 816 && Game.CurrentLevel.FlagDescend >= 432;
+        }
+
+        private bool ShouldMarioClimbUp()
+        {
+            return _positionY < 816;
+        }
+
+        private void StartMarioDeadAnimation()
+        {
+            velocityY += 1;
+            _positionY += velocityY;
+            SDL_mixer.Mix_FreeChunk(Game.gameMusic);
+            System.IntPtr playerDeathSFX = SDL_mixer.Mix_LoadWAV("Assets/SFX/deathMario.wav");
+            SDL_mixer.Mix_Volume(-1, 20);
+            SDL_mixer.Mix_PlayChannel(-1, playerDeathSFX, 0);
+        }
+
+        private void FallDown()
+        {
+            HasReachedPit = true;
+            _offset = 336;
+            _animationFrames = 1;
+            velocityY = -6;
+            _positionY += velocityY;
+
+            if (_positionY <= App.ScreenHeight - 96)
+            {
+                velocityY += 1;
+                _positionY += velocityY;
+                HasLost = true;
+            }
+        }
+
+        private bool ShouldMarioFallDownAndDie()
+        {
+            return (_positionY >= App.ScreenHeight || HasReachedPit) // out of map
+                && !HasLost;
         }
 
         private void HandleKinnectMovement()
         {
-            if (!Kinnect._isKinnectAvailable || Game._inMainMenu || isDying)
+            if (CanHandleKinnectMovement())
             {
                 return;
             }
@@ -313,6 +498,11 @@ namespace Mario
                 _offset = 288;
                 _animationFrames = 1;
             }
+        }
+
+        private bool CanHandleKinnectMovement()
+        {
+            return !Kinnect.IsKinnectAvailable || Game._inMainMenu || IsDying;
         }
 
         private void MoveLeft()
@@ -351,7 +541,7 @@ namespace Mario
                 velocityX = hasExceedMaxVelocity ? -maxVelocity : velocityX - accelerationRate;
             }
 
-            if (_positionX > App.screenWidth / 2)
+            if (_positionX > App.ScreenWidth / 2)
             {
                 Game.ScrollSpeed = 5 * directionX;
             }
@@ -372,11 +562,11 @@ namespace Mario
 
         private bool IsHeadUnderAnyHand()
         {
-            var head = Kinnect.GetKinnect()[JointType.Head];
-            var leftHand = Kinnect.GetKinnect()[JointType.HandLeft];
-            var rightHand = Kinnect.GetKinnect()[JointType.HandRight];
+            Vector2 head = Kinnect.GetKinnect()[JointType.Head];
+            Vector2 leftHand = Kinnect.GetKinnect()[JointType.HandLeft];
+            Vector2 rightHand = Kinnect.GetKinnect()[JointType.HandRight];
 
-            return head.Item2 < leftHand.Item2 || head.Item2 < rightHand.Item2;
+            return head.Y < leftHand.Y || head.Y < rightHand.Y;
         }
 
         private ActionType FindActionType()
@@ -397,18 +587,23 @@ namespace Mario
 
         private bool ShouldTurnRight()
         {
-            return Kinnect.GetKinnect()[JointType.AnkleRight].Item2 > Kinnect.GetKinnect()[JointType.KneeLeft].Item2;
+            // Y is directed towards down
+            return Kinnect.GetKinnect()[JointType.AnkleRight].Y > Kinnect.GetKinnect()[JointType.KneeLeft].Y;
         }
 
         private bool ShouldTurnLeft()
         {
-            return Kinnect.GetKinnect()[JointType.AnkleLeft].Item2 > Kinnect.GetKinnect()[JointType.KneeRight].Item2;
+            // Y is directed towards down
+            return Kinnect.GetKinnect()[JointType.AnkleLeft].Y > Kinnect.GetKinnect()[JointType.KneeRight].Y;
         }
 
         public override void UpdateAnimation()
         {
-            surface = App.AssignValuesForRectangle(_offset + 48 * (int)((SDL.SDL_GetTicks() / 125) % _animationFrames), 0, textureInfo.Width / _frames, textureInfo.Height);
-            destination = App.AssignValuesForRectangle(_positionX - Game.CurrentLevel.cameraOffset, _positionY, textureInfo.Width / _frames, textureInfo.Height);
+            _surface = App.AssignValuesForRectangle(_offset + 48 * (int)((SDL.SDL_GetTicks() / 125) % _animationFrames),
+                0, _textureInfo.Width / _frames, _textureInfo.Height);
+
+            _destination = App.AssignValuesForRectangle(_positionX - Game.CurrentLevel.CameraOffset,
+                _positionY, _textureInfo.Width / _frames, _textureInfo.Height);
         }
     }
 }

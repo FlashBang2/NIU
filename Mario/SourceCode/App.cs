@@ -4,12 +4,12 @@ namespace Mario
 {
     internal class App
     {
-        public const int screenWidth = 1792;
-        public const int screenHeight = 1008;
-        public const int FPS = 60;
-        public const int desiredFrameTime = 1000 / FPS;
-        public static int gameFrameTime;
-        public static int frame = 0;
+        public const int ScreenWidth = 1792;
+        public const int ScreenHeight = 1008;
+        public const int Fps = 60;
+        public const int DesiredFrameTime = 1000 / Fps;
+        public static int GameFrameTime;
+        public static int Frame = 0;
 
         public static SDL.SDL_Rect AssignValuesForRectangle(int x, int y, int w, int h)
         {
@@ -24,7 +24,7 @@ namespace Mario
         static void Main()
         {
             Game game = new Game();
-            game.Init("Mario", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
+            game.Init("Mario", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, ScreenWidth, ScreenHeight, SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
 
             while (game.IsRunning)
             {
@@ -33,20 +33,20 @@ namespace Mario
                 game.Update();
                 game.Render();
 
-                gameFrameTime = (int)(SDL.SDL_GetTicks() - lastFrameTimeInMiliseconds);
+                GameFrameTime = (int)(SDL.SDL_GetTicks() - lastFrameTimeInMiliseconds);
 
                 if (IsGeneratingTooMuchFrames())
                 {
-                    SDL.SDL_Delay((uint)(desiredFrameTime - gameFrameTime));
+                    SDL.SDL_Delay((uint)(DesiredFrameTime - GameFrameTime));
                 }
 
                 if (IsFirstFrame())
                 {
-                    frame = 0;
+                    Frame = 0;
                     Game.inGameTime -= 1;
                 }
 
-                frame++;
+                Frame++;
             }
 
             game.CleanUp();
@@ -54,13 +54,13 @@ namespace Mario
 
         private static bool IsFirstFrame()
         {
-            return frame >= 24 && !Game._inMainMenu && Game.inGameTime > 0 && !Game._player.isWinning &&
-                                !Game._player.isDying;
+            return Frame >= 24 && !Game._inMainMenu && Game.inGameTime > 0 && !Game._player.IsWinning &&
+                                !Game._player.IsDying;
         }
 
         static bool IsGeneratingTooMuchFrames()
         {
-            return desiredFrameTime > gameFrameTime;
+            return DesiredFrameTime > GameFrameTime;
         }
     }
 }

@@ -7,12 +7,25 @@ using System.Threading.Tasks;
 
 namespace Mario.SourceCode
 {
+    public struct Vector2
+    {
+        public float X;
+        public float Y;
+
+        public Vector2(float x, float y)
+        {
+            X = x;
+            Y = y;
+        }
+    }
+
     public class Kinnect
     {
-        public static  bool _isKinnectAvailable;
-        private IDictionary<JointType, Tuple<float, float>> _destination = new Dictionary<JointType, Tuple<float, float>>();
-        private IDictionary<JointType, Tuple<float, float>> _copy = new Dictionary<JointType, Tuple<float, float>>();
-        private bool _useDestination = false;
+        public static bool IsKinnectAvailable;
+        private IDictionary<JointType, Vector2> _destination = new Dictionary<JointType, Vector2>();
+        private IDictionary<JointType, Vector2> _copy = new Dictionary<JointType, Vector2>();
+        private bool _isDestinationDictionaryInUsage = false;
+        private Skeleton[] _skeletons;
 
         private static Kinnect Instance;
         public static Kinnect GetKinnect()
@@ -20,13 +33,11 @@ namespace Mario.SourceCode
             return Instance;
         }
 
-        public bool IsKinnectAvailable { get => _isKinnectAvailable; }
-
-        public Tuple<float, float> this[JointType type]
+        public Vector2 this[JointType type]
         {
             get
             {
-                if (_useDestination)
+                if (_isDestinationDictionaryInUsage)
                 {
                     return _copy[type];
                 }
@@ -39,9 +50,9 @@ namespace Mario.SourceCode
         {
             KinectSensor kinect = KinectSensor.KinectSensors.FirstOrDefault(s => s.Status == KinectStatus.Connected);
 
-            _isKinnectAvailable = kinect != null;
+            IsKinnectAvailable = kinect != null;
 
-            if (_isKinnectAvailable)
+            if (IsKinnectAvailable)
             {
                 kinect.SkeletonStream.Enable();
                 kinect.SkeletonFrameReady += OnSkeletonFrameReady;
@@ -50,8 +61,8 @@ namespace Mario.SourceCode
 
             foreach (var x in Enum.GetValues(typeof(JointType)).Cast<JointType>())
             {
-                _destination.Add(x, new Tuple<float, float>(0, 0));
-                _copy.Add(x, new Tuple<float, float>(0, 0));
+                _destination.Add(x, new Vector2(0, 0));
+                _copy.Add(x, new Vector2(0, 0));
             }
 
             Instance = this;
@@ -65,34 +76,53 @@ namespace Mario.SourceCode
 
                 if (isSkeletonDataAvailable)
                 {
-                    Skeleton[] skeletons = new Skeleton[frame.SkeletonArrayLength];
-                    frame.CopySkeletonDataTo(skeletons);
-
-                    if (skeletons.Length > 0)
-                    {
-                        Skeleton user = skeletons.Where(u => u.TrackingState == SkeletonTrackingState.Tracked)
-                            .FirstOrDefault();
-
-                        if (user != null)
-                        {
-                            foreach (var x in user.Joints.Cast<Joint>())
-                            {
-                                if (_useDestination)
-                                {
-                                    _destination[x.JointType] = new Tuple<float, float>(x.Position.X, x.Position.Y);
-                                }
-                                else
-                                {
-                                    _copy[x.JointType] = new Tuple<float, float>(x.Position.X, x.Position.Y);
-                                }
-                            }
-
-                            _useDestination = !_useDestination;
-                        }
-                    }
+                    CopySkeletonData(frame);
                 }
             }
         }
 
+        private void CopySkeletonData(SkeletonFrame frame)
+        {
+            if (HasSkeletonDataChanged(frame))
+            {
+                _skeletons = new Skeleton[frame.SkeletonArrayLength];
+            }
+
+            frame.CopySkeletonDataTo(_skeletons);
+
+            if (_skeletons.Length > 0)
+            {
+                Skeleton user = _skeletons.Where(u => u.TrackingState == SkeletonTrackingState.Tracked)
+                    .FirstOrDefault();
+
+                if (user != null)
+                {
+                    UpdateSkeletonData(user);
+                }
+            }
+        }
+
+        private void UpdateSkeletonData(Skeleton user)
+        {
+            foreach (var x in user.Joints.Cast<Joint>())
+            {
+                if (_isDestinationDictionaryInUsage)
+                {
+                    _destination[x.JointType] = new Vector2(x.Position.X, x.Position.Y);
+                }
+                else
+                {
+                    _copy[x.JointType] = new Vector2(x.Position.X, x.Position.Y);
+                }
+            }
+
+            // switch buffers
+            _isDestinationDictionaryInUsage = !_isDestinationDictionaryInUsage;
+        }
+
+        private bool HasSkeletonDataChanged(SkeletonFrame frame)
+        {
+            return _skeletons == null || frame.SkeletonArrayLength != _skeletons.Length;
+        }
     }
 }

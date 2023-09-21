@@ -28,7 +28,7 @@ namespace Mario
                 return;
             }
 
-            if (_positionY > App.screenHeight - 48)
+            if (_positionY > App.ScreenHeight - 48)
             {
                 return;
             }
@@ -42,8 +42,8 @@ namespace Mario
 
             if (velocityX <= 0)
             {
-                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[oldPositionY / 48, _positionX / 48].value) ||
-                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48].value))
+                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.Tiles[oldPositionY / 48, _positionX / 48].Value) ||
+                    Game.immpasableBlocks.Contains(Game.CurrentLevel.Tiles[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48].Value))
                 {
                     _positionX -= velocityX;
                     velocityX *= -1;
@@ -51,8 +51,8 @@ namespace Mario
             }
             else 
             {
-                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[oldPositionY / 48, _positionX / 48 + 1].value) ||
-                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48 + 1].value))
+                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.Tiles[oldPositionY / 48, _positionX / 48 + 1].Value) ||
+                    Game.immpasableBlocks.Contains(Game.CurrentLevel.Tiles[(int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48 + 1].Value))
                 {
                     _positionX -= velocityX;
                     velocityX *= -1;
@@ -60,8 +60,8 @@ namespace Mario
             }
             if (velocityY <= 0)
             {
-                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[_positionY / 48, _positionX / 48].value) ||
-                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[_positionY / 48, _positionX / 48 + 1].value))
+                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.Tiles[_positionY / 48, _positionX / 48].Value) ||
+                    Game.immpasableBlocks.Contains(Game.CurrentLevel.Tiles[_positionY / 48, _positionX / 48 + 1].Value))
                 {
                     _positionY -= velocityY;
                     velocityY = 0;
@@ -69,8 +69,8 @@ namespace Mario
             }
             else
             {
-                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48].value) ||
-                    Game.immpasableBlocks.Contains(Game.CurrentLevel.data[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48 + 1].value))
+                if (Game.immpasableBlocks.Contains(Game.CurrentLevel.Tiles[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48].Value) ||
+                    Game.immpasableBlocks.Contains(Game.CurrentLevel.Tiles[(int)System.Math.Round((float)_positionY / 48 + 0.36f), _positionX / 48 + 1].Value))
                 {
                     _positionY -= velocityY;
                     velocityY = 0;
@@ -80,8 +80,8 @@ namespace Mario
 
         public override void UpdateAnimation()
         {
-            surface = App.AssignValuesForRectangle((textureInfo.Width / _frames) * (int)((SDL.SDL_GetTicks() / 300) % _frames), 0, textureInfo.Width / _frames, textureInfo.Height);
-            destination = App.AssignValuesForRectangle(_positionX - Game.CurrentLevel.cameraOffset, _positionY, textureInfo.Width / _frames, textureInfo.Height);
+            _surface = App.AssignValuesForRectangle((_textureInfo.Width / _frames) * (int)((SDL.SDL_GetTicks() / 300) % _frames), 0, _textureInfo.Width / _frames, _textureInfo.Height);
+            _destination = App.AssignValuesForRectangle(_positionX - Game.CurrentLevel.CameraOffset, _positionY, _textureInfo.Width / _frames, _textureInfo.Height);
         }
     }
 }

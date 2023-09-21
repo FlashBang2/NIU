@@ -1,128 +1,224 @@
 ﻿using SDL2;
 using System.Linq;
+using System.Xml;
 
 namespace Mario
 {
     internal class Map
     {
-        public tile[,] data;
-        public int cameraOffset, flagDescend = 0, bumpAnimation;
-        private System.Data.DataSet _set;
-        private TextureManager.TextureInfo[] textureData;
+        public Tile[,] Tiles;
 
-        public struct tile
+        public int CameraOffset;
+        public int FlagDescend = 0;
+        public int BumpAnimation;
+
+        public static readonly int TileWidth = 48;
+        public static readonly int TileHeight = 48;
+
+        private System.Data.DataSet _set;
+        private TextureManager.TextureInfo[] _textureData;
+
+        public struct Tile
         {
-            public int value;
-            public bool isBumped;
+            public int Value;
+            public bool WasHit;
+
+            public bool IsBottomSideDoors()
+            {
+                return Value == 28;
+            }
+
+            public bool IsQuestionMarkPlacedHere()
+            {
+                return Value == 2;
+            }
+
+            public bool IsEmpty()
+            {
+                return Value == 0;
+            }
+
+            public bool IsLeftSideOfFlagPlacedHere()
+            {
+                return Value == 24;
+            }
+
+            public bool IsFlagPolePlacedHere()
+            {
+                return Value == 23;
+            }
+
+            public bool IsRightSideOfFlagPlacedHere()
+            {
+                return Value == 25;
+            }
+
+            public bool ShouldRenderAsSolidBlock()
+            {
+                return !IsEmpty() && !IsQuestionMarkPlacedHere() &&
+                        !IsLeftSideOfFlagPlacedHere() && !IsRightSideOfFlagPlacedHere() &&
+                        !WasHit;
+            }
         }
 
-        public Map(string path)
+        public Map(string pathToMapFile)
         {
-            System.Xml.XmlDocument xml = new System.Xml.XmlDocument();
-            xml.Load(path);
+            var xml = new XmlDocument();
+            xml.Load(pathToMapFile);
             _set = new System.Data.DataSet();
             _set.ReadXml(new System.IO.StringReader(xml.InnerXml));
 
-            textureData = new TextureManager.TextureInfo[_set.Tables["texture"].Rows.Count];
-            int index = 0;
+            _textureData = new TextureManager.TextureInfo[_set.Tables["texture"].Rows.Count];
+            int textureIndex = 0;
 
             foreach (System.Data.DataRow row in _set.Tables["texture"].Rows)
             {
-                textureData[index] = TextureManager.LoadTexture(row[1].ToString());
-                index++;
+                _textureData[textureIndex] = TextureManager.LoadTexture(row[1].ToString());
+                textureIndex++;
             }
 
             LoadMap();
         }
 
-        public void LoadMap()
+        private void LoadMap()
         {
-            data = new tile[_set.Tables["row"].Rows.Count, _set.Tables["row"].Rows[0].GetChildRows("row_column").Count()];
-            int rowIndex = 0, columnIndex = 0;
+            Tiles = new Tile[_set.Tables["row"].Rows.Count, _set.Tables["row"].Rows[0].GetChildRows("row_column").Count()];
+            int rowIndex = 0;
 
             foreach (System.Data.DataRow row in _set.Tables["row"].Rows)
             {
-                columnIndex = 0;
+                int columnIndex = 0;
+
                 foreach (System.Data.DataRow innerRow in row.GetChildRows("row_column"))
                 {
-                    data[rowIndex, columnIndex].value = int.Parse(innerRow[1].ToString());
-                    data[rowIndex, columnIndex].isBumped = false;
+                    Tiles[rowIndex, columnIndex].Value = int.Parse(innerRow[1].ToString());
+                    Tiles[rowIndex, columnIndex].WasHit = false;
                     columnIndex++;
                 }
+
                 rowIndex++;
             }
-
         }
 
-        public void UpdateCameraOffset()
+        public bool IsSideDoorOnTile(int x, int y)
         {
-            if (cameraOffset >= 0 && cameraOffset < data.GetLength(1) * 48 - App.screenWidth)
+            return Tiles[x, y].IsBottomSideDoors();
+        }
+
+        private void UpdateCameraOffset()
+        {
+            bool shouldUpdateCameraOffset = CameraOffset >= 0 && CameraOffset < Tiles.GetLength(1) * TileWidth - App.ScreenWidth;
+
+            if (shouldUpdateCameraOffset)
             {
-                cameraOffset += Game.ScrollSpeed;
-                if (cameraOffset < 0)
+                CameraOffset += Game.ScrollSpeed;
+
+                if (CameraOffset < 0)
                 {
-                    cameraOffset = 0;
+                    CameraOffset = 0;
                 }
-                if (cameraOffset > data.GetLength(1) * 48 - App.screenWidth)
+                else if (CameraOffset > Tiles.GetLength(1) * TileWidth - App.ScreenWidth)
                 {
-                    cameraOffset = (data.GetLength(1) * 48 - App.screenWidth) - 1;
+                    CameraOffset = (Tiles.GetLength(1) * TileWidth - App.ScreenWidth) - 1;
                 }
             }
+        }
+
+        public void UpdateMap()
+        {
+            UpdateCameraOffset();
         }
 
         public void DrawMap()
         {
-            for (int rowIndex = 0; rowIndex < data.GetLength(0); rowIndex++)
+            for (int rowIndex = 0; rowIndex < Tiles.GetLength(0); rowIndex++)
             {
-                for (int columnIndex = 0; columnIndex < data.GetLength(1); columnIndex++)
+                for (int columnIndex = 0; columnIndex < Tiles.GetLength(1); columnIndex++)
                 {
-                    if (data[rowIndex, columnIndex].isBumped && data[rowIndex, columnIndex].value != 2)
-                    {
-                        if (bumpAnimation > 0) bumpAnimation -= 4;
-                        if (bumpAnimation == 0) data[rowIndex, columnIndex].isBumped = false;
-                        TextureManager.DrawTexture(textureData[data[rowIndex, columnIndex].value - 1], columnIndex * 48 - cameraOffset, rowIndex * 48 - bumpAnimation, 1);
-                    }
-
-                    if (data[rowIndex, columnIndex].isBumped && data[rowIndex, columnIndex].value == 2)
-                    {
-                        if (bumpAnimation > 0) bumpAnimation -= 4;
-                        if (bumpAnimation == 0) data[rowIndex, columnIndex].isBumped = false;
-                        TextureManager.DrawTexture(textureData[data[rowIndex, columnIndex].value - 1], columnIndex * 48 - cameraOffset, rowIndex * 48 - bumpAnimation, 3);
-                    }
-
-                    if (data[rowIndex, columnIndex].value != 0 && data[rowIndex, columnIndex].value != 2 &&
-                        data[rowIndex, columnIndex].value != 24 && data[rowIndex, columnIndex].value != 25 &&
-                        !data[rowIndex, columnIndex].isBumped)
-                    {
-                        TextureManager.DrawTexture(textureData[data[rowIndex, columnIndex].value - 1], columnIndex * 48 - cameraOffset, rowIndex * 48, 1);
-                    }
-                    if (data[rowIndex, columnIndex].value == 2 && !data[rowIndex, columnIndex].isBumped)
-                    {
-                        TextureManager.DrawTexture(textureData[data[rowIndex, columnIndex].value - 1], columnIndex * 48 - cameraOffset, rowIndex * 48, 3);
-                    }
-                    if (data[rowIndex, columnIndex].value == 24 || data[rowIndex, columnIndex].value == 25)
-                    {
-                        if (Game._player.isWinning) 
-                        {
-                            if (rowIndex * 48 + flagDescend < 816)
-                            {
-                                flagDescend += 2;
-                            }
-                            if (data[rowIndex, columnIndex].value == 25) TextureManager.DrawTexture(textureData[23 - 1], columnIndex * 48 - cameraOffset, rowIndex * 48, 1);
-                        }
-                        TextureManager.DrawTexture(textureData[data[rowIndex, columnIndex].value - 1], columnIndex * 48 - cameraOffset, rowIndex * 48 + flagDescend, 1);
-                    }
+                    RenderTileAt(rowIndex, columnIndex);
                 }
             }
         }
 
-        public void CleanMapTexture()
+        private void RenderTileAt(int rowIndex, int columnIndex)
         {
-            for (int i = 0; i < textureData.Length; i++)
+            ref Tile currentRendererdTile = ref Tiles[rowIndex, columnIndex];
+
+            if (currentRendererdTile.WasHit)
             {
-                SDL.SDL_DestroyTexture(textureData[i].Texture);
+                RenderHitBlock(rowIndex, columnIndex);
+            }
+
+            if (currentRendererdTile.ShouldRenderAsSolidBlock())
+            {
+                TextureManager.DrawTexture(_textureData[currentRendererdTile.Value - 1], 
+                    columnIndex * TileWidth - CameraOffset, rowIndex * TileHeight, 1);
+            }
+            if (currentRendererdTile.IsQuestionMarkPlacedHere() && !currentRendererdTile.WasHit)
+            {
+                TextureManager.DrawTexture(_textureData[currentRendererdTile.Value - 1], columnIndex * TileWidth - CameraOffset, rowIndex * TileHeight, 3);
+            }
+
+            if (currentRendererdTile.IsLeftSideOfFlagPlacedHere() || currentRendererdTile.IsRightSideOfFlagPlacedHere())
+            {
+                AnimateFlag(rowIndex, columnIndex);
             }
         }
-        
+
+        private void RenderHitBlock(int rowIndex, int columnIndex)
+        {
+            int frames = 1;
+            ref Tile currentRendererdTile = ref Tiles[rowIndex, columnIndex];
+
+            if (currentRendererdTile.IsQuestionMarkPlacedHere())
+            {
+                frames = 3;
+            }
+
+            UpdateHitAnimationOfBlockAt(rowIndex, columnIndex, frames);
+        }
+
+        private void AnimateFlag(int rowIndex, int columnIndex)
+        {
+            ref Tile currentRendererdTile = ref Tiles[rowIndex, columnIndex];
+
+            if (Game._player.IsWinning)
+            {
+                bool hasFlagDescendLowEnough = rowIndex * TileHeight + FlagDescend >= 816;
+
+                if (!hasFlagDescendLowEnough)
+                {
+                    FlagDescend += 2;
+                }
+                if (currentRendererdTile.IsRightSideOfFlagPlacedHere())
+                {
+                    TextureManager.DrawTexture(_textureData[23 - 1], columnIndex * TileWidth - CameraOffset, rowIndex * TileHeight, 1);
+                }
+            }
+
+            TextureManager.DrawTexture(_textureData[currentRendererdTile.Value - 1], columnIndex * TileWidth - CameraOffset, rowIndex * TileHeight + FlagDescend, 1);
+        }
+
+        private void UpdateHitAnimationOfBlockAt(int rowIndex, int columnIndex, int frames)
+        {
+            if (BumpAnimation > 0)
+            {
+                BumpAnimation -= 4;
+            }
+            if (BumpAnimation == 0)
+            {
+                Tiles[rowIndex, columnIndex].WasHit = false;
+            }
+
+            TextureManager.DrawTexture(_textureData[Tiles[rowIndex, columnIndex].Value - 1], columnIndex * TileWidth - CameraOffset, rowIndex * TileHeight - BumpAnimation, frames);
+        }
+
+        public void CleanMapTexture()
+        {
+            for (int i = 0; i < _textureData.Length; i++)
+            {
+                SDL.SDL_DestroyTexture(_textureData[i].Texture);
+            }
+        }
     }
 }

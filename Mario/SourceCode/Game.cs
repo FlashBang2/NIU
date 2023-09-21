@@ -89,11 +89,11 @@ namespace Mario
             596, 34, 120, 24,
             996, 10, 120, 24,
             996, 34, 120, 24,
-            App.screenWidth-246, 10, 120, 24,
-            App.screenWidth-246, 34, 120, 24,
-            App.screenWidth / 2, App.screenHeight / 2, 288, 24,
-            App.screenWidth / 2, App.screenHeight / 2 - 24, 336, 24,
-            App.screenWidth / 2, App.screenHeight / 2 - 48, 264, 24
+            App.ScreenWidth-246, 10, 120, 24,
+            App.ScreenWidth-246, 34, 120, 24,
+            App.ScreenWidth / 2, App.ScreenHeight / 2, 288, 24,
+            App.ScreenWidth / 2, App.ScreenHeight / 2 - 24, 336, 24,
+            App.ScreenWidth / 2, App.ScreenHeight / 2 - 48, 264, 24
         };
 
         private readonly string[] _fontLabels =
@@ -331,9 +331,9 @@ namespace Mario
 
         public void Update()
         {
-            if (!_player.isReseting || inGameTime > 0)
+            if (!_player.IsReseting || inGameTime > 0)
             {
-                CurrentLevel.UpdateCameraOffset();
+                CurrentLevel.UpdateMap();
                 _player.Update();
                 _player.UpdateAnimation();
                 for (int i = 0; i < _enemies.Length; i++)
@@ -346,7 +346,7 @@ namespace Mario
 
         public void Render()
         {
-            if (!_player.isReseting || inGameTime > 0)
+            if (!_player.IsReseting || inGameTime > 0)
             {
                 SDL.SDL_RenderClear(Renderer);
                 CurrentLevel.DrawMap();
@@ -377,18 +377,18 @@ namespace Mario
                     }
                 }
 
-                if (_player.isReseting && inGameTime == 1)
+                if (_player.IsReseting && inGameTime == 1)
                 {
                     SDL.SDL_SetRenderDrawColor(Renderer, 0, 0, 0, 255);
                     SDL.SDL_RenderClear(Renderer);
                     SDL.SDL_RenderPresent(Renderer);
                     SDL.SDL_Delay(2000);
                     _player.IsTouchingGround = true;
-                    _player.isEnding = false;
-                    _player.isReseting = false;
-                    _player.isWinning = false;
-                    CurrentLevel.flagDescend = 0;
-                    CurrentLevel.cameraOffset = 0;
+                    _player.IsEnding = false;
+                    _player.IsReseting = false;
+                    _player.IsWinning = false;
+                    CurrentLevel.FlagDescend = 0;
+                    CurrentLevel.CameraOffset = 0;
                     _inMainMenu = true;
                     score = "000000";
                     inGameTime = 400;
@@ -400,24 +400,24 @@ namespace Mario
                     }
                     SDL.SDL_SetRenderDrawColor(Renderer, 142, 140, 237, 255);
                 }
-                if (_player.hasLost)
+                if (_player.HasLost)
                 {
                     _player.velocityY += 1;
                     _player._positionY += _player.velocityY;
-                    if (_player._positionY > App.screenHeight)
+                    if (_player._positionY > App.ScreenHeight)
                     {
                         _player._positionX = 96;
                         _player._positionY = 864;
                         _player.velocityY = 0;
                         _player.IsTouchingGround = true;
-                        _player.isDying = false;
-                        _player.hasReachedPit = false;
-                        _player.hasLost = false;
-                        _player.isEnding = false;
-                        _player.isReseting = false;
-                        _player.isWinning = false;
+                        _player.IsDying = false;
+                        _player.HasReachedPit = false;
+                        _player.HasLost = false;
+                        _player.IsEnding = false;
+                        _player.IsReseting = false;
+                        _player.IsWinning = false;
                         _inMainMenu = true;
-                        CurrentLevel.cameraOffset = 0;
+                        CurrentLevel.CameraOffset = 0;
                         score = "000000";
                         inGameTime = 400;
                         ScrollSpeed = 0;
@@ -430,6 +430,10 @@ namespace Mario
 
                 }
                 SDL.SDL_RenderPresent(Renderer);
+            }
+            else if (_player.IsReseting)
+            {
+                Console.Write("OK\n");
             }
         }
 
