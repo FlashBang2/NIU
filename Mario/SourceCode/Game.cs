@@ -117,6 +117,21 @@ namespace Mario
             public static bool isPressingD = false;
             public static bool isPressingS = false;
             public static bool isPressingShift = false;
+
+            public static bool ShouldDoRightAction()
+            {
+                return isPressingD;
+            }
+
+            public static bool ShouldDoLeftAction()
+            {
+                return isPressingA;
+            }
+
+            public static bool ShouldDoJumpAction()
+            {
+                return isPressingW;
+            }
         }
 
         private TextureManager.TextureInfo _titleGraphic;

@@ -342,27 +342,27 @@ namespace Mario
                 }
             }
 
-            if (Game.Controls.isPressingD && !IsEnding)
+            if (Game.Controls.ShouldDoRightAction() && !IsEnding)
             {
                 MoveMarioForward();
             }
 
-            if (Game.Controls.isPressingA && !IsEnding)
+            if (Game.Controls.ShouldDoLeftAction() && !IsEnding)
             {
                 MoveMarioBackward();
             }
 
-            if (Game.Controls.isPressingW && _counter < 13 && !IsEnding)
+            if (Game.Controls.ShouldDoJumpAction() && _counter < 13 && !IsEnding)
             {
                 Jump();
             }
 
-            if (!Game.Controls.isPressingD && !Game.Controls.isPressingA && IsTouchingGround && !Kinnect.IsKinnectAvailable)
+            if (!Game.Controls.ShouldDoRightAction() && !Game.Controls.ShouldDoLeftAction() && IsTouchingGround && !Kinnect.IsKinnectAvailable)
             {
                 StopImmediatelly();
             }
 
-            if (!Game.Controls.isPressingW)
+            if (!Game.Controls.ShouldDoJumpAction())
             {
                 _counter = 0;
             }
