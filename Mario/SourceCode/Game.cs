@@ -172,38 +172,27 @@ namespace Mario
             public bool IsLeftActionPressed { get => _isLeftActionPressed; set => _isLeftActionPressed = value; }
             public bool IsJumpActionPressed { get => _isJumpActionPressed; set => _isJumpActionPressed = value; }
 
-            public void UpdateByEvent(ref SDL.SDL_Event evt) {
+            public void UpdateByEvent(ref SDL.SDL_Event evt)
+            {
 
                 if (_inMainMenu)
                 {
+                    if (evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN && evt.jbutton.button == (byte)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START)
+                    {
+                        StartPlayingGame();
+                    }
+
                     return;
                 }
 
-                if (!(evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN || evt.type == SDL.SDL_EventType.SDL_JOYBUTTONUP ||
-                    evt.type == SDL.SDL_EventType.SDL_JOYHATMOTION
-                    ))
+                if (!IsJoystickEvent(evt))
                 {
                     return;
                 }
-
 
                 if (evt.type == SDL.SDL_EventType.SDL_JOYHATMOTION)
                 {
-                    if (evt.jhat.hatValue == SDL.SDL_HAT_LEFT)
-                    {
-                        _isLeftActionPressed = true;
-                        _isRightActionPressed = false;
-                    }
-                    else if (evt.jhat.hatValue == SDL.SDL_HAT_RIGHT)
-                    {
-                        _isRightActionPressed = true;
-                        _isLeftActionPressed = false;
-                    }
-                    else if (evt.jhat.hatValue == SDL.SDL_HAT_CENTERED)
-                    {
-                        _isRightActionPressed = false;
-                        _isLeftActionPressed = false;
-                    }
+                    UpdateMovementButtons(evt);
 
                     return;
                 }
@@ -215,13 +204,41 @@ namespace Mario
                     case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_X:
                         TryUpdateJumpButton(evt);
                         break;
-                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-                        _isRightActionPressed = evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN;
-                        break;
-                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-                        _isLeftActionPressed = evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN;
-                        break;
                 }
+            }
+
+            private void UpdateMovementButtons(SDL.SDL_Event evt)
+            {
+                if (evt.jhat.hatValue == SDL.SDL_HAT_LEFT)
+                {
+                    _isLeftActionPressed = true;
+                    _isRightActionPressed = false;
+                }
+                else if (evt.jhat.hatValue == SDL.SDL_HAT_RIGHT)
+                {
+                    _isRightActionPressed = true;
+                    _isLeftActionPressed = false;
+                }
+                else if (evt.jhat.hatValue == SDL.SDL_HAT_CENTERED)
+                {
+                    _isRightActionPressed = false;
+                    _isLeftActionPressed = false;
+                }
+            }
+
+            private static bool IsJoystickEvent(SDL.SDL_Event evt)
+            {
+                return evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN || evt.type == SDL.SDL_EventType.SDL_JOYBUTTONUP ||
+                                    evt.type == SDL.SDL_EventType.SDL_JOYHATMOTION;
+            }
+
+            private static void StartPlayingGame()
+            {
+                _inMainMenu = false;
+                SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 2048);
+                gameMusic = SDL_mixer.Mix_LoadWAV("Assets/Music/OverworldTheme.wav");
+                SDL_mixer.Mix_Volume(-1, 20);
+                SDL_mixer.Mix_PlayChannel(-1, gameMusic, -1);
             }
 
             private void TryUpdateJumpButton(SDL.SDL_Event evt)
