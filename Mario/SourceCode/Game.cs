@@ -141,6 +141,8 @@ namespace Mario
             bool IsJumpActionPressed { get; }
 
             void UpdateByEvent(ref SDL.SDL_Event evt);
+
+            void CleanupJoystick();
         }
 
         class NullJoystick : Joystick
@@ -150,6 +152,7 @@ namespace Mario
             public bool IsJumpActionPressed => false;
 
             public void UpdateByEvent(ref SDL.SDL_Event evt) { }
+            public void CleanupJoystick() { }
         }
 
         private class SdlJoystick : Joystick
@@ -202,6 +205,11 @@ namespace Mario
                         TryUpdateJumpButton(ref evt);
                         break;
                 }
+            }
+
+            public void CleanupJoystick()
+            {
+                SDL.SDL_JoystickClose(_joystick);
             }
 
             private static bool ShouldStartGame(SDL.SDL_Event evt)
@@ -301,6 +309,8 @@ namespace Mario
 
         private void SetNewJoystickImplementation()
         {
+            joystick?.CleanupJoystick();
+
             _isJoystickEnabled = SDL.SDL_NumJoysticks() > 0;
             if (_isJoystickEnabled)
             {
