@@ -120,24 +120,101 @@ namespace Mario
 
             public static bool ShouldDoRightAction()
             {
-                return isPressingD;
+                return isPressingD || joystick.IsRightActionPressed;
             }
 
             public static bool ShouldDoLeftAction()
             {
-                return isPressingA;
+                return isPressingA || joystick.IsLeftActionPressed;
             }
 
             public static bool ShouldDoJumpAction()
             {
-                return isPressingW;
+                return isPressingW || joystick.IsJumpActionPressed;
             }
         }
+
+        public interface Joystick
+        {
+            bool IsRightActionPressed { get; set; }
+            bool IsLeftActionPressed { get; set;}
+            bool IsJumpActionPressed { get; set; }
+
+            void UpdateByEvent(ref SDL.SDL_Event evt);
+        }
+
+        class NullJoystick : Joystick
+        {
+            private bool _dummyBool;
+
+            public bool IsRightActionPressed { get => false; set => _dummyBool = value; }
+            public bool IsLeftActionPressed  { get => false; set => _dummyBool = value; }
+            public bool IsJumpActionPressed { get => false; set => _dummyBool = value; }
+
+            public void UpdateByEvent(ref SDL.SDL_Event evt) { }
+        }
+
+        private class SdlJoystick : Joystick
+        {
+            private bool _isRightActionPressed = false;
+            private bool _isLeftActionPressed  = false;
+            private bool _isJumpActionPressed  = false;
+
+            // _joystick must be kept, because it would crash, if any of the unmanaged code use it
+            private IntPtr _joystick = IntPtr.Zero;
+
+            public SdlJoystick()
+            {
+                _joystick = SDL.SDL_JoystickOpen(0);
+            }
+
+            public bool IsRightActionPressed { get => _isRightActionPressed; set => _isRightActionPressed = value; }
+            public bool IsLeftActionPressed { get => _isLeftActionPressed; set => _isLeftActionPressed = value; }
+            public bool IsJumpActionPressed { get => _isJumpActionPressed; set => _isJumpActionPressed = value; }
+
+            public void UpdateByEvent(ref SDL.SDL_Event evt) { 
+            
+                if (!(evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN || evt.type == SDL.SDL_EventType.SDL_JOYBUTTONUP))
+                {
+                    return;
+                }
+
+                SDL.SDL_GameControllerButton button = (SDL.SDL_GameControllerButton)evt.jbutton.button;
+                switch (button)
+                {
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_X:
+                        TryUpdateJumpButton(evt);
+                        break;
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+                        _isRightActionPressed = evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN;
+                        break;
+                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+                        _isLeftActionPressed = evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN;
+                        break;
+                }
+            }
+
+            private void TryUpdateJumpButton(SDL.SDL_Event evt)
+            {
+                if (_player.IsTouchingGround)
+                {
+                    _isJumpActionPressed = evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN;
+                }
+                else
+                {
+                    _isJumpActionPressed = false;
+                }
+            }
+        }
+
 
         private TextureManager.TextureInfo _titleGraphic;
         private TextureManager.TextureInfo _coinIcon;
         private Kinnect kinnect;
         private IntPtr fontPointer;
+        private bool _isJoystickEnabled = false;
+        public static Joystick joystick;
+
         public static IntPtr gameMusic;
 
         public Game()
@@ -150,7 +227,7 @@ namespace Mario
                 throw new ApplicationException(exceptionMessage);
             }
 
-            if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO | SDL.SDL_INIT_AUDIO) < 0)
+            if (SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING) < 0)
             {
                 string exceptionMessage = string.Format("Unable to initialize SDL. Error {0}", SDL.SDL_GetError());
                 throw new ApplicationException(exceptionMessage);
@@ -167,6 +244,15 @@ namespace Mario
                 throw new ApplicationException(exceptionMessage);
             }
 
+            _isJoystickEnabled = SDL.SDL_NumJoysticks() > 0;
+            if (_isJoystickEnabled)
+            {
+                joystick = new SdlJoystick();
+            }
+            else
+            {
+                joystick = new NullJoystick();
+            }
 
             System.IO.Directory.SetCurrentDirectory("../");
             kinnect = new Kinnect();
@@ -260,6 +346,8 @@ namespace Mario
                         StartPlayingGame(evt);
                         break;
                 }
+
+                joystick.UpdateByEvent(ref evt);
             }
         }
 
