@@ -136,20 +136,18 @@ namespace Mario
 
         public interface Joystick
         {
-            bool IsRightActionPressed { get; set; }
-            bool IsLeftActionPressed { get; set;}
-            bool IsJumpActionPressed { get; set; }
+            bool IsRightActionPressed { get; }
+            bool IsLeftActionPressed { get; }
+            bool IsJumpActionPressed { get; }
 
             void UpdateByEvent(ref SDL.SDL_Event evt);
         }
 
         class NullJoystick : Joystick
         {
-            private bool _dummyBool;
-
-            public bool IsRightActionPressed { get => false; set => _dummyBool = value; }
-            public bool IsLeftActionPressed  { get => false; set => _dummyBool = value; }
-            public bool IsJumpActionPressed { get => false; set => _dummyBool = value; }
+            public bool IsRightActionPressed => false;
+            public bool IsLeftActionPressed => false;
+            public bool IsJumpActionPressed => false;
 
             public void UpdateByEvent(ref SDL.SDL_Event evt) { }
         }
@@ -157,20 +155,20 @@ namespace Mario
         private class SdlJoystick : Joystick
         {
             private bool _isRightActionPressed = false;
-            private bool _isLeftActionPressed  = false;
-            private bool _isJumpActionPressed  = false;
+            private bool _isLeftActionPressed = false;
+            private bool _isJumpActionPressed = false;
 
             // _joystick must be kept, because it would crash, if any of the unmanaged code use it
-            private IntPtr _joystick = IntPtr.Zero;
+            private IntPtr _joystick;
 
             public SdlJoystick()
             {
                 _joystick = SDL.SDL_JoystickOpen(0);
             }
 
-            public bool IsRightActionPressed { get => _isRightActionPressed; set => _isRightActionPressed = value; }
-            public bool IsLeftActionPressed { get => _isLeftActionPressed; set => _isLeftActionPressed = value; }
-            public bool IsJumpActionPressed { get => _isJumpActionPressed; set => _isJumpActionPressed = value; }
+            public bool IsRightActionPressed => _isRightActionPressed;
+            public bool IsLeftActionPressed => _isLeftActionPressed;
+            public bool IsJumpActionPressed => _isJumpActionPressed;
 
             public void UpdateByEvent(ref SDL.SDL_Event evt)
             {
@@ -185,14 +183,14 @@ namespace Mario
                     return;
                 }
 
-                if (!IsJoystickEvent(evt))
+                if (!IsJoystickEvent(ref evt))
                 {
                     return;
                 }
 
                 if (evt.type == SDL.SDL_EventType.SDL_JOYHATMOTION)
                 {
-                    UpdateMovementButtons(evt);
+                    UpdateMovementButtons(ref evt);
                     return;
                 }
 
@@ -201,7 +199,7 @@ namespace Mario
                 switch (button)
                 {
                     case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_X:
-                        TryUpdateJumpButton(evt);
+                        TryUpdateJumpButton(ref evt);
                         break;
                 }
             }
@@ -211,7 +209,7 @@ namespace Mario
                 return evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN && evt.jbutton.button == (byte)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START;
             }
 
-            private void UpdateMovementButtons(SDL.SDL_Event evt)
+            private void UpdateMovementButtons(ref SDL.SDL_Event evt)
             {
                 if (evt.jhat.hatValue == SDL.SDL_HAT_LEFT)
                 {
@@ -230,7 +228,7 @@ namespace Mario
                 }
             }
 
-            private static bool IsJoystickEvent(SDL.SDL_Event evt)
+            private static bool IsJoystickEvent(ref SDL.SDL_Event evt)
             {
                 return evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN || evt.type == SDL.SDL_EventType.SDL_JOYBUTTONUP ||
                                     evt.type == SDL.SDL_EventType.SDL_JOYHATMOTION;
@@ -245,7 +243,7 @@ namespace Mario
                 SDL_mixer.Mix_PlayChannel(-1, gameMusic, -1);
             }
 
-            private void TryUpdateJumpButton(SDL.SDL_Event evt)
+            private void TryUpdateJumpButton(ref SDL.SDL_Event evt)
             {
                 if (_player.IsTouchingGround)
                 {
