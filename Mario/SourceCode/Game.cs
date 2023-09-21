@@ -172,8 +172,13 @@ namespace Mario
             public bool IsLeftActionPressed { get => _isLeftActionPressed; set => _isLeftActionPressed = value; }
             public bool IsJumpActionPressed { get => _isJumpActionPressed; set => _isJumpActionPressed = value; }
 
-            public void UpdateByEvent(ref SDL.SDL_Event evt) { 
-            
+            public void UpdateByEvent(ref SDL.SDL_Event evt) {
+
+                if (_inMainMenu)
+                {
+                    return;
+                }
+
                 if (!(evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN || evt.type == SDL.SDL_EventType.SDL_JOYBUTTONUP ||
                     evt.type == SDL.SDL_EventType.SDL_JOYHATMOTION
                     ))
