@@ -174,10 +174,35 @@ namespace Mario
 
             public void UpdateByEvent(ref SDL.SDL_Event evt) { 
             
-                if (!(evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN || evt.type == SDL.SDL_EventType.SDL_JOYBUTTONUP))
+                if (!(evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN || evt.type == SDL.SDL_EventType.SDL_JOYBUTTONUP ||
+                    evt.type == SDL.SDL_EventType.SDL_JOYHATMOTION
+                    ))
                 {
                     return;
                 }
+
+
+                if (evt.type == SDL.SDL_EventType.SDL_JOYHATMOTION)
+                {
+                    if (evt.jhat.hatValue == SDL.SDL_HAT_LEFT)
+                    {
+                        _isLeftActionPressed = true;
+                        _isRightActionPressed = false;
+                    }
+                    else if (evt.jhat.hatValue == SDL.SDL_HAT_RIGHT)
+                    {
+                        _isRightActionPressed = true;
+                        _isLeftActionPressed = false;
+                    }
+                    else if (evt.jhat.hatValue == SDL.SDL_HAT_CENTERED)
+                    {
+                        _isRightActionPressed = false;
+                        _isLeftActionPressed = false;
+                    }
+
+                    return;
+                }
+
 
                 SDL.SDL_GameControllerButton button = (SDL.SDL_GameControllerButton)evt.jbutton.button;
                 switch (button)
