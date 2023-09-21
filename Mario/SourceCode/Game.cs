@@ -293,6 +293,14 @@ namespace Mario
                 throw new ApplicationException(exceptionMessage);
             }
 
+            SetNewJoystickImplementation();
+
+            System.IO.Directory.SetCurrentDirectory("../");
+            kinnect = new Kinnect();
+        }
+
+        private void SetNewJoystickImplementation()
+        {
             _isJoystickEnabled = SDL.SDL_NumJoysticks() > 0;
             if (_isJoystickEnabled)
             {
@@ -302,9 +310,6 @@ namespace Mario
             {
                 joystick = new NullJoystick();
             }
-
-            System.IO.Directory.SetCurrentDirectory("../");
-            kinnect = new Kinnect();
         }
 
         public void Init(string title, int x, int y, int w, int h, SDL.SDL_WindowFlags flags)
@@ -393,6 +398,10 @@ namespace Mario
                         break;
                     case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
                         StartPlayingGame(evt);
+                        break;
+                    case SDL.SDL_EventType.SDL_JOYDEVICEADDED:
+                    case SDL.SDL_EventType.SDL_JOYDEVICEREMOVED:
+                        SetNewJoystickImplementation();
                         break;
                 }
 
