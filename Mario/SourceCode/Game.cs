@@ -177,7 +177,7 @@ namespace Mario
 
                 if (_inMainMenu)
                 {
-                    if (evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN && evt.jbutton.button == (byte)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START)
+                    if (ShouldStartGame(evt))
                     {
                         StartPlayingGame();
                     }
@@ -193,7 +193,6 @@ namespace Mario
                 if (evt.type == SDL.SDL_EventType.SDL_JOYHATMOTION)
                 {
                     UpdateMovementButtons(evt);
-
                     return;
                 }
 
@@ -205,6 +204,11 @@ namespace Mario
                         TryUpdateJumpButton(evt);
                         break;
                 }
+            }
+
+            private static bool ShouldStartGame(SDL.SDL_Event evt)
+            {
+                return evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN && evt.jbutton.button == (byte)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START;
             }
 
             private void UpdateMovementButtons(SDL.SDL_Event evt)
