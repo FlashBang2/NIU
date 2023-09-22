@@ -4,7 +4,7 @@ using Mario.SourceCode;
 
 namespace Mario
 {
-    internal class Game
+    internal partial class Game
     {
         public static IntPtr Renderer = IntPtr.Zero;
         public static int ScrollSpeed = 0;
@@ -112,165 +112,31 @@ namespace Mario
 
         public static class Controls
         {
-            public static bool isPressingW = false;
-            public static bool isPressingA = false;
-            public static bool isPressingD = false;
             public static bool isPressingS = false;
             public static bool isPressingShift = false;
 
             public static bool ShouldDoRightAction()
             {
-                return isPressingD || joystick.IsRightActionPressed;
+                return inputDevice.IsRightActionPressed;
             }
 
             public static bool ShouldDoLeftAction()
             {
-                return isPressingA || joystick.IsLeftActionPressed;
+                return inputDevice.IsLeftActionPressed;
             }
 
             public static bool ShouldDoJumpAction()
             {
-                return isPressingW || joystick.IsJumpActionPressed;
+                return inputDevice.IsJumpActionPressed;
             }
         }
-
-        public interface Joystick
-        {
-            bool IsRightActionPressed { get; }
-            bool IsLeftActionPressed { get; }
-            bool IsJumpActionPressed { get; }
-
-            void UpdateByEvent(ref SDL.SDL_Event evt);
-
-            void CleanupJoystick();
-        }
-
-        class NullJoystick : Joystick
-        {
-            public bool IsRightActionPressed => false;
-            public bool IsLeftActionPressed => false;
-            public bool IsJumpActionPressed => false;
-
-            public void UpdateByEvent(ref SDL.SDL_Event evt) { }
-            public void CleanupJoystick() { }
-        }
-
-        private class SdlJoystick : Joystick
-        {
-            private bool _isRightActionPressed = false;
-            private bool _isLeftActionPressed = false;
-            private bool _isJumpActionPressed = false;
-
-            // _joystick must be kept, because it would crash, if any of the unmanaged code use it
-            private IntPtr _joystick;
-
-            public SdlJoystick()
-            {
-                _joystick = SDL.SDL_JoystickOpen(0);
-            }
-
-            public bool IsRightActionPressed => _isRightActionPressed;
-            public bool IsLeftActionPressed => _isLeftActionPressed;
-            public bool IsJumpActionPressed => _isJumpActionPressed;
-
-            public void UpdateByEvent(ref SDL.SDL_Event evt)
-            {
-
-                if (_inMainMenu)
-                {
-                    if (ShouldStartGame(evt))
-                    {
-                        StartPlayingGame();
-                    }
-
-                    return;
-                }
-
-                if (!IsJoystickEvent(ref evt))
-                {
-                    return;
-                }
-
-                if (evt.type == SDL.SDL_EventType.SDL_JOYHATMOTION)
-                {
-                    UpdateMovementButtons(ref evt);
-                    return;
-                }
-
-
-                SDL.SDL_GameControllerButton button = (SDL.SDL_GameControllerButton)evt.jbutton.button;
-                switch (button)
-                {
-                    case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_X:
-                        TryUpdateJumpButton(ref evt);
-                        break;
-                }
-            }
-
-            public void CleanupJoystick()
-            {
-                SDL.SDL_JoystickClose(_joystick);
-            }
-
-            private static bool ShouldStartGame(SDL.SDL_Event evt)
-            {
-                return evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN && evt.jbutton.button == (byte)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START;
-            }
-
-            private void UpdateMovementButtons(ref SDL.SDL_Event evt)
-            {
-                if (evt.jhat.hatValue == SDL.SDL_HAT_LEFT)
-                {
-                    _isLeftActionPressed = true;
-                    _isRightActionPressed = false;
-                }
-                else if (evt.jhat.hatValue == SDL.SDL_HAT_RIGHT)
-                {
-                    _isRightActionPressed = true;
-                    _isLeftActionPressed = false;
-                }
-                else if (evt.jhat.hatValue == SDL.SDL_HAT_CENTERED)
-                {
-                    _isRightActionPressed = false;
-                    _isLeftActionPressed = false;
-                }
-            }
-
-            private static bool IsJoystickEvent(ref SDL.SDL_Event evt)
-            {
-                return evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN || evt.type == SDL.SDL_EventType.SDL_JOYBUTTONUP ||
-                                    evt.type == SDL.SDL_EventType.SDL_JOYHATMOTION;
-            }
-
-            private static void StartPlayingGame()
-            {
-                _inMainMenu = false;
-                SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 2048);
-                gameMusic = SDL_mixer.Mix_LoadWAV("Assets/Music/OverworldTheme.wav");
-                SDL_mixer.Mix_Volume(-1, 20);
-                SDL_mixer.Mix_PlayChannel(-1, gameMusic, -1);
-            }
-
-            private void TryUpdateJumpButton(ref SDL.SDL_Event evt)
-            {
-                if (_player.IsTouchingGround)
-                {
-                    _isJumpActionPressed = evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN;
-                }
-                else
-                {
-                    _isJumpActionPressed = false;
-                }
-            }
-        }
-
 
         private TextureManager.TextureInfo _titleGraphic;
         private TextureManager.TextureInfo _coinIcon;
         private Kinnect kinnect;
         private IntPtr fontPointer;
         private bool _isJoystickEnabled = false;
-        public static Joystick joystick;
+        public static InputDevice inputDevice;
 
         public static IntPtr gameMusic;
 
@@ -309,16 +175,16 @@ namespace Mario
 
         private void SetNewJoystickImplementation()
         {
-            joystick?.CleanupJoystick();
+            inputDevice?.Cleanup();
 
             _isJoystickEnabled = SDL.SDL_NumJoysticks() > 0;
             if (_isJoystickEnabled)
             {
-                joystick = new SdlJoystick();
+                inputDevice = new Joystick();
             }
             else
             {
-                joystick = new NullJoystick();
+                inputDevice = new Keyboard();
             }
         }
 
@@ -400,12 +266,6 @@ namespace Mario
                     case SDL.SDL_EventType.SDL_QUIT:
                         IsRunning = false;
                         break;
-                    case SDL.SDL_EventType.SDL_KEYDOWN:
-                        UpdateKeyUpState(evt);
-                        break;
-                    case SDL.SDL_EventType.SDL_KEYUP:
-                        UpdateKeyDownState(evt);
-                        break;
                     case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
                         StartPlayingGame(evt);
                         break;
@@ -415,67 +275,9 @@ namespace Mario
                         break;
                 }
 
-                joystick.UpdateByEvent(ref evt);
+                inputDevice.UpdateByEvent(ref evt);
             }
         }
-
-        private void UpdateKeyUpState(SDL.SDL_Event evt)
-        {
-            if (_inMainMenu)
-            {
-                return;
-            }
-
-            switch (evt.key.keysym.sym)
-            {
-                case SDL.SDL_Keycode.SDLK_w:
-                    if (_player.IsTouchingGround)
-                    {
-                        Controls.isPressingW = true;
-                    }
-                    break;
-                case SDL.SDL_Keycode.SDLK_d:
-                    Controls.isPressingD = true;
-                    break;
-                case SDL.SDL_Keycode.SDLK_a:
-                    Controls.isPressingA = true;
-                    break;
-                case SDL.SDL_Keycode.SDLK_s:
-                    Controls.isPressingS = true;
-                    break;
-                case SDL.SDL_Keycode.SDLK_LSHIFT:
-                    Controls.isPressingShift = true;
-                    break;
-                case SDL.SDL_Keycode.SDLK_RSHIFT:
-                    Controls.isPressingShift = true;
-                    break;
-            }
-        }
-
-        private void UpdateKeyDownState(SDL.SDL_Event evt)
-        {
-            if (_inMainMenu)
-            {
-                return;
-            }
-
-            switch (evt.key.keysym.sym)
-            {
-                case SDL.SDL_Keycode.SDLK_w:
-                    Controls.isPressingW = false;
-                    break;
-                case SDL.SDL_Keycode.SDLK_a:
-                    Controls.isPressingA = false;
-                    break;
-                case SDL.SDL_Keycode.SDLK_d:
-                    Controls.isPressingD = false;
-                    break;
-                case SDL.SDL_Keycode.SDLK_s:
-                    Controls.isPressingS = false;
-                    break;
-            }
-        }
-
         private void StartPlayingGame(SDL.SDL_Event e)
         {
             const byte LeftMouseButton = (byte)SDL.SDL_BUTTON_LEFT;
