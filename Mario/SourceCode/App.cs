@@ -1,6 +1,4 @@
-﻿using SDL2;
-
-namespace Mario
+﻿namespace Mario
 {
     internal class App
     {
@@ -11,9 +9,9 @@ namespace Mario
         public static int GameFrameTime;
         public static int Frame = 0;
 
-        public static SDL.SDL_Rect AssignValuesForRectangle(int x, int y, int w, int h)
+        public static SDL2.SDL.SDL_Rect AssignValuesForRectangle(int x, int y, int w, int h)
         {
-            SDL.SDL_Rect rect;
+            SDL2.SDL.SDL_Rect rect;
             rect.x = x;
             rect.y = y;
             rect.w = w;
@@ -24,20 +22,20 @@ namespace Mario
         static void Main()
         {
             Game game = new Game();
-            game.Init("Mario", SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, ScreenWidth, ScreenHeight, SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
+            game.Init("Mario", SDL2.SDL.SDL_WINDOWPOS_CENTERED, SDL2.SDL.SDL_WINDOWPOS_CENTERED, ScreenWidth, ScreenHeight, SDL2.SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE);
 
             while (game.IsRunning)
             {
-                uint lastFrameTimeInMiliseconds = SDL.SDL_GetTicks();
+                uint lastFrameTimeInMiliseconds = SDL2.SDL.SDL_GetTicks();
                 game.HandleEvents();
                 game.Update();
                 game.Render();
 
-                GameFrameTime = (int)(SDL.SDL_GetTicks() - lastFrameTimeInMiliseconds);
+                GameFrameTime = (int)(SDL2.SDL.SDL_GetTicks() - lastFrameTimeInMiliseconds);
 
                 if (IsGeneratingTooMuchFrames())
                 {
-                    SDL.SDL_Delay((uint)(DesiredFrameTime - GameFrameTime));
+                    SDL2.SDL.SDL_Delay((uint)(DesiredFrameTime - GameFrameTime));
                 }
 
                 if (IsFirstFrame())

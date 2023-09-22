@@ -1,12 +1,8 @@
-﻿using SDL2;
-using System;
-using Mario.SourceCode;
-
-namespace Mario
+﻿namespace Mario
 {
     internal partial class Game
     {
-        public static IntPtr Renderer = IntPtr.Zero;
+        public static System.IntPtr Renderer = System.IntPtr.Zero;
         public static int ScrollSpeed = 0;
         public static Map CurrentLevel;
 
@@ -24,11 +20,11 @@ namespace Mario
 
         public struct Font
         {
-            public IntPtr Texture;
-            public Predicate<Font> AvailabilityCondition;
-            public SDL.SDL_Rect RenderRectangle;
+            public System.IntPtr Texture;
+            public System.Predicate<Font> AvailabilityCondition;
+            public SDL2.SDL.SDL_Rect RenderRectangle;
 
-            public Font(IntPtr texture, Predicate<Font> availabilityCondition, int fontX, int fontY, int fontWidth, int fontHeight) : this()
+            public Font(System.IntPtr texture, System.Predicate<Font> availabilityCondition, int fontX, int fontY, int fontWidth, int fontHeight) : this()
             {
                 Texture = texture;
                 AvailabilityCondition = availabilityCondition;
@@ -36,7 +32,7 @@ namespace Mario
             }
         }
 
-        private IntPtr _window;
+        private System.IntPtr _window;
         private Font[] _fonts = new Font[AvailableNumFonts];
 
         public static GameObject _player;
@@ -134,37 +130,37 @@ namespace Mario
         private TextureManager.TextureInfo _titleGraphic;
         private TextureManager.TextureInfo _coinIcon;
         private Kinnect kinnect;
-        private IntPtr fontPointer;
+        private System.IntPtr fontPointer;
         private bool _isJoystickEnabled = false;
         public static InputDevice inputDevice;
 
-        public static IntPtr gameMusic;
+        public static System.IntPtr gameMusic;
 
         public Game()
         {
             System.IO.Directory.SetCurrentDirectory("DLLs");
 
-            if (SDL_mixer.Mix_Init(SDL_mixer.MIX_InitFlags.MIX_INIT_MP3) < 0)
+            if (SDL2.SDL_mixer.Mix_Init(SDL2.SDL_mixer.MIX_InitFlags.MIX_INIT_MP3) < 0)
             {
-                string exceptionMessage = string.Format("Unable to initialize SDL_mixer. Error {0}", SDL.SDL_GetError());
-                throw new ApplicationException(exceptionMessage);
+                string exceptionMessage = string.Format("Unable to initialize SDL_mixer. Error {0}", SDL2.SDL.SDL_GetError());
+                throw new System.ApplicationException(exceptionMessage);
             }
 
-            if (SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING) < 0)
+            if (SDL2.SDL.SDL_Init(SDL2.SDL.SDL_INIT_EVERYTHING) < 0)
             {
-                string exceptionMessage = string.Format("Unable to initialize SDL. Error {0}", SDL.SDL_GetError());
-                throw new ApplicationException(exceptionMessage);
+                string exceptionMessage = string.Format("Unable to initialize SDL2.SDL. Error {0}", SDL2.SDL.SDL_GetError());
+                throw new System.ApplicationException(exceptionMessage);
             }
 
-            if (SDL_image.IMG_Init(SDL_image.IMG_InitFlags.IMG_INIT_PNG | SDL_image.IMG_InitFlags.IMG_INIT_JPG) != (int)(SDL_image.IMG_InitFlags.IMG_INIT_PNG | SDL_image.IMG_InitFlags.IMG_INIT_JPG))
+            if (SDL2.SDL_image.IMG_Init(SDL2.SDL_image.IMG_InitFlags.IMG_INIT_PNG | SDL2.SDL_image.IMG_InitFlags.IMG_INIT_JPG) != (int)(SDL2.SDL_image.IMG_InitFlags.IMG_INIT_PNG | SDL2.SDL_image.IMG_InitFlags.IMG_INIT_JPG))
             {
-                string exceptionMessage = string.Format("Unable to initialize SDL_image. Error {0}", SDL.SDL_GetError());
-                throw new ApplicationException(exceptionMessage);
+                string exceptionMessage = string.Format("Unable to initialize SDL_image. Error {0}", SDL2.SDL.SDL_GetError());
+                throw new System.ApplicationException(exceptionMessage);
             }
-            if (SDL_ttf.TTF_Init() < 0)
+            if (SDL2.SDL_ttf.TTF_Init() < 0)
             {
-                string exceptionMessage = string.Format("Unable to initialize SDL_ttf. Error {0}", SDL.SDL_GetError());
-                throw new ApplicationException(exceptionMessage);
+                string exceptionMessage = string.Format("Unable to initialize SDL_ttf. Error {0}", SDL2.SDL.SDL_GetError());
+                throw new System.ApplicationException(exceptionMessage);
             }
 
             SetNewInputDeviceImplementation();
@@ -177,7 +173,7 @@ namespace Mario
         {
             inputDevice?.Cleanup();
 
-            _isJoystickEnabled = SDL.SDL_NumJoysticks() > 0;
+            _isJoystickEnabled = SDL2.SDL.SDL_NumJoysticks() > 0;
             if (_isJoystickEnabled)
             {
                 inputDevice = new Joystick();
@@ -188,24 +184,24 @@ namespace Mario
             }
         }
 
-        public void Init(string title, int x, int y, int w, int h, SDL.SDL_WindowFlags flags)
+        public void Init(string title, int x, int y, int w, int h, SDL2.SDL.SDL_WindowFlags flags)
         {
-            _window = SDL.SDL_CreateWindow(title, x, y, w, h, flags);
-            if (_window == IntPtr.Zero)
+            _window = SDL2.SDL.SDL_CreateWindow(title, x, y, w, h, flags);
+            if (_window == System.IntPtr.Zero)
             {
-                string exceptionMessage = string.Format("Unable to create SDL window. Error {0}", SDL.SDL_GetError());
-                throw new ApplicationException(exceptionMessage);
+                string exceptionMessage = string.Format("Unable to create SDL2.SDL window. Error {0}", SDL2.SDL.SDL_GetError());
+                throw new System.ApplicationException(exceptionMessage);
             }
 
-            Renderer = SDL.SDL_CreateRenderer(_window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
+            Renderer = SDL2.SDL.SDL_CreateRenderer(_window, -1, SDL2.SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
 
-            if (Renderer == IntPtr.Zero)
+            if (Renderer == System.IntPtr.Zero)
             {
-                string exceptionMessage = string.Format("Unable to create SDL renderer. Error{0}", SDL.SDL_GetError());
-                throw new ApplicationException(exceptionMessage);
+                string exceptionMessage = string.Format("Unable to create SDL2.SDL renderer. Error{0}", SDL2.SDL.SDL_GetError());
+                throw new System.ApplicationException(exceptionMessage);
             }
 
-            SDL.SDL_SetRenderDrawColor(Renderer, 142, 140, 237, 255);
+            SDL2.SDL.SDL_SetRenderDrawColor(Renderer, 142, 140, 237, 255);
             CurrentLevel = new Map("Data/Levels/1-1.xml");
             _player = new Player("Assets/Characters/Player/marioSmall.png", 96, 864, 10);
 
@@ -227,15 +223,15 @@ namespace Mario
 
         private void GenerateFonts()
         {
-            fontPointer = SDL_ttf.TTF_OpenFont("Assets/Fonts/super-mario-bros-nes.ttf", 8);
+            fontPointer = SDL2.SDL_ttf.TTF_OpenFont("Assets/Fonts/super-mario-bros-nes.ttf", 8);
 
-            if (fontPointer == IntPtr.Zero)
+            if (fontPointer == System.IntPtr.Zero)
             {
-                string exceptionMessage = string.Format("Error occured during loading font \'Assets/Fonts/super-mario-bros-nes.ttf\': Error {0}", SDL.SDL_GetError());
-                throw new ApplicationException(exceptionMessage);
+                string exceptionMessage = string.Format("Error occured during loading font \'Assets/Fonts/super-mario-bros-nes.ttf\': Error {0}", SDL2.SDL.SDL_GetError());
+                throw new System.ApplicationException(exceptionMessage);
             }
 
-            SDL.SDL_Color fontColor;
+            SDL2.SDL.SDL_Color fontColor;
             fontColor.r = 255;
             fontColor.g = 255;
             fontColor.b = 255;
@@ -243,9 +239,9 @@ namespace Mario
 
             for (int i = 0; i < AvailableNumFonts; i++)
             {
-                IntPtr fontRenderSurface = SDL_ttf.TTF_RenderText_Solid(fontPointer, _fontLabels[i], fontColor);
-                IntPtr texture = SDL.SDL_CreateTextureFromSurface(Renderer, fontRenderSurface);
-                SDL.SDL_FreeSurface(fontRenderSurface);
+                System.IntPtr fontRenderSurface = SDL2.SDL_ttf.TTF_RenderText_Solid(fontPointer, _fontLabels[i], fontColor);
+                System.IntPtr texture = SDL2.SDL.SDL_CreateTextureFromSurface(Renderer, fontRenderSurface);
+                SDL2.SDL.SDL_FreeSurface(fontRenderSurface);
 
                 _fonts[i] = new Font(texture, _font => true, _fontRects[i * 4], _fontRects[i * 4 + 1], _fontRects[i * 4 + 2], _fontRects[i * 4 + 3]);
             }
@@ -259,18 +255,18 @@ namespace Mario
 
         public void HandleEvents()
         {
-            while (SDL.SDL_PollEvent(out SDL.SDL_Event evt) != 0)
+            while (SDL2.SDL.SDL_PollEvent(out SDL2.SDL.SDL_Event evt) != 0)
             {
                 switch (evt.type)
                 {
-                    case SDL.SDL_EventType.SDL_QUIT:
+                    case SDL2.SDL.SDL_EventType.SDL_QUIT:
                         IsRunning = false;
                         break;
-                    case SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
+                    case SDL2.SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN:
                         StartPlayingGame(evt);
                         break;
-                    case SDL.SDL_EventType.SDL_JOYDEVICEADDED:
-                    case SDL.SDL_EventType.SDL_JOYDEVICEREMOVED:
+                    case SDL2.SDL.SDL_EventType.SDL_JOYDEVICEADDED:
+                    case SDL2.SDL.SDL_EventType.SDL_JOYDEVICEREMOVED:
                         SetNewInputDeviceImplementation();
                         break;
                 }
@@ -278,9 +274,9 @@ namespace Mario
                 inputDevice.UpdateByEvent(ref evt);
             }
         }
-        private void StartPlayingGame(SDL.SDL_Event e)
+        private void StartPlayingGame(SDL2.SDL.SDL_Event e)
         {
-            const byte LeftMouseButton = (byte)SDL.SDL_BUTTON_LEFT;
+            const byte LeftMouseButton = (byte)SDL2.SDL.SDL_BUTTON_LEFT;
 
             // Block user from playing too many music in same time
             if (!_inMainMenu)
@@ -293,10 +289,10 @@ namespace Mario
                 case LeftMouseButton:
                     _inMainMenu = false;
 
-                    SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 2048);
-                    gameMusic = SDL_mixer.Mix_LoadWAV("Assets/Music/OverworldTheme.wav");
-                    SDL_mixer.Mix_Volume(-1, 20);
-                    SDL_mixer.Mix_PlayChannel(-1, gameMusic, -1);
+                    SDL2.SDL_mixer.Mix_OpenAudio(44100, SDL2.SDL_mixer.MIX_DEFAULT_FORMAT, 2, 2048);
+                    gameMusic = SDL2.SDL_mixer.Mix_LoadWAV("Assets/Music/OverworldTheme.wav");
+                    SDL2.SDL_mixer.Mix_Volume(-1, 20);
+                    SDL2.SDL_mixer.Mix_PlayChannel(-1, gameMusic, -1);
                     break;
             }
         }
@@ -325,7 +321,7 @@ namespace Mario
         {
             if (!_player.IsReseting || inGameTime > 0)
             {
-                SDL.SDL_RenderClear(Renderer);
+                SDL2.SDL.SDL_RenderClear(Renderer);
                 CurrentLevel.DrawMap();
                 _player.Render();
 
@@ -336,31 +332,31 @@ namespace Mario
 
                 TextureManager.DrawTexture(_coinIcon, 572, 34, 3);
 
-                SDL.SDL_Color fontColor;
+                SDL2.SDL.SDL_Color fontColor;
                 fontColor.r = 255;
                 fontColor.g = 255;
                 fontColor.b = 255;
                 fontColor.a = 255;
 
-                var fontSurface = SDL_ttf.TTF_RenderText_Solid(fontPointer, score, fontColor);
-                SDL.SDL_DestroyTexture(_fonts[1].Texture);
-                _fonts[1].Texture = SDL.SDL_CreateTextureFromSurface(Renderer, fontSurface);
-                SDL.SDL_FreeSurface(fontSurface);
+                var fontSurface = SDL2.SDL_ttf.TTF_RenderText_Solid(fontPointer, score, fontColor);
+                SDL2.SDL.SDL_DestroyTexture(_fonts[1].Texture);
+                _fonts[1].Texture = SDL2.SDL.SDL_CreateTextureFromSurface(Renderer, fontSurface);
+                SDL2.SDL.SDL_FreeSurface(fontSurface);
 
                 for (int i = 0; i < _fonts.Length; i++)
                 {
                     if (_fonts[i].AvailabilityCondition(_fonts[i]))
                     {
-                        SDL.SDL_RenderCopy(Renderer, _fonts[i].Texture, IntPtr.Zero, ref _fonts[i].RenderRectangle);
+                        SDL2.SDL.SDL_RenderCopy(Renderer, _fonts[i].Texture, System.IntPtr.Zero, ref _fonts[i].RenderRectangle);
                     }
                 }
 
                 if (_player.IsReseting && inGameTime == 1)
                 {
-                    SDL.SDL_SetRenderDrawColor(Renderer, 0, 0, 0, 255);
-                    SDL.SDL_RenderClear(Renderer);
-                    SDL.SDL_RenderPresent(Renderer);
-                    SDL.SDL_Delay(2000);
+                    SDL2.SDL.SDL_SetRenderDrawColor(Renderer, 0, 0, 0, 255);
+                    SDL2.SDL.SDL_RenderClear(Renderer);
+                    SDL2.SDL.SDL_RenderPresent(Renderer);
+                    SDL2.SDL.SDL_Delay(2000);
 
                     _player.IsTouchingGround = true;
                     _player.IsEnding = false;
@@ -381,7 +377,7 @@ namespace Mario
                         _enemies[i]._positionY = _enemiesPositionsY[i];
                     }
 
-                    SDL.SDL_SetRenderDrawColor(Renderer, 142, 140, 237, 255);
+                    SDL2.SDL.SDL_SetRenderDrawColor(Renderer, 142, 140, 237, 255);
                 }
 
                 if (_player.HasLost)
@@ -395,11 +391,11 @@ namespace Mario
                     }
                 }
 
-                SDL.SDL_RenderPresent(Renderer);
+                SDL2.SDL.SDL_RenderPresent(Renderer);
             }
             else if (_player.IsReseting)
             {
-                Console.Write("OK\n");
+                System.Console.Write("OK\n");
             }
         }
 
@@ -434,7 +430,7 @@ namespace Mario
 
         public void CleanUp()
         {
-            SDL.SDL_DestroyRenderer(Renderer);
+            SDL2.SDL.SDL_DestroyRenderer(Renderer);
             CurrentLevel.CleanMapTexture();
             _player.Clean();
 
@@ -443,8 +439,8 @@ namespace Mario
                 _enemies[i].Clean();
             }
 
-            SDL.SDL_DestroyWindow(_window);
-            SDL.SDL_Quit();
+            SDL2.SDL.SDL_DestroyWindow(_window);
+            SDL2.SDL.SDL_Quit();
         }
     }
 }

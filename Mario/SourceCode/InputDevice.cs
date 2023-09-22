@@ -1,8 +1,4 @@
-﻿using SDL2;
-using static Mario.Game;
-using System;
-
-namespace Mario
+﻿namespace Mario
 {
     public interface InputDevice
     {
@@ -10,7 +6,7 @@ namespace Mario
         bool IsLeftActionPressed { get; }
         bool IsJumpActionPressed { get; }
 
-        void UpdateByEvent(ref SDL.SDL_Event evt);
+        void UpdateByEvent(ref SDL2.SDL.SDL_Event evt);
 
         void Cleanup();
     }
@@ -23,21 +19,21 @@ namespace Mario
         private bool _isJumpActionPressed = false;
 
         // _joystick must be kept, because it would crash, if any of the unmanaged code use it
-        private IntPtr _joystick;
+        private System.IntPtr _joystick;
 
         public Joystick()
         {
-            _joystick = SDL.SDL_JoystickOpen(0);
+            _joystick = SDL2.SDL.SDL_JoystickOpen(0);
         }
 
         public bool IsRightActionPressed => _isRightActionPressed;
         public bool IsLeftActionPressed => _isLeftActionPressed;
         public bool IsJumpActionPressed => _isJumpActionPressed;
 
-        public void UpdateByEvent(ref SDL.SDL_Event evt)
+        public void UpdateByEvent(ref SDL2.SDL.SDL_Event evt)
         {
 
-            if (_inMainMenu)
+            if (Game._inMainMenu)
             {
                 if (ShouldStartGame(evt))
                 {
@@ -52,17 +48,17 @@ namespace Mario
                 return;
             }
 
-            if (evt.type == SDL.SDL_EventType.SDL_JOYHATMOTION)
+            if (evt.type == SDL2.SDL.SDL_EventType.SDL_JOYHATMOTION)
             {
                 UpdateMovementButtons(ref evt);
                 return;
             }
 
 
-            SDL.SDL_GameControllerButton button = (SDL.SDL_GameControllerButton)evt.jbutton.button;
+            SDL2.SDL.SDL_GameControllerButton button = (SDL2.SDL.SDL_GameControllerButton)evt.jbutton.button;
             switch (button)
             {
-                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_X:
+                case SDL2.SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_X:
                     TryUpdateJumpButton(ref evt);
                     break;
             }
@@ -70,53 +66,53 @@ namespace Mario
 
         public void Cleanup()
         {
-            SDL.SDL_JoystickClose(_joystick);
+            SDL2.SDL.SDL_JoystickClose(_joystick);
         }
 
-        private static bool ShouldStartGame(SDL.SDL_Event evt)
+        private static bool ShouldStartGame(SDL2.SDL.SDL_Event evt)
         {
-            return evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN && evt.jbutton.button == (byte)SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START;
+            return evt.type == SDL2.SDL.SDL_EventType.SDL_JOYBUTTONDOWN && evt.jbutton.button == (byte)SDL2.SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START;
         }
 
-        private void UpdateMovementButtons(ref SDL.SDL_Event evt)
+        private void UpdateMovementButtons(ref SDL2.SDL.SDL_Event evt)
         {
-            if (evt.jhat.hatValue == SDL.SDL_HAT_LEFT)
+            if (evt.jhat.hatValue == SDL2.SDL.SDL_HAT_LEFT)
             {
                 _isLeftActionPressed = true;
                 _isRightActionPressed = false;
             }
-            else if (evt.jhat.hatValue == SDL.SDL_HAT_RIGHT)
+            else if (evt.jhat.hatValue == SDL2.SDL.SDL_HAT_RIGHT)
             {
                 _isRightActionPressed = true;
                 _isLeftActionPressed = false;
             }
-            else if (evt.jhat.hatValue == SDL.SDL_HAT_CENTERED)
+            else if (evt.jhat.hatValue == SDL2.SDL.SDL_HAT_CENTERED)
             {
                 _isRightActionPressed = false;
                 _isLeftActionPressed = false;
             }
         }
 
-        private static bool IsJoystickEvent(ref SDL.SDL_Event evt)
+        private static bool IsJoystickEvent(ref SDL2.SDL.SDL_Event evt)
         {
-            return evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN || evt.type == SDL.SDL_EventType.SDL_JOYBUTTONUP ||
-                                evt.type == SDL.SDL_EventType.SDL_JOYHATMOTION;
+            return evt.type == SDL2.SDL.SDL_EventType.SDL_JOYBUTTONDOWN || evt.type == SDL2.SDL.SDL_EventType.SDL_JOYBUTTONUP ||
+                                evt.type == SDL2.SDL.SDL_EventType.SDL_JOYHATMOTION;
         }
 
         private static void StartPlayingGame()
         {
-            _inMainMenu = false;
-            SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 2048);
-            gameMusic = SDL_mixer.Mix_LoadWAV("Assets/Music/OverworldTheme.wav");
-            SDL_mixer.Mix_Volume(-1, 20);
-            SDL_mixer.Mix_PlayChannel(-1, gameMusic, -1);
+            Game._inMainMenu = false;
+            SDL2.SDL_mixer.Mix_OpenAudio(44100, SDL2.SDL_mixer.MIX_DEFAULT_FORMAT, 2, 2048);
+            Game.gameMusic = SDL2.SDL_mixer.Mix_LoadWAV("Assets/Music/OverworldTheme.wav");
+            SDL2.SDL_mixer.Mix_Volume(-1, 20);
+            SDL2.SDL_mixer.Mix_PlayChannel(-1, Game.gameMusic, -1);
         }
 
-        private void TryUpdateJumpButton(ref SDL.SDL_Event evt)
+        private void TryUpdateJumpButton(ref SDL2.SDL.SDL_Event evt)
         {
-            if (_player.IsTouchingGround)
+            if (Game._player.IsTouchingGround)
             {
-                _isJumpActionPressed = evt.type == SDL.SDL_EventType.SDL_JOYBUTTONDOWN;
+                _isJumpActionPressed = evt.type == SDL2.SDL.SDL_EventType.SDL_JOYBUTTONDOWN;
             }
             else
             {
@@ -142,68 +138,68 @@ namespace Mario
         {
         }
 
-        public void UpdateByEvent(ref SDL.SDL_Event evt)
+        public void UpdateByEvent(ref SDL2.SDL.SDL_Event evt)
         {
-            if (_inMainMenu)
+            if (Game._inMainMenu)
             {
                 return;
             }
 
-            if (evt.type == SDL.SDL_EventType.SDL_KEYDOWN)
+            if (evt.type == SDL2.SDL.SDL_EventType.SDL_KEYDOWN)
             {
                 UpdateKeyDownStates(ref evt);
             }
-            else if (evt.type == SDL.SDL_EventType.SDL_KEYUP)
+            else if (evt.type == SDL2.SDL.SDL_EventType.SDL_KEYUP)
             {
                 UpdateKeyUpStates(ref evt);
             }
         }
 
-        private void UpdateKeyUpStates(ref SDL.SDL_Event evt)
+        private void UpdateKeyUpStates(ref SDL2.SDL.SDL_Event evt)
         {
             switch (evt.key.keysym.sym)
             {
-                case SDL.SDL_Keycode.SDLK_w:
+                case SDL2.SDL.SDL_Keycode.SDLK_w:
                     _isJumpActionPressed = false;
                     break;
-                case SDL.SDL_Keycode.SDLK_a:
+                case SDL2.SDL.SDL_Keycode.SDLK_a:
                     _isLeftActionPressed = false;
                     break;
-                case SDL.SDL_Keycode.SDLK_d:
+                case SDL2.SDL.SDL_Keycode.SDLK_d:
                     _isRightActionPressed = false;
                     break;
-                case SDL.SDL_Keycode.SDLK_s:
-                    Controls.isPressingS = false;
+                case SDL2.SDL.SDL_Keycode.SDLK_s:
+                    Game.Controls.isPressingS = false;
                     break;
             }
         }
 
-        private void UpdateKeyDownStates(ref SDL.SDL_Event evt)
+        private void UpdateKeyDownStates(ref SDL2.SDL.SDL_Event evt)
         {
             switch (evt.key.keysym.sym)
             {
-                case SDL.SDL_Keycode.SDLK_w:
-                    if (_player.IsTouchingGround)
+                case SDL2.SDL.SDL_Keycode.SDLK_w:
+                    if (Game._player.IsTouchingGround)
                     {
                         _isJumpActionPressed = true;
                     }
                     break;
-                case SDL.SDL_Keycode.SDLK_d:
+                case SDL2.SDL.SDL_Keycode.SDLK_d:
                     _isRightActionPressed = true;
                     break;
-                case SDL.SDL_Keycode.SDLK_a:
+                case SDL2.SDL.SDL_Keycode.SDLK_a:
                     _isLeftActionPressed = true;
                     break;
-                case SDL.SDL_Keycode.SDLK_s:
-                    Controls.isPressingS = true;
+                case SDL2.SDL.SDL_Keycode.SDLK_s:
+                    Game.Controls.isPressingS = true;
                     break;
-                case SDL.SDL_Keycode.SDLK_LSHIFT:
-                    Controls.isPressingShift = true;
+                case SDL2.SDL.SDL_Keycode.SDLK_LSHIFT:
+                    Game.Controls.isPressingShift = true;
                     break;
-                case SDL.SDL_Keycode.SDLK_RSHIFT:
-                    Controls.isPressingShift = true;
+                case SDL2.SDL.SDL_Keycode.SDLK_RSHIFT:
+                    Game.Controls.isPressingShift = true;
                     break;
             }
         }
-    }
+    }   
 }

@@ -1,8 +1,4 @@
-﻿using SDL2;
-using System.Linq;
-using Mario.SourceCode;
-using Microsoft.Kinect;
-using System;
+﻿using System.Linq;
 
 namespace Mario
 {
@@ -157,7 +153,7 @@ namespace Mario
         {
             return IsEnding && Game.CurrentLevel.IsSideDoorOnTile(oldPositionY / 48, _positionX / 48) ||
                             Game.CurrentLevel.IsSideDoorOnTile(
-                                (int)Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48
+                                (int)System.Math.Round((float)oldPositionY / 48 + 0.36f), _positionX / 48
                             ) || IsReseting;
         }
 
@@ -173,9 +169,9 @@ namespace Mario
         {
             _positionY -= velocityY;
             velocityY = 0;
-            System.IntPtr bumpSFX = SDL_mixer.Mix_LoadWAV("Assets/SFX/bump.wav");
-            SDL_mixer.Mix_Volume(2, 60);
-            SDL_mixer.Mix_PlayChannel(2, bumpSFX, 0);
+            System.IntPtr bumpSFX = SDL2.SDL_mixer.Mix_LoadWAV("Assets/SFX/bump.wav");
+            SDL2.SDL_mixer.Mix_Volume(2, 60);
+            SDL2.SDL_mixer.Mix_PlayChannel(2, bumpSFX, 0);
         }
 
         private static void HitBlockAt(int blockX, int blockY)
@@ -224,10 +220,10 @@ namespace Mario
         {
             IsWinning = true;
             _positionX += 26;
-            SDL_mixer.Mix_FreeChunk(Game.gameMusic);
-            System.IntPtr flagSlideSound = SDL_mixer.Mix_LoadWAV("Assets/SFX/flagpoleSlide.wav");
-            SDL_mixer.Mix_Volume(-1, 20);
-            SDL_mixer.Mix_PlayChannel(-1, flagSlideSound, 0);
+            SDL2.SDL_mixer.Mix_FreeChunk(Game.gameMusic);
+            System.IntPtr flagSlideSound = SDL2.SDL_mixer.Mix_LoadWAV("Assets/SFX/flagpoleSlide.wav");
+            SDL2.SDL_mixer.Mix_Volume(-1, 20);
+            SDL2.SDL_mixer.Mix_PlayChannel(-1, flagSlideSound, 0);
             _animationFrames = 2;
             _offset = 384;
         }
@@ -288,7 +284,7 @@ namespace Mario
 
         private void UpdateTextureFrames()
         {
-            _surface = App.AssignValuesForRectangle(_offset + 48 * (int)((SDL.SDL_GetTicks() / 125) % _animationFrames),
+            _surface = App.AssignValuesForRectangle(_offset + 48 * (int)((SDL2.SDL.SDL_GetTicks() / 125) % _animationFrames),
                 0, _textureInfo.Width / _frames, _textureInfo.Height);
 
             _destination = App.AssignValuesForRectangle(_positionX - Game.CurrentLevel.CameraOffset, _positionY,
@@ -334,7 +330,7 @@ namespace Mario
                 {
                     _offset = 48;
                     _animationFrames = 4;
-                    flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
+                    flipFlag = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_NONE;
                 }
                 else
                 {
@@ -389,7 +385,7 @@ namespace Mario
 
         private void MoveMarioBackward()
         {
-            flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
+            flipFlag = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
             velocityX = -5;
             Game.ScrollSpeed = -5;
             _animationFrames = 4;
@@ -400,7 +396,7 @@ namespace Mario
         {
             if (IsTouchingGround)
             {
-                flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
+                flipFlag = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_NONE;
             }
             if (_positionX < App.ScreenWidth / 2)
             {
@@ -420,10 +416,10 @@ namespace Mario
         {
             IsEnding = true;
             _positionX += 46;
-            flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
-            IntPtr levelClear = SDL_mixer.Mix_LoadWAV("Assets/SFX/levelClear.wav");
-            SDL_mixer.Mix_Volume(-1, 20);
-            SDL_mixer.Mix_PlayChannel(-1, levelClear, 0);
+            flipFlag = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
+            System.IntPtr levelClear = SDL2.SDL_mixer.Mix_LoadWAV("Assets/SFX/levelClear.wav");
+            SDL2.SDL_mixer.Mix_Volume(-1, 20);
+            SDL2.SDL_mixer.Mix_PlayChannel(-1, levelClear, 0);
         }
 
         private bool HasFlagReachedEndLocation()
@@ -440,10 +436,10 @@ namespace Mario
         {
             velocityY += 1;
             _positionY += velocityY;
-            SDL_mixer.Mix_FreeChunk(Game.gameMusic);
-            System.IntPtr playerDeathSFX = SDL_mixer.Mix_LoadWAV("Assets/SFX/deathMario.wav");
-            SDL_mixer.Mix_Volume(-1, 20);
-            SDL_mixer.Mix_PlayChannel(-1, playerDeathSFX, 0);
+            SDL2.SDL_mixer.Mix_FreeChunk(Game.gameMusic);
+            System.IntPtr playerDeathSFX = SDL2.SDL_mixer.Mix_LoadWAV("Assets/SFX/deathMario.wav");
+            SDL2.SDL_mixer.Mix_Volume(-1, 20);
+            SDL2.SDL_mixer.Mix_PlayChannel(-1, playerDeathSFX, 0);
         }
 
         private void FallDown()
@@ -510,7 +506,7 @@ namespace Mario
             TryAccelerate(1);
             _animationFrames = 4;
             _offset = 0;
-            flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_NONE;
+            flipFlag = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_NONE;
         }
 
         private void MoveRight()
@@ -518,7 +514,7 @@ namespace Mario
             TryAccelerate(-1);
             _animationFrames = 4;
             _offset = 0;
-            flipFlag = SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
+            flipFlag = SDL2.SDL.SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
         }
 
         private static int GetJumpHeight()
@@ -562,9 +558,9 @@ namespace Mario
 
         private bool IsHeadUnderAnyHand()
         {
-            Vector2 head = Kinnect.GetKinnect()[JointType.Head];
-            Vector2 leftHand = Kinnect.GetKinnect()[JointType.HandLeft];
-            Vector2 rightHand = Kinnect.GetKinnect()[JointType.HandRight];
+            Vector2 head = Kinnect.GetKinnect()[Microsoft.Kinect.JointType.Head];
+            Vector2 leftHand = Kinnect.GetKinnect()[Microsoft.Kinect.JointType.HandLeft];
+            Vector2 rightHand = Kinnect.GetKinnect()[Microsoft.Kinect.JointType.HandRight];
 
             return head.Y < leftHand.Y || head.Y < rightHand.Y;
         }
@@ -588,18 +584,18 @@ namespace Mario
         private bool ShouldTurnRight()
         {
             // Y is directed towards down
-            return Kinnect.GetKinnect()[JointType.AnkleRight].Y > Kinnect.GetKinnect()[JointType.KneeLeft].Y;
+            return Kinnect.GetKinnect()[Microsoft.Kinect.JointType.AnkleRight].Y > Kinnect.GetKinnect()[Microsoft.Kinect.JointType.KneeLeft].Y;
         }
 
         private bool ShouldTurnLeft()
         {
             // Y is directed towards down
-            return Kinnect.GetKinnect()[JointType.AnkleLeft].Y > Kinnect.GetKinnect()[JointType.KneeRight].Y;
+            return Kinnect.GetKinnect()[Microsoft.Kinect.JointType.AnkleLeft].Y > Kinnect.GetKinnect()[Microsoft.Kinect.JointType.KneeRight].Y;
         }
 
         public override void UpdateAnimation()
         {
-            _surface = App.AssignValuesForRectangle(_offset + 48 * (int)((SDL.SDL_GetTicks() / 125) % _animationFrames),
+            _surface = App.AssignValuesForRectangle(_offset + 48 * (int)((SDL2.SDL.SDL_GetTicks() / 125) % _animationFrames),
                 0, _textureInfo.Width / _frames, _textureInfo.Height);
 
             _destination = App.AssignValuesForRectangle(_positionX - Game.CurrentLevel.CameraOffset,

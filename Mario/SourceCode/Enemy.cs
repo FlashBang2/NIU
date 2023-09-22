@@ -1,6 +1,4 @@
-﻿using SDL2;
-using System.Linq;
-using static Mario.TextureManager;
+﻿using System.Linq;
 
 namespace Mario
 {
@@ -80,7 +78,7 @@ namespace Mario
 
         public override void UpdateAnimation()
         {
-            _surface = App.AssignValuesForRectangle((_textureInfo.Width / _frames) * (int)((SDL.SDL_GetTicks() / 300) % _frames), 0, _textureInfo.Width / _frames, _textureInfo.Height);
+            _surface = App.AssignValuesForRectangle((_textureInfo.Width / _frames) * (int)((SDL2.SDL.SDL_GetTicks() / 300) % _frames), 0, _textureInfo.Width / _frames, _textureInfo.Height);
             _destination = App.AssignValuesForRectangle(_positionX - Game.CurrentLevel.CameraOffset, _positionY, _textureInfo.Width / _frames, _textureInfo.Height);
         }
     }

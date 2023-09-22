@@ -1,6 +1,4 @@
-﻿using SDL2;
-using System.Linq;
-using System.Xml;
+﻿using System.Linq;
 
 namespace Mario
 {
@@ -63,7 +61,7 @@ namespace Mario
 
         public Map(string pathToMapFile)
         {
-            var xml = new XmlDocument();
+            var xml = new System.Xml.XmlDocument();
             xml.Load(pathToMapFile);
             _set = new System.Data.DataSet();
             _set.ReadXml(new System.IO.StringReader(xml.InnerXml));
@@ -217,7 +215,7 @@ namespace Mario
         {
             for (int i = 0; i < _textureData.Length; i++)
             {
-                SDL.SDL_DestroyTexture(_textureData[i].Texture);
+                SDL2.SDL.SDL_DestroyTexture(_textureData[i].Texture);
             }
         }
     }
