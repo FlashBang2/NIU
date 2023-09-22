@@ -4,18 +4,15 @@ using System;
 
 namespace Mario
 {
-    internal partial class Game
+    public interface InputDevice
     {
-        public interface InputDevice
-        {
-            bool IsRightActionPressed { get; }
-            bool IsLeftActionPressed { get; }
-            bool IsJumpActionPressed { get; }
+        bool IsRightActionPressed { get; }
+        bool IsLeftActionPressed { get; }
+        bool IsJumpActionPressed { get; }
 
-            void UpdateByEvent(ref SDL.SDL_Event evt);
+        void UpdateByEvent(ref SDL.SDL_Event evt);
 
-            void Cleanup();
-        }
+        void Cleanup();
     }
 
 
@@ -147,17 +144,22 @@ namespace Mario
 
         public void UpdateByEvent(ref SDL.SDL_Event evt)
         {
+            if (_inMainMenu)
+            {
+                return;
+            }
+
             if (evt.type == SDL.SDL_EventType.SDL_KEYDOWN)
             {
-                UpdateKeyDownStates(evt);
+                UpdateKeyDownStates(ref evt);
             }
             else if (evt.type == SDL.SDL_EventType.SDL_KEYUP)
             {
-                UpdateKeyUpStates(evt);
+                UpdateKeyUpStates(ref evt);
             }
         }
 
-        private void UpdateKeyUpStates(SDL.SDL_Event evt)
+        private void UpdateKeyUpStates(ref SDL.SDL_Event evt)
         {
             switch (evt.key.keysym.sym)
             {
@@ -176,7 +178,7 @@ namespace Mario
             }
         }
 
-        private void UpdateKeyDownStates(SDL.SDL_Event evt)
+        private void UpdateKeyDownStates(ref SDL.SDL_Event evt)
         {
             switch (evt.key.keysym.sym)
             {

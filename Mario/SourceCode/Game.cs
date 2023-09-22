@@ -167,13 +167,13 @@ namespace Mario
                 throw new ApplicationException(exceptionMessage);
             }
 
-            SetNewJoystickImplementation();
+            SetNewInputDeviceImplementation();
 
             System.IO.Directory.SetCurrentDirectory("../");
             kinnect = new Kinnect();
         }
 
-        private void SetNewJoystickImplementation()
+        private void SetNewInputDeviceImplementation()
         {
             inputDevice?.Cleanup();
 
@@ -271,7 +271,7 @@ namespace Mario
                         break;
                     case SDL.SDL_EventType.SDL_JOYDEVICEADDED:
                     case SDL.SDL_EventType.SDL_JOYDEVICEREMOVED:
-                        SetNewJoystickImplementation();
+                        SetNewInputDeviceImplementation();
                         break;
                 }
 
@@ -291,14 +291,13 @@ namespace Mario
             switch (e.button.button)
             {
                 case LeftMouseButton:
-                    {
-                        _inMainMenu = false;
-                        SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 2048);
-                        gameMusic = SDL_mixer.Mix_LoadWAV("Assets/Music/OverworldTheme.wav");
-                        SDL_mixer.Mix_Volume(-1, 20);
-                        SDL_mixer.Mix_PlayChannel(-1, gameMusic, -1);
-                        break;
-                    }
+                    _inMainMenu = false;
+
+                    SDL_mixer.Mix_OpenAudio(44100, SDL_mixer.MIX_DEFAULT_FORMAT, 2, 2048);
+                    gameMusic = SDL_mixer.Mix_LoadWAV("Assets/Music/OverworldTheme.wav");
+                    SDL_mixer.Mix_Volume(-1, 20);
+                    SDL_mixer.Mix_PlayChannel(-1, gameMusic, -1);
+                    break;
             }
         }
 
@@ -309,9 +308,14 @@ namespace Mario
                 CurrentLevel.UpdateMap();
                 _player.Update();
                 _player.UpdateAnimation();
+
                 for (int i = 0; i < _enemies.Length; i++)
                 {
-                    if (!_inMainMenu) _enemies[i].Update();
+                    if (!_inMainMenu)
+                    {
+                        _enemies[i].Update();
+                    }
+
                     _enemies[i].UpdateAnimation();
                 }
             }
@@ -331,6 +335,7 @@ namespace Mario
                 }
 
                 TextureManager.DrawTexture(_coinIcon, 572, 34, 3);
+
                 SDL.SDL_Color fontColor;
                 fontColor.r = 255;
                 fontColor.g = 255;
@@ -356,57 +361,74 @@ namespace Mario
                     SDL.SDL_RenderClear(Renderer);
                     SDL.SDL_RenderPresent(Renderer);
                     SDL.SDL_Delay(2000);
+
                     _player.IsTouchingGround = true;
                     _player.IsEnding = false;
                     _player.IsReseting = false;
                     _player.IsWinning = false;
+
                     CurrentLevel.FlagDescend = 0;
                     CurrentLevel.CameraOffset = 0;
+
                     _inMainMenu = true;
                     score = "000000";
                     inGameTime = 400;
                     ScrollSpeed = 0;
+
                     for (int i = 0; i < _enemies.Length; i++)
                     {
                         _enemies[i]._positionX = _enemiesPositionsX[i];
                         _enemies[i]._positionY = _enemiesPositionsY[i];
                     }
+
                     SDL.SDL_SetRenderDrawColor(Renderer, 142, 140, 237, 255);
                 }
+
                 if (_player.HasLost)
                 {
                     _player.velocityY += 1;
                     _player._positionY += _player.velocityY;
+
                     if (_player._positionY > App.ScreenHeight)
                     {
-                        _player._positionX = 96;
-                        _player._positionY = 864;
-                        _player.velocityY = 0;
-                        _player.IsTouchingGround = true;
-                        _player.IsDying = false;
-                        _player.HasReachedPit = false;
-                        _player.HasLost = false;
-                        _player.IsEnding = false;
-                        _player.IsReseting = false;
-                        _player.IsWinning = false;
-                        _inMainMenu = true;
-                        CurrentLevel.CameraOffset = 0;
-                        score = "000000";
-                        inGameTime = 400;
-                        ScrollSpeed = 0;
-                        for (int i = 0; i < _enemies.Length; i++)
-                        {
-                            _enemies[i]._positionX = _enemiesPositionsX[i];
-                            _enemies[i]._positionY = _enemiesPositionsY[i];
-                        }
+                        ResetMap();
                     }
-
                 }
+
                 SDL.SDL_RenderPresent(Renderer);
             }
             else if (_player.IsReseting)
             {
                 Console.Write("OK\n");
+            }
+        }
+
+        private void ResetMap()
+        {
+            _player._positionX = 96;
+            _player._positionY = 864;
+
+            _player.velocityY = 0;
+            _player.IsTouchingGround = true;
+            _player.IsDying = false;
+            _player.HasReachedPit = false;
+
+            _player.HasLost = false;
+            _player.IsEnding = false;
+            _player.IsReseting = false;
+            _player.IsWinning = false;
+
+            _inMainMenu = true;
+
+            CurrentLevel.CameraOffset = 0;
+            score = "000000";
+            inGameTime = 400;
+            ScrollSpeed = 0;
+
+            for (int i = 0; i < _enemies.Length; i++)
+            {
+                _enemies[i]._positionX = _enemiesPositionsX[i];
+                _enemies[i]._positionY = _enemiesPositionsY[i];
             }
         }
 
