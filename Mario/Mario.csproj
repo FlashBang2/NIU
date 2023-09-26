@@ -75,6 +75,9 @@
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SDL2-CS\LPUtf8StrMarshaler.cs" />
@@ -83,12 +86,14 @@
     <Compile Include="SDL2-CS\SDL2_mixer.cs" />
     <Compile Include="SDL2-CS\SDL2_ttf.cs" />
     <Compile Include="SourceCode\App.cs" />
+    <Compile Include="SourceCode\Kinnect.cs" />
     <Compile Include="SourceCode\Player.cs" />
     <Compile Include="SourceCode\Enemy.cs" />
     <Compile Include="SourceCode\Game.cs" />
     <Compile Include="SourceCode\GameObject.cs" />
     <Compile Include="SourceCode\Map.cs" />
     <Compile Include="SourceCode\TextureManager.cs" />
+    <Compile Include="SourceCode\UI.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

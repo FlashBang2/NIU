@@ -1,4 +1,6 @@
 ﻿using SDL2;
+using System;
+using System.Runtime.InteropServices;
 
 namespace Mario
 {
@@ -7,7 +9,7 @@ namespace Mario
 
         public struct TextureInfo
         {
-            public TextureInfo(System.IntPtr texture, int width, int height)
+            public TextureInfo(IntPtr texture, int width, int height)
             {
                 Texture = texture;
                 Width = width;
@@ -15,16 +17,16 @@ namespace Mario
 
             }
 
-            public System.IntPtr Texture { get; }
+            public IntPtr Texture { get; }
             public int Width { get; }
             public int Height { get; }
             
         }
         public static TextureInfo LoadTexture(string path)
         {
-            System.IntPtr tempSurface = SDL_image.IMG_Load(path);
-            SDL.SDL_Surface surf = (SDL.SDL_Surface) System.Runtime.InteropServices.Marshal.PtrToStructure(tempSurface, typeof(SDL.SDL_Surface));
-            System.IntPtr texture = SDL.SDL_CreateTextureFromSurface(Game._Renderer, tempSurface);
+            IntPtr tempSurface = SDL_image.IMG_Load(path);
+            SDL.SDL_Surface surf = (SDL.SDL_Surface) Marshal.PtrToStructure(tempSurface, typeof(SDL.SDL_Surface));
+            IntPtr texture = SDL.SDL_CreateTextureFromSurface(Game._Renderer, tempSurface);
             SDL.SDL_FreeSurface(tempSurface);
             return new TextureInfo(texture, surf.w, surf.h);
         }

@@ -1,5 +1,4 @@
 ﻿using SDL2;
-using System.Linq;
 
 namespace Mario
 {

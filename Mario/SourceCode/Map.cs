@@ -1,4 +1,7 @@
 ﻿using SDL2;
+using System.Xml;
+using System.IO;
+using System.Data;
 using System.Linq;
 
 namespace Mario
@@ -7,7 +10,7 @@ namespace Mario
     {
         public tile[,] data;
         public int cameraOffset, flagDescend = 0, bumpAnimation;
-        private System.Data.DataSet _set;
+        private DataSet _set;
         private TextureManager.TextureInfo[] textureData;
 
         public struct tile
@@ -18,15 +21,15 @@ namespace Mario
 
         public Map(string path)
         {
-            System.Xml.XmlDocument xml = new System.Xml.XmlDocument();
+            XmlDocument xml = new XmlDocument();
             xml.Load(path);
-            _set = new System.Data.DataSet();
-            _set.ReadXml(new System.IO.StringReader(xml.InnerXml));
+            _set = new DataSet();
+            _set.ReadXml(new StringReader(xml.InnerXml));
 
             textureData = new TextureManager.TextureInfo[_set.Tables["texture"].Rows.Count];
             int index = 0;
 
-            foreach (System.Data.DataRow row in _set.Tables["texture"].Rows)
+            foreach (DataRow row in _set.Tables["texture"].Rows)
             {
                 textureData[index] = TextureManager.LoadTexture(row[1].ToString());
                 index++;
@@ -40,10 +43,10 @@ namespace Mario
             data = new tile[_set.Tables["row"].Rows.Count, _set.Tables["row"].Rows[0].GetChildRows("row_column").Count()];
             int rowIndex = 0, columnIndex = 0;
 
-            foreach (System.Data.DataRow row in _set.Tables["row"].Rows)
+            foreach (DataRow row in _set.Tables["row"].Rows)
             {
                 columnIndex = 0;
-                foreach (System.Data.DataRow innerRow in row.GetChildRows("row_column"))
+                foreach (DataRow innerRow in row.GetChildRows("row_column"))
                 {
                     data[rowIndex, columnIndex].value = int.Parse(innerRow[1].ToString());
                     data[rowIndex, columnIndex].isBumped = false;
